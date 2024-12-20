@@ -120,7 +120,8 @@ module ModelParams
      ! _tensor settings only used in initialization,
      !Max_l and Max_eta_k are set to the tensor variables if only tensors requested
 
-     real(dl)  :: omegab, omegac, omegav, omegan, omegaax, ma, m_ovH0, dfac, a_osc, tau_osc, opac_tauosc, expmmu_tauosc, alpha_ax, r_val, omegah2_rad, amp_i, axfrac, omegada, Hinf !RL added tau at oscillation - the correct value will be calculated at init_background in equations_ppf
+     real(dl)  :: omegab, omegac, omegav, omegan, omegaax, ma, m_ovH0, dfac
+     real(dl)  :: a_osc, tau_osc, opac_tauosc, expmmu_tauosc, alpha_ax, r_val, omegah2_rad, amp_i, axfrac, omegada, Hinf !RL added tau at oscillation - the correct value will be calculated at init_background in equations_ppf
      real(dl) :: ah_osc, ahosc_ETA, A_coeff, tvarphi_c, tvarphi_cp, tvarphi_s, tvarphi_sp, wEFA_c !RL added background EFA parameters at the switch
      real(dl) :: A_coeff_alt !RL 043024 testing with changed A coeff
      real(dl) :: a_skip, dfac_skip, a_skipst !RL 012524 added for skipping recombination
@@ -251,8 +252,10 @@ module ModelParams
   real(dl) :: AccuracyBoost = 1._dl !1. is the default value. If you wish to change, change the one in the .ini file (RL: learned it the hard way!!)
   integer :: ntable = 5000 !RL 111123. ntable should be properly set in inidriver_axion.
   real(dl) :: aeq_LCDM !RL 031924, added for photon oscillation skipping
-  real(dl), allocatable :: loga_table(:), phinorm_table(:), phidotnorm_table(:), phinorm_table_ddlga(:), phidotnorm_table_ddlga(:), rhoaxh2ovrhom_logtable(:), rhoaxh2ovrhom_logtable_buff(:) !RL 112823
-  public loga_table, phinorm_table, phidotnorm_table, phinorm_table_ddlga, phidotnorm_table_ddlga, rhoaxh2ovrhom_logtable, rhoaxh2ovrhom_logtable_buff !RL 112823 - replacing CP tables with public tables
+  real(dl), allocatable :: loga_table(:), phinorm_table(:), phidotnorm_table(:), phinorm_table_ddlga(:)
+  real(dl), allocatable :: phidotnorm_table_ddlga(:), rhoaxh2ovrhom_logtable(:), rhoaxh2ovrhom_logtable_buff(:) !RL 112823
+  public loga_table, phinorm_table, phidotnorm_table, phinorm_table_ddlga, phidotnorm_table_ddlga
+  public rhoaxh2ovrhom_logtable, rhoaxh2ovrhom_logtable_buff !RL 112823 - replacing CP tables with public tables
   public aeq_LCDM !RL 031924
 
 
@@ -2983,7 +2986,8 @@ contains
        !rs =rombint(dsound_da_exact,1d-8,1/(z_star+1),1d-6) 
        !RL062624 This rs should be split - and 1d-6 is the atol which should be changed throughout these two lines if it needs to be changed
        if (1d-8 .le. CP%a_osc .and. 1/(z_star+1) .gt. CP%a_osc) then       
-          rs=rombint(dsound_da_exact,1d-8,CP%a_osc,1d-6) + rombint(dsound_da_exact, CP%a_osc*(1._dl+max(1d-6/100.0_dl,1.d-15)), 1/(z_star+1), 1d-6)
+          rs=rombint(dsound_da_exact,1d-8,CP%a_osc,1d-6) + &
+               & rombint(dsound_da_exact, CP%a_osc*(1._dl+max(1d-6/100.0_dl,1.d-15)), 1/(z_star+1), 1d-6)
        else
           rs =rombint(dsound_da_exact,1d-8,1/(z_star+1),1d-6) 
        end if

@@ -871,7 +871,9 @@ contains
     !RL putting a flag to check the perturbation taustart is after the background taustart
     !write(*, *) 'Rayne, DeltaTime in cmbmain1'
     if (taustart .le. DeltaTime(0._dl, 10.0**(loga_table(1)), 1.0d-10)) then
-       write(*, *) 'WARNING: perturbation taustart is before background taustart, the initial condition may not be valid. perttaustart, bgtaustart:', taustart, DeltaTime(0._dl, 10.0**(loga_table(1)), 1.0d-10)
+       write(*, *) 'WARNING: perturbation taustart is before background taustart, &
+            &the initial condition may not be valid. perttaustart, bgtaustart:', &
+            &taustart, DeltaTime(0._dl, 10.0**(loga_table(1)), 1.0d-10)
     end if
 
   end function GetTauStart
@@ -1812,8 +1814,8 @@ contains
     real(dl) a2, J_l, aa(IV%SourceSteps), fac(IV%SourceSteps)
     real(dl) xf, sums(SourceNum)
     real(dl) qmax_int
-    integer bes_ix,n, bes_index(IV%SourceSteps)
-    real(dl) xf_osc, besix_osc, fac_osc, aa_osc, Jl_osc !RL090623 delt_osc, 
+    integer bes_ix, besix_osc, n, bes_index(IV%SourceSteps)
+    real(dl) xf_osc, fac_osc, aa_osc, Jl_osc !RL090623 delt_osc, 
     real(dl) dotJl_osc !RL091223
     integer i_output !RL092023
     logical source_output_done !RL092023
@@ -1950,7 +1952,9 @@ contains
           fac_osc=BessRanges%points(besix_osc+1)-BessRanges%points(besix_osc)
           aa_osc=(BessRanges%points(besix_osc+1)-xf_osc)/fac_osc
           !Calculate analytical form of the derivative of the J_l cubic spline expression before reusing fac_osc
-          dotJl_osc = -IV%q*((ajl(besix_osc+1,j) - ajl(besix_osc,j))/fac_osc + fac_osc*((1._dl - 3._dl*(aa_osc**2._dl))*ajlpr(besix_osc,j) + (2._dl - 6._dl*aa_osc + 3._dl*(aa_osc**2._dl))*ajlpr(besix_osc+1,j))/6._dl)
+          dotJl_osc = -IV%q*((ajl(besix_osc+1,j) - ajl(besix_osc,j))/fac_osc + &
+               &fac_osc*((1._dl - 3._dl*(aa_osc**2._dl))*ajlpr(besix_osc,j) + &
+               &(2._dl - 6._dl*aa_osc + 3._dl*(aa_osc**2._dl))*ajlpr(besix_osc+1,j))/6._dl)
           fac_osc=fac_osc**2._dl*aa_osc/6._dl
           !Now obtain the corresponding spline interpolated J_l
           !Note that in this loop j runs over (1,max_bessels_l_index) and doesn't represent TimeSteps anymore
@@ -2001,7 +2005,9 @@ contains
              !!!write(*, *) 'Rayne, output IV%q', IV%q
              !!!write(*, *) 'Rayne, the compensated boundary scalar source term', CP%expmmu_tauosc*Jl_osc*(IV%metricdeltas_q(1, 1) - CP%opac_tauosc*IV%metricdeltas_q(2, 1)*11._dl/10._dl) + CP%expmmu_tauosc*dotJl_osc*IV%metricdeltas_q(2, 1)
           end if
-          sums(1) = sums(1) + CP%expmmu_tauosc*Jl_osc*(IV%metricdeltas_q(1, 1) - CP%opac_tauosc*IV%metricdeltas_q(2, 1)*11._dl/10._dl) + CP%expmmu_tauosc*dotJl_osc*IV%metricdeltas_q(2, 1) !!RL 090424
+          sums(1) = sums(1) + CP%expmmu_tauosc*Jl_osc*(IV%metricdeltas_q(1, 1) &
+               &- CP%opac_tauosc*IV%metricdeltas_q(2, 1)*11._dl/10._dl) &
+               &+ CP%expmmu_tauosc*dotJl_osc*IV%metricdeltas_q(2, 1) !!RL 090424
        end if
 
        ThisCT%Delta_p_l_k(1:SourceNum,j,IV%q_ix) = ThisCT%Delta_p_l_k(1:SourceNum,j,IV%q_ix) + sums(1:SourceNum)
@@ -2402,7 +2408,9 @@ contains
        ujl_osc = ujl_osc/sh_osc
        dotujl_osc = -(dotujl_osc - ujl_osc*cosfunc(chi_osc))/(sh_osc*CP%r)
        !write(*, *) 'Switch BC,, IV%q_ix, IV%q, l, CP%r, chi_osc, chi_osc*CP%r*IV%q, ujl_osc, dotujl_osc', IV%q_ix, IV%q, l, CP%r, chi_osc, chi_osc*CP%r*IV%q, ujl_osc, dotujl_osc
-       out(1) = out(1) + CP%expmmu_tauosc*ujl_osc*(IV%metricdeltas_q(1, 1) - CP%opac_tauosc*IV%metricdeltas_q(2, 1)*11._dl/10._dl) + CP%expmmu_tauosc*dotujl_osc*IV%metricdeltas_q(2, 1) !RL090424
+       out(1) = out(1) + CP%expmmu_tauosc*ujl_osc*(IV%metricdeltas_q(1, 1) &
+            &- CP%opac_tauosc*IV%metricdeltas_q(2, 1)*11._dl/10._dl) &
+            &+ CP%expmmu_tauosc*dotujl_osc*IV%metricdeltas_q(2, 1) !RL090424
        !write(*, *) 'CURVED UNIVERSE TRIGGERED, BC TERMS', CP%expmmu_tauosc*ujl_osc*(IV%metricdeltas_q(1, 1) - CP%opac_tauosc*IV%metricdeltas_q(2, 1)*11._dl/10._dl) + CP%expmmu_tauosc*dotujl_osc*IV%metricdeltas_q(2, 1)
     end if
 

@@ -60,7 +60,9 @@ program driver
   real(dl), allocatable :: RHCl_temp(:,:,:), RHCl_temp_lensed(:,:,:), RHCl_temp_tensor(:,:,:) !RL 111523 moving the RHCl_temp arrays here (might change later) to eliminate the stack overflow problem
   !!call cpu_time(clock_totstart) ! RH timing
 
-  real(dl) twobeta_tgt, beta_coeff, y_phase, movHETA_beta, movHETA_new, twobeta_new, twobeta_old1, twobeta_old2, hETA_beta, hETA_new, hosc_new, hosc_old1, hosc_old2, hETA_old1, hETA_old2, beta_tol !RL 030624
+  real(dl) twobeta_tgt, beta_coeff, y_phase, movHETA_beta, movHETA_new
+  real(dl) twobeta_new, twobeta_old1, twobeta_old2, hETA_beta, hETA_new
+  real(dl) hosc_new, hosc_old1, hosc_old2, hETA_old1, hETA_old2, beta_tol !RL 030624
   character(LEN=Ini_max_string_len) filenametest !RL 042824
   ! End axion stuff
 
@@ -290,7 +292,7 @@ program driver
      !       print*, 'This is Hinflation renee', P%Hinf
      P%axion_isocurvature = Ini_Read_Logical('axion_isocurvature', .true.)
      !RL 121924 disable isocurvature
-     if (P%axion_isocurvature == .true.) then
+     if (P%axion_isocurvature .eqv. .true.) then
         write(*, *) 'WARNING: axion isocurvature disabled in this release, proceeding without'
         P%axion_isocurvature = .false.
      end if
@@ -582,11 +584,15 @@ program driver
   !!!write(*, *) 'P%a_osc*(P%omegaax/(P%omegac+P%omegaax))/aeq_LCDM, P%a_osc*(P%omegaax/(P%omegac+P%omegaax))/P%aeq', P%a_osc*(P%omegaax/(P%omegac+P%omegaax))/aeq_LCDM, P%a_osc*(P%omegaax/(P%omegac+P%omegaax))/P%aeq
   
   !First check if we're in the window before recombination where the photon ETA is an issue
-  if (P%dfac .lt. 23._dl .and. P%m_ovH0 .ge. 10._dl .and. P%ma .lt. 1.e-25_dl .and. P%a_osc*(P%omegaax/(P%omegac+P%omegaax))/aeq_LCDM .gt. 0.03_dl .and. P%a_osc .lt. P%a_skipst) then !RL 022624 - is an empirically tuned number 0.03_dl 
+  if (P%dfac .lt. 23._dl .and. P%m_ovH0 .ge. 10._dl .and. P%ma .lt. 1.e-25_dl &
+       &.and. P%a_osc*(P%omegaax/(P%omegac+P%omegaax))/aeq_LCDM .gt. 0.03_dl &
+       &.and. P%a_osc .lt. P%a_skipst) then !RL 022624 - is an empirically tuned number 0.03_dl 
   !if (P%a_osc .lt. 1._dl) then
      twobeta_tgt = 7.08_dl*const_pi!22.25_dl!10.5_dl*const_pi!
      !P%dfac = twobeta_tgt + 0.75_dl*const_pi !First guess using radiation domination
-     P%dfac = twobeta_tgt + 0.75_dl*const_pi - twobeta_tgt**2/(4._dl*(twobeta_tgt + 2._dl*P%m_ovH0*(aeq_LCDM**1.5_dl)/sqrt(2._dl*(P%omegac + P%omegab + P%omegan + P%omegaax)))) !First guess considering matter-radiation equality in LCDM
+     P%dfac = twobeta_tgt + 0.75_dl*const_pi - twobeta_tgt**2/&
+          &(4._dl*(twobeta_tgt + 2._dl*P%m_ovH0*(aeq_LCDM**1.5_dl)/&
+          &sqrt(2._dl*(P%omegac + P%omegab + P%omegan + P%omegaax)))) !First guess considering matter-radiation equality in LCDM
      !P%dfac = min(23.1_dl, P%dfac_skip) !RL 022624 - First obtain an initial guess of 23.1 to obtain y and find the best phase for the axion mass and cosmology in question. 23.1 is also a tuned number based on 1e-26eV for this mass range that minimizes the error due to the axion mass osicllations' effect on photons
      ntable = nint(P%dfac*100) + 1     
      call w_evolve(P, badflag)
@@ -706,7 +712,8 @@ program driver
   end do
 
   if (iter_dfac .gt. 500 .and. P%a_osc .lt. P%a_skip) then
-     print*, 'Warning: maximum iteration reached, but aosc still not skipped sufficiently: P%a_osc, P%a_skip', P%a_osc, P%a_skip
+     print*, 'Warning: maximum iteration reached, but aosc still not skipped sufficiently: &
+&P%a_osc, P%a_skip', P%a_osc, P%a_skip
   end if
 
   !!

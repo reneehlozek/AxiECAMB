@@ -282,7 +282,9 @@ subroutine init_background
   end if
   !RL 062624 - add scenarios  potential problems that the background switches but the perturbation does not
   if (CP%a_osc .le. 1._dl .and. CP%tau_osc .gt. CP%tau0) then
-     write(*, *) 'a_osc <= 1 and tau_osc > tau0. This is a rare scenario, but likely a_osc is too close to 1 that there is an issue related to the tolerance of the tau integration. Taking tau_osc as the smaller value (tau0) instead.'
+     write(*, *) 'a_osc <= 1 and tau_osc > tau0. Rarely happens, but likely a_osc is too &
+&close to 1 that there is an issue related to the tolerance of the tau integration. &
+&Taking tau_osc as the smaller value (tau0) instead.'
      CP%tau_osc = min(CP%tau_osc, CP%tau0)
   end if
   
@@ -343,7 +345,8 @@ function grhoax_frac(a)
      !wcorr_coeff = CP%ah_osc*CP%a_osc/((CP%ma/CP%H0_eV)*(CP%H0/100.0d0))
      wcorr_coeff = CP%ahosc_ETA*CP%a_osc/((CP%ma/CP%H0_eV)*(CP%H0/100.0d0)) !RL082924
      !!write(*, *) 'In grhoax_frac, CP%rhorefp_hsq*((CP%a_osc/a)**3.0d0)*dexp((wcorr_coeff**2.0d0)*9.0d0*(1.0d0/(a2**2.0d0) - 1.0d0/(CP%a_osc**4.0d0))/8.0d0), CP%rhorefp_hsq*((CP%a_osc/a)**3.0d0)*dexp((wcorr_coeff**2.0d0)*3.0d0*CP%wEFA_c*(1.0d0/(a2**2.0d0) - 1.0d0/(CP%a_osc**4.0d0))/4.0d0), their fractional difference', CP%rhorefp_hsq*((CP%a_osc/a)**3.0d0)*dexp((wcorr_coeff**2.0d0)*9.0d0*(1.0d0/(a2**2.0d0) - 1.0d0/(CP%a_osc**4.0d0))/8.0d0), CP%rhorefp_hsq*((CP%a_osc/a)**3.0d0)*dexp((wcorr_coeff**2.0d0)*3.0d0*CP%wEFA_c*(1.0d0/(a2**2.0d0) - 1.0d0/(CP%a_osc**4.0d0))/4.0d0), (CP%rhorefp_hsq*((CP%a_osc/a)**3.0d0)*dexp((wcorr_coeff**2.0d0)*9.0d0*(1.0d0/(a2**2.0d0) - 1.0d0/(CP%a_osc**4.0d0))/8.0d0))/(CP%rhorefp_hsq*((CP%a_osc/a)**3.0d0)*dexp((wcorr_coeff**2.0d0)*3.0d0*CP%wEFA_c*(1.0d0/(a2**2.0d0) - 1.0d0/(CP%a_osc**4.0d0))/4.0d0)) - 1.0_dl
-     grhoax_frac=(CP%rhorefp_ovh2)*((CP%a_osc/a)**3.0d0)*dexp((wcorr_coeff**2.0d0)*3.0d0*CP%wEFA_c*(1.0d0/(a2**2.0d0) - 1.0d0/(CP%a_osc**4.0d0))/4.0d0)
+     grhoax_frac=(CP%rhorefp_ovh2)*((CP%a_osc/a)**3.0d0)*dexp((wcorr_coeff**2.0d0)*3.0d0*CP%wEFA_c*(1.0d0/(a2**2.0d0) &
+          &- 1.0d0/(CP%a_osc**4.0d0))/4.0d0)
   endif
   
 end function grhoax_frac
@@ -1223,15 +1226,20 @@ contains
        !--------------------------------------------
        !!write(*, *) 'Rayne, k^2 delta v1, -hLdot*v2/2*H0', k**2.0d0*y(EV%a_kg_ix), yprime(3)*v2_bg*CP%H0_in_Mpc_inv
        !Compute the U coefficient for constructing the pert EFA variables
-       tU = ((-CP%tvarphi_c + CP%tvarphi_sp)*2.0d0*yprime(3) - 2.0d0*k2*y(EV%a_kg_ix+1)/(a2*(CP%m_ovH0**2.0d0)*CP%H0_in_Mpc_inv))/(a*CP%m_ovH0*CP%H0_in_Mpc_inv)+ 6.0d0*CP%ah_osc*y(EV%a_kg_ix)*EV%renorm_c/(a*CP%m_ovH0*CP%H0/100.0d0)
+       tU = ((-CP%tvarphi_c + CP%tvarphi_sp)*2.0d0*yprime(3) &
+            &- 2.0d0*k2*y(EV%a_kg_ix+1)/(a2*(CP%m_ovH0**2.0d0)*CP%H0_in_Mpc_inv))/(a*CP%m_ovH0*CP%H0_in_Mpc_inv)&
+            &+ 6.0d0*CP%ah_osc*y(EV%a_kg_ix)*EV%renorm_c/(a*CP%m_ovH0*CP%H0/100.0d0)
        !write(*, *) 'Rayne, for tU, (-CP%tvarphi_c + CP%tvarphi_sp)*2.0d0*yprime(3)/(a*CP%m_ovH0*CP%H0_in_Mpc_inv), - 2.0d0*k2*y(EV%a_kg_ix+1)/(a2*(CP%m_ovH0**2.0d0)*CP%H0_in_Mpc_inv)/(a*CP%m_ovH0*CP%H0_in_Mpc_inv), + 6.0d0*CP%ah_osc*y(EV%a_kg_ix)/(a*CP%m_ovH0*CP%H0/100.0d0)'
        !write(*, '(36e52.42,\)') (-CP%tvarphi_c + CP%tvarphi_sp)*2.0d0*yprime(3)/(a*CP%m_ovH0*CP%H0_in_Mpc_inv), - 2.0d0*k2*y(EV%a_kg_ix+1)/(a2*(CP%m_ovH0**2.0d0)*CP%H0_in_Mpc_inv)/(a*CP%m_ovH0*CP%H0_in_Mpc_inv), + 6.0d0*CP%ah_osc*y(EV%a_kg_ix)/(a*CP%m_ovH0*CP%H0/100.0d0)
        !V coefficient
-       tV = (-(CP%tvarphi_s + CP%tvarphi_cp)*2.0d0*yprime(3) + 2.0d0*k2*y(EV%a_kg_ix)*EV%renorm_c/(a*CP%m_ovH0*CP%H0_in_Mpc_inv))/(a*CP%m_ovH0*CP%H0_in_Mpc_inv) + 6.0d0*CP%ah_osc*y(EV%a_kg_ix+1)/(a2*(CP%m_ovH0**2.0d0)*CP%H0/100.0d0)
+       tV = (-(CP%tvarphi_s + CP%tvarphi_cp)*2.0d0*yprime(3) &
+            &+ 2.0d0*k2*y(EV%a_kg_ix)*EV%renorm_c/(a*CP%m_ovH0*CP%H0_in_Mpc_inv))/(a*CP%m_ovH0*CP%H0_in_Mpc_inv) &
+            &+ 6.0d0*CP%ah_osc*y(EV%a_kg_ix+1)/(a2*(CP%m_ovH0**2.0d0)*CP%H0/100.0d0)
        !write(*, *) 'Rayne, for tV, -(CP%tvarphi_s + CP%tvarphi_cp)*2.0d0*yprime(3)/(a*CP%m_ovH0*CP%H0_in_Mpc_inv), + 2.0d0*k2*y(EV%a_kg_ix)/(a*CP%m_ovH0*CP%H0_in_Mpc_inv)/(a*CP%m_ovH0*CP%H0_in_Mpc_inv), + 6.0d0*CP%ah_osc*y(EV%a_kg_ix+1)/(a2*(CP%m_ovH0**2.0d0)*CP%H0/100.0d0)'
        !write(*, '(36e52.42,\)') -(CP%tvarphi_s + CP%tvarphi_cp)*2.0d0*yprime(3)/(a*CP%m_ovH0*CP%H0_in_Mpc_inv), + 2.0d0*k2*y(EV%a_kg_ix)/(a*CP%m_ovH0*CP%H0_in_Mpc_inv)/(a*CP%m_ovH0*CP%H0_in_Mpc_inv), + 6.0d0*CP%ah_osc*y(EV%a_kg_ix+1)/(a2*(CP%m_ovH0**2.0d0)*CP%H0/100.0d0)
        !W coefficient untouched
-       tW = CP%A_coeff**2.0d0 + 3.0d0*CP%A_coeff*CP%ah_osc/(a*CP%m_ovH0*CP%H0/100.0d0) + 2.0d0*k2/((a*CP%m_ovH0*CP%H0_in_Mpc_inv)**2.0d0) + 4.0d0
+       tW = CP%A_coeff**2.0d0 + 3.0d0*CP%A_coeff*CP%ah_osc/(a*CP%m_ovH0*CP%H0/100.0d0) &
+            &+ 2.0d0*k2/((a*CP%m_ovH0*CP%H0_in_Mpc_inv)**2.0d0) + 4.0d0
        !RL testing alternative tW with A_alt-------------
 !RL0430       tW = CP%A_coeff_alt**2.0d0 + 3.0d0*CP%A_coeff_alt*CP%ah_osc/(a*CP%m_ovH0*CP%H0/100.0d0) + 2.0d0*k2/((a*CP%m_ovH0*CP%H0_in_Mpc_inv)**2.0d0) + 4.0d0
        !------------------------
@@ -1246,7 +1254,10 @@ contains
 !RL0430       tdvarphi_s = y(EV%a_kg_ix + 1)/(a*CP%m_ovH0) - tdvarphi_cp
 !RL0430       tdvarphi_sp = (CP%A_coeff_alt*tU - (2.0d0 + k2/((a*CP%m_ovH0*CP%H0_in_Mpc_inv)**2.0d0))*tV)/(2.0d0*tW)
        !Normalized deltarho_ef
-       tdrho_ef = (CP%m_ovH0**2.0d0)*(CP%tvarphi_s*tdvarphi_cp - CP%tvarphi_c*tdvarphi_sp + CP%tvarphi_cp*tdvarphi_cp + CP%tvarphi_sp*tdvarphi_sp + tdvarphi_s*(2.0d0*CP%tvarphi_s + CP%tvarphi_cp) + tdvarphi_c*(2.0d0*CP%tvarphi_c - CP%tvarphi_sp))
+        tdrho_ef = (CP%m_ovH0**2.0d0)*(CP%tvarphi_s*tdvarphi_cp - CP%tvarphi_c*tdvarphi_sp &
+             &+ CP%tvarphi_cp*tdvarphi_cp + CP%tvarphi_sp*tdvarphi_sp &
+             &+ tdvarphi_s*(2.0d0*CP%tvarphi_s + CP%tvarphi_cp) &
+             &+ tdvarphi_c*(2.0d0*CP%tvarphi_c - CP%tvarphi_sp))
        !Normalized deltaP_ef test, RL 042524 - note the factor of 2 due to the normalization of the variables. See Eqn. (46) of candidacy notes
        tdP_ef_test = tdrho_ef - 2._dl*(CP%m_ovH0**2.0d0)*(tdvarphi_s*CP%tvarphi_s + tdvarphi_c*CP%tvarphi_c)
 
@@ -1256,7 +1267,8 @@ contains
           csquared_ax_test = kamnorm_test/4.0_dl + 5.0_dl*((1/(a*dtauda(a)))**2.0_dl)/(4.0_dl*(k2/kamnorm_test))
           !!write(*, *) 'Rayne, machine precision, kamnorm, csquared_ax_test', kamnorm_test, csquared_ax_test
     else
-          csquared_ax_test = (sqrt(1.0_dl + kamnorm_test) - 1.0_dl)**2.0_dl/(kamnorm_test) + 5.0_dl*((1/(a*dtauda(a)))**2.0_dl)/(4.0_dl*(k2/kamnorm_test))       
+       csquared_ax_test = (sqrt(1.0_dl + kamnorm_test) - 1.0_dl)**2.0_dl/(kamnorm_test) &
+            &+ 5.0_dl*((1/(a*dtauda(a)))**2.0_dl)/(4.0_dl*(k2/kamnorm_test))       
        !!csquared_ax_test = (sqrt(1.0_dl + kamnorm_test) - 1.0_dl)**2.0_dl/(kamnorm_test) + 1.1_dl*((1/(a*dtauda(a)))**2.0_dl)/((k2/kamnorm_test))
       end if
        !!if (EV%q_ix .eq. 200) then
@@ -1277,7 +1289,8 @@ contains
        
        !Normalized u_ax_ef = (1+w)thetaax_ef/k. This is a bit long so declared a variable name for it
        !First just compute the RHS of the equation (without background rho+P)
-       u_ax_ef = k*CP%m_ovH0*(tdvarphi_c*(CP%tvarphi_s + CP%tvarphi_cp) + tdvarphi_s*(-CP%tvarphi_c + CP%tvarphi_sp))/(a*CP%H0_in_Mpc_inv)
+      u_ax_ef = k*CP%m_ovH0*(tdvarphi_c*(CP%tvarphi_s + CP%tvarphi_cp) &
+           &+ tdvarphi_s*(-CP%tvarphi_c + CP%tvarphi_sp))/(a*CP%H0_in_Mpc_inv)
        !!write(*, *) 'Rayne, theta', u_ax_ef*k/(CP%rhorefp_hsq*(CP%H0**2.0d0/1.0d4) + CP%Prefp)
        !!write(*, *) 'Rayne, hLdot/2', -yprime(3) 
        !Then take into account the background omaxh2_ef
@@ -1291,7 +1304,8 @@ contains
        !sup_C = 3.0_dl
        !weight = (k*CP%tau_osc)**4._dl/(2._dl**4._dl + (k*CP%tau_osc)**4._dl)
        !weight = (k*CP%tau_osc)**2._dl/(4._dl + (k*CP%tau_osc)**2._dl) !RL 081324
-       weight = (k/(CP%ahosc_ETA*CP%H0_in_Mpc_inv/(CP%H0/100.0d0)))**2._dl/(3._dl + (k/(CP%ahosc_ETA*CP%H0_in_Mpc_inv/(CP%H0/100.0d0)))**2._dl) !RL 082024
+       weight = (k/(CP%ahosc_ETA*CP%H0_in_Mpc_inv/(CP%H0/100.0d0)))**2._dl/&
+            &(3._dl + (k/(CP%ahosc_ETA*CP%H0_in_Mpc_inv/(CP%H0/100.0d0)))**2._dl) !RL 082024
        !weight = (k*CP%tau_osc)**3._dl/(0.3_dl**3._dl + (k*CP%tau_osc)**3._dl)
        !tau = DeltaTime(0._dl, a)
        !write(*, *) 'Rayne, tau, CP%tau_osc, their fractional difference', tau, CP%tau_osc, tau/CP%tau_osc-1._dl
@@ -1351,18 +1365,24 @@ contains
           !EVout%metric_delta(1)= 0._dl
           !EVout%metric_delta(2)= 0._dl
           !--------assignment of all metric sigma boundary terms
-          EVout%metric_delta(1)= ((-yprime(3)/k+3._dl*yprime(2)/k2)*(2._dl*(yprime(1)/a))/k - y(2)/k) - ((-yprimeout(3)/k+3._dl*yprimeout(2)/k2)*(2._dl*(yprimeout(1)/a))/k - yout(2)/k)
+          EVout%metric_delta(1)= ((-yprime(3)/k+3._dl*yprime(2)/k2)*(2._dl*(yprime(1)/a))/k &
+               &- y(2)/k) - ((-yprimeout(3)/k+3._dl*yprimeout(2)/k2)*(2._dl*(yprimeout(1)/a))/k - yout(2)/k)
           !!EVout%metric_delta(1)= ((-yprime(3)/k+3._dl*yprime(2)/k2)*(2._dl*(yprime(1)/a)-CP%opac_tauosc)/k - y(2)/k + dgpi_out/k2) - ((-yprimeout(3)/k+3._dl*yprimeout(2)/k2)*(2._dl*(yprimeout(1)/a)-CP%opac_tauosc)/k - yout(2)/k + dgpiout_out/k2)
-          EVout%metric_delta(2)= (-yprime(3)/k+3._dl*yprime(2)/k2)/k - (-yprimeout(3)/k+3._dl*yprimeout(2)/k2)/k
+          EVout%metric_delta(2)= (-yprime(3)/k+3._dl*yprime(2)/k2)/k - &
+               &(-yprimeout(3)/k+3._dl*yprimeout(2)/k2)/k
           !--------------
           !!write(*, *) 'Rayne, k, (-yprime(3)/k+3._dl*yprime(2)/k2)*(2._dl*(yprime(1)/a)-CP%opac_tauosc)/k - (-yprimeout(3)/k+3._dl*yprimeout(2)/k2)*(2._dl*(yprimeout(1)/a)-CP%opac_tauosc)/k, -y(2)/k-(-yout(2)/k), dgpi_out/k2 - dgpiout_out/k2', k, (-yprime(3)/k+3._dl*yprime(2)/k2)*(2._dl*(yprime(1)/a)-CP%opac_tauosc)/k - (-yprimeout(3)/k+3._dl*yprimeout(2)/k2)*(2._dl*(yprimeout(1)/a)-CP%opac_tauosc)/k, -y(2)/k-(-yout(2)/k), dgpi_out/k2-dgpiout_out/k2
        else
           !--------assignment of all metric sigma boundary terms
           !!EVout%metric_delta(1)= 0._dl
           !!EVout%metric_delta(2)= 0._dl
-          EVout%metric_delta(1)= ((-yprime(3)/k+3._dl*(yprime(2)-CP%curv*(-yprime(3)/k))/k2)*(2._dl*(yprime(1)/a))/(k*EV%Kf(1)) - y(2)/(k*EV%Kf(1))) - ((-yprimeout(3)/k+3._dl*(yprimeout(2) - CP%curv*(-yprimeout(3)/k))/k2)*(2._dl*(yprimeout(1)/a))/(k*EVout%Kf(1)) - yout(2)/(k*EV%Kf(1)))
+          EVout%metric_delta(1)= ((-yprime(3)/k+3._dl*(yprime(2)-CP%curv*(-yprime(3)/k))/k2)*&
+               &(2._dl*(yprime(1)/a))/(k*EV%Kf(1)) - y(2)/(k*EV%Kf(1))) -&
+               & ((-yprimeout(3)/k+3._dl*(yprimeout(2) - CP%curv*(-yprimeout(3)/k))/k2)*&
+               &(2._dl*(yprimeout(1)/a))/(k*EVout%Kf(1)) - yout(2)/(k*EV%Kf(1)))
           !!EVout%metric_delta(1)= ((-yprime(3)/k+3._dl*(yprime(2)-CP%curv*(-yprime(3)/k))/k2)*(2._dl*(yprime(1)/a)-CP%opac_tauosc)/(k*EV%Kf(1))+ dgpi_out/k2) - ((-yprimeout(3)/k+3._dl*(yprimeout(2) - CP%curv*(-yprimeout(3)/k))/k2)*(2._dl*(yprimeout(1)/a)-CP%opac_tauosc)/(k*EVout%Kf(1)) - yout(2)/(k*EV%Kf(1)) + dgpiout_out/k2)
-          EVout%metric_delta(2)= (-yprime(3)/k+3._dl*(yprime(2)-CP%curv*(-yprime(3)/k))/k2)/(k*EV%Kf(1)) - (-yprimeout(3)/k+3._dl*(yprimeout(2) - CP%curv*(-yprimeout(3)/k))/k2)/(k*EV%Kf(1))
+          EVout%metric_delta(2)= (-yprime(3)/k+3._dl*(yprime(2)-CP%curv*(-yprime(3)/k))/k2)/(k*EV%Kf(1)) - &
+               &(-yprimeout(3)/k+3._dl*(yprimeout(2) - CP%curv*(-yprimeout(3)/k))/k2)/(k*EV%Kf(1))
           !--------
        end if
        !!-----------RL testing 101623 for etak EFA version
@@ -2086,7 +2106,8 @@ contains
        !!write(*, *) 'In GrowthRate, CP%wEFA_c', CP%wEFA_c
        w_ax = ((wcorr_coeff/a2)**2.0d0)*CP%wEFA_c
        w_ax_p1 = 1.0_dl + w_ax
-       dorp=grhom*CP%rhorefp_ovh2*((CP%a_osc/a)**3.0d0)*dexp((wcorr_coeff**2.0d0)*3.0d0*CP%wEFA_c*(1.0d0/(a2**2.0d0) - 1.0d0/(CP%a_osc**4.0d0))/4.0d0) !RL 110923
+       dorp=grhom*CP%rhorefp_ovh2*((CP%a_osc/a)**3.0d0)*dexp((wcorr_coeff**2.0d0)*3.0d0&
+            &*CP%wEFA_c*(1.0d0/(a2**2.0d0) - 1.0d0/(CP%a_osc**4.0d0))/4.0d0) !RL 110923
        !dorp=grhom*CP%rhorefp_hsq*((CP%a_osc/a)**3.0d0)
        !past tauosc, directly obtain clxax and u_ax
        clxax_kg = y(EV%a_kg_ix)
@@ -2171,8 +2192,10 @@ contains
     real(dl) dorp
     real(dl) gr, gr_delogged
     integer i
-    real(dl) dv1_quasitest, hLddot_forquasitest, v2dot_forquasitest, dv2_quasitest, clxax_quasitest, dpax_kg, dgpaxa2_kg, dgpnumass_temp, dgrhonumass_temp !RL testing gr_minus2x, gr_minus2x_delogged, gr_minus, gr_minus_delogged, gr_plus, gr_plus_delogged, gr_plus2x, gr_plus2x_delogged, dlnaepsilon, dgrdlna, dgrdlna_minus, dgrdlna_plus, gP, gP_minus, gP_plus, dgPdlna, dgPlnadgrlna
-    real(dl) delta_rho_sync_quasitest, delta_p_sync_quasitest, delta_rho_rest_quasitest, delta_p_rest_quasitest, kamnorm, csquared_ax!RL testing
+    real(dl) dv1_quasitest, hLddot_forquasitest, v2dot_forquasitest, dv2_quasitest, clxax_quasitest
+    real(dl) dpax_kg, dgpaxa2_kg, dgpnumass_temp, dgrhonumass_temp !RL testing gr_minus2x, gr_minus2x_delogged, gr_minus, gr_minus_delogged, gr_plus, gr_plus_delogged, gr_plus2x, gr_plus2x_delogged, dlnaepsilon, dgrdlna, dgrdlna_minus, dgrdlna_plus, gP, gP_minus, gP_plus, dgPdlna, dgPlnadgrlna
+    real(dl) delta_rho_sync_quasitest, delta_p_sync_quasitest, delta_rho_rest_quasitest, delta_p_rest_quasitest
+    real(dl) kamnorm, csquared_ax!RL testing
     real(dl) opacity_output, dopacity_output, opacity_use, dopacity_use, cs2_output !RL added to call thermo to compute opacity (temporarily)
     real(dl) H0_in_Mpc_inv !RL testing
     real(dl) dtauda
@@ -2270,7 +2293,8 @@ contains
        !!cad2=w_ax*((w_ax + 7.0_dl/3.0_dl)/w_ax_p1)
        !write(*, *) 'Rayne, cad2 from output', cad2
        !cad2 = 0._dl
-       dorp=grhom*CP%rhorefp_ovh2*((CP%a_osc/a)**3.0d0)*dexp((wcorr_coeff**2.0d0)*3.0d0*CP%wEFA_c*(1.0d0/(a2**2.0d0) - 1.0d0/(CP%a_osc**4.0d0))/4.0d0) !RL 110923
+       dorp=grhom*CP%rhorefp_ovh2*((CP%a_osc/a)**3.0d0)*dexp((wcorr_coeff**2.0d0)*3.0d0*&
+            &CP%wEFA_c*(1.0d0/(a2**2.0d0) - 1.0d0/(CP%a_osc**4.0d0))/4.0d0) !RL 110923
        !!write(*, *) 'In output, CP%wEFA_c', CP%wEFA_c
        !dorp=grhom*CP%rhorefp_hsq*((CP%a_osc/a)**3.0d0)
        clxax_kg = y(EV%a_kg_ix)
@@ -2952,8 +2976,10 @@ contains
     !clxax_analytical = (v2_bg*dv2_analytical/a2 + (CP%m_ovH0**2.0d0)*v1_bg*dv1_analytical)*2.0d0/grhoax_kg
     !write(*, *) 'Rayne, is your initial dgrho, etak, adotoa, z correct?', dgrho, initv(1,i_eta)*k/2, adotoa, z !RL tested z to be ~7e-9 fractionally from the first entry of z in derivs
     !write(*, *) 'Rayne, what are your calculated k*z, clxcdot, and their fractional differences?', k*z, -chi*EV%Kf(1)*(1-omtau/5)*k*x/2, -chi*EV%Kf(1)*(1-omtau/5)*k*x/2/(k*z) - 1.0_dl !RL tested to be ~1e-8 fractional different
-    initv(1,i_dphi_ax) = ((CP%m_ovH0*CP%H0_in_Mpc_inv)**2.0d0) * (chi*EV%Kf(1)*(1-omtau/5)*k*x/2) * a2 * v1_bg/(210.0d0 * (adotoa**3.0d0)) !RL - clxcdotmethod
-    initv(1,i_dphidot_ax) = (CP%m_ovH0**2.0d0) * CP%H0_in_Mpc_inv * (chi*EV%Kf(1)*(1-omtau/5)*k*x/2) * a2 * v1_bg/(35.0d0 * (adotoa**2.0d0)) !RL- clxcdotmethod
+    initv(1,i_dphi_ax) = ((CP%m_ovH0*CP%H0_in_Mpc_inv)**2.0d0) * &
+         &(chi*EV%Kf(1)*(1-omtau/5)*k*x/2) * a2 * v1_bg/(210.0d0 * (adotoa**3.0d0)) !RL - clxcdotmethod
+    initv(1,i_dphidot_ax) = (CP%m_ovH0**2.0d0) * CP%H0_in_Mpc_inv &
+         &* (chi*EV%Kf(1)*(1-omtau/5)*k*x/2) * a2 * v1_bg/(35.0d0 * (adotoa**2.0d0)) !RL- clxcdotmethod
     
     !initv(1,i_dphi_ax) = ((CP%m_ovH0*CP%H0_in_Mpc_inv)**2.0d0) * (k * z) * a2 * v1_bg/(210.0d0 * (adotoa**3.0d0)) !RL - kzmethod
     !initv(1,i_dphidot_ax) = (CP%m_ovH0**2.0d0) * CP%H0_in_Mpc_inv * (k * z) * a2 * v1_bg/(35.0d0 * (adotoa**2.0d0)) !RL- kzmethod
@@ -3384,7 +3410,8 @@ contains
        wcorr_coeff = CP%ahosc_ETA*CP%a_osc/(CP%m_ovH0*(CP%H0/100.0d0)) !RL082924
        !!write(*, *) 'In outtransf, CP%wEFA_c', CP%wEFA_c
        !w_ax_p1 = 1.0_dl + 3.0d0*((wcorr_coeff/a2)**2.0d0)/2.0d0
-       dorp=grhom*CP%rhorefp_ovh2*((CP%a_osc/a)**3.0d0)*dexp((wcorr_coeff**2.0d0)*3.0d0*CP%wEFA_c*(1.0d0/(a2**2.0d0) - 1.0d0/(CP%a_osc**4.0d0))/4.0d0)
+       dorp=grhom*CP%rhorefp_ovh2*((CP%a_osc/a)**3.0d0)*dexp((wcorr_coeff**2.0d0)*3.0d0*&
+            &CP%wEFA_c*(1.0d0/(a2**2.0d0) - 1.0d0/(CP%a_osc**4.0d0))/4.0d0)
        !dorp=grhom*CP%rhorefp_hsq*((CP%a_osc/a)**3.0d0)
        clxax_kg = y(EV%a_kg_ix)
     end if
@@ -3536,7 +3563,8 @@ contains
        wcorr_coeff = CP%ahosc_ETA*CP%a_osc/(CP%m_ovH0*(CP%H0/100.0d0)) !RL082924
        w_ax = ((wcorr_coeff/a2)**2.0d0)*CP%wEFA_c
        w_ax_p1 = 1.0_dl + w_ax
-       dorp=grhom*CP%rhorefp_ovh2*((CP%a_osc/a)**3.0d0)*dexp((wcorr_coeff**2.0d0)*3.0d0*CP%wEFA_c*(1.0d0/(a2**2.0d0) - 1.0d0/(CP%a_osc**4.0d0))/4.0d0) !RL 110923
+       dorp=grhom*CP%rhorefp_ovh2*((CP%a_osc/a)**3.0d0)*dexp((wcorr_coeff**2.0d0)*3.0d0*&
+            &CP%wEFA_c*(1.0d0/(a2**2.0d0) - 1.0d0/(CP%a_osc**4.0d0))/4.0d0) !RL 110923
        !write(*, *) 'In derivs, CP%wEFA_c', CP%wEFA_c
        !RL: now I need cad2 and from my approximation scheme it only depend on H at aosc
        !cad2 = w_ax*((w_ax + 7.0_dl/3.0_dl)/w_ax_p1) !RL 081324 - define cad2 after the w_total is obtained
@@ -3762,7 +3790,8 @@ contains
        !ayprime(EV%a_kg_ix+1) = -2 * adotoa * dv2 - k2*dv1/(CP%H0_in_Mpc_inv) - a2*(CP%m_ovH0**2.0_dl)*dv1*CP%H0_in_Mpc_inv !- k*z*v2_bg
        !The untouched KG---------------
        ayprime(EV%a_kg_ix) = dv2 * CP%H0_in_Mpc_inv/EV%renorm_c 
-       ayprime(EV%a_kg_ix+1) = -2 * adotoa * dv2 - k2*dv1*EV%renorm_c/(CP%H0_in_Mpc_inv) - a2*(CP%m_ovH0**2.0_dl)*dv1*EV%renorm_c*CP%H0_in_Mpc_inv - k*z*v2_bg !RL 050324
+       ayprime(EV%a_kg_ix+1) = -2 * adotoa * dv2 - k2*dv1*EV%renorm_c/(CP%H0_in_Mpc_inv) &
+            &- a2*(CP%m_ovH0**2.0_dl)*dv1*EV%renorm_c*CP%H0_in_Mpc_inv - k*z*v2_bg !RL 050324
     else !Now past the oscillation phase, use EFA
        !w_ax_p1 is defined at the start of the subroutine
        cad2 = w_ax*((1._dl+ gpres/grho)/w_ax_p1 +1._dl) !RL 081324 gpres is "changed" again in a later chunk but that's ppf and doens't matter
@@ -3792,8 +3821,10 @@ contains
        !clxax_kg_dot = -k*(u_ax_kg )-3.0_dl*(csquared_ax-w_ax)*adotoa*clxax_kg-9.0_dl*(csquared_ax-cad2)*(adotoa**2.0_dl)*u_ax_kg/k
        !u_ax_kg_dot=-adotoa*u_ax_kg+3.0_dl*csquared_ax*adotoa*u_ax_kg+k*csquared_ax*clxax_kg+3.0_dl*(w_ax-cad2)*adotoa*u_ax_kg
        !--------------------------- untouched EFA EoM
-       clxax_kg_dot = -k*(u_ax_kg + z*w_ax_p1)-3.0_dl*(csquared_ax-w_ax)*adotoa*clxax_kg-9.0_dl*(csquared_ax-cad2)*(adotoa**2.0_dl)*u_ax_kg/k
-       u_ax_kg_dot=-adotoa*u_ax_kg+3.0_dl*csquared_ax*adotoa*u_ax_kg+k*csquared_ax*clxax_kg+3.0_dl*(w_ax-cad2)*adotoa*u_ax_kg
+     clxax_kg_dot = -k*(u_ax_kg + z*w_ax_p1)-3.0_dl*(csquared_ax-w_ax)*adotoa*clxax_kg-&
+          &9.0_dl*(csquared_ax-cad2)*(adotoa**2.0_dl)*u_ax_kg/k
+     u_ax_kg_dot=-adotoa*u_ax_kg+3.0_dl*csquared_ax*adotoa*u_ax_kg+k*csquared_ax*clxax_kg+&
+          &3.0_dl*(w_ax-cad2)*adotoa*u_ax_kg
        ayprime(EV%a_kg_ix) = clxax_kg_dot
        ayprime(EV%a_kg_ix+1) = u_ax_kg_dot
     end if
@@ -4172,7 +4203,8 @@ contains
        wcorr_coeff = CP%ahosc_ETA*CP%a_osc/(CP%m_ovH0*(CP%H0/100.0d0)) !RL082924
        w_ax = ((wcorr_coeff/a2)**2.0d0)*CP%wEFA_c
        w_ax_p1 = 1.0_dl + w_ax
-       dorp=grhom*CP%rhorefp_ovh2*((CP%a_osc/a)**3.0d0)*dexp((wcorr_coeff**2.0d0)*3.0d0*CP%wEFA_c*(1.0d0/(a2**2.0d0) - 1.0d0/(CP%a_osc**4.0d0))/4.0d0)
+       dorp=grhom*CP%rhorefp_ovh2*((CP%a_osc/a)**3.0d0)*dexp((wcorr_coeff**2.0d0)*3.0d0*&
+            &CP%wEFA_c*(1.0d0/(a2**2.0d0) - 1.0d0/(CP%a_osc**4.0d0))/4.0d0)
        !dorp=grhom*CP%rhorefp_hsq*((CP%a_osc/a)**3.0d0)
 
     endif
@@ -4369,7 +4401,8 @@ contains
        !wcorr_coeff = CP%ah_osc*CP%a_osc/(CP%m_ovH0*(CP%H0/100.0d0))
        wcorr_coeff = CP%ahosc_ETA*CP%a_osc/(CP%m_ovH0*(CP%H0/100.0d0)) !RL082924
        !w_ax_p1 = 1.0_dl + 3.0d0*((wcorr_coeff/a2)**2.0d0)/2.0d0 !Not declared, not needed
-       dorp=grhom*CP%rhorefp_ovh2*((CP%a_osc/a)**3.0d0)*dexp((wcorr_coeff**2.0d0)*3.0d0*CP%wEFA_c*(1.0d0/(a2**2.0d0) - 1.0d0/(CP%a_osc**4.0d0))/4.0d0)
+       dorp=grhom*CP%rhorefp_ovh2*((CP%a_osc/a)**3.0d0)*dexp((wcorr_coeff**2.0d0)*3.0d0*&
+            &CP%wEFA_c*(1.0d0/(a2**2.0d0) - 1.0d0/(CP%a_osc**4.0d0))/4.0d0)
        !dorp=grhom*CP%rhorefp_hsq*((CP%a_osc/a)**3.0d0)
     endif
 

@@ -26,8 +26,8 @@ FFLAGS= -O3 -qopenmp #-g -warn all -check all # ##-O3  # #RL 08012023 -ip -WB  -
 #if pre v4.3 add -D__GFORTRAN__
 #With v4.6+ try -Ofast -march=native -fopenmp
 #On my machine v4.5 is about 20% slower than ifort
-#F90C     = gfortran -ffast-math
-##FFLAGS =  -O2  
+#F90C     = gfortran #-ffast-math
+#FFLAGS = -O3 -fopenmp -ffixed-line-length-300 #-O2  
 #-ffast-math 
 
 

@@ -617,7 +617,8 @@ contains
     if (maxion_twiddle .lt. 3.0d0) then !The case where axions never oscillate
        v1_initguess(2) = dsqrt(omegah2_ax)/maxion_twiddle
        !In this case, !maximum a isn't changing and remains 1.0d0
-    else if ((maxion_twiddle**2.0d0)/9.0d0 .lt. (omegah2_m**4.0d0)/(Params%omegah2_rad**3.0d0) + (Params%omegah2_rad**3.0d0)/(omegah2_m**4.0d0)) then !Oscillation starts approximately in matter-domination
+    else if ((maxion_twiddle**2.0d0)/9.0d0 .lt. &
+         &(omegah2_m**4.0d0)/(Params%omegah2_rad**3.0d0) + (Params%omegah2_rad**3.0d0)/(omegah2_m**4.0d0)) then !Oscillation starts approximately in matter-domination
        v1_initguess(2) = dsqrt(omegah2_ax)/(3.0d0*dsqrt(omegah2_m)/hnot)
     else !Oscillation starts approximately in radiation-domination
        v1_initguess(2) = dsqrt(omegah2_ax)/(((9.0d0*Params%omegah2_rad/hsq)**0.375d0)*(maxion_twiddle**0.25d0))
@@ -696,7 +697,8 @@ contains
              v_vec(1,1)=vtwiddle_init
              v_vec(2,1)=0.0d0 !axionCAMB original (1st place, initial)
              !calculate dimensionless hubble including standard matter and axion potential and kinetic energy
-             call lh(omegah2_regm,Params%omegah2_rad,omegah2_lambda,omk,hsq,maxion_twiddle,a_arr(1),v_vec(1:2,1),littlehfunc(1),badflag,&
+             call lh(omegah2_regm,Params%omegah2_rad,omegah2_lambda,omk,hsq,&
+                  &maxion_twiddle,a_arr(1),v_vec(1:2,1),littlehfunc(1),badflag,&
                   lhsqcont_massless,lhsqcont_massive,Params%Nu_mass_eigenstates,Nu_masses)
              !RL modifying v_vec(2,1) after obtaining the initial Hubble
              v_vec(2,1)= - vtwiddle_init * (a_arr(1)**2.0d0) * (maxion_twiddle**2.0d0) * hnot/(5.0d0 * littlehfunc(1)) 
@@ -739,7 +741,8 @@ contains
                      &+svec(14)*kvec(14,:)+svec(15)*kvec(15,:))
 !!!!
                 !calculate hubble for next step
-                call lh(omegah2_regm,Params%omegah2_rad,omegah2_lambda,omk,hsq,maxion_twiddle,a_arr(i),v_vec(1:2,i),littlehfunc(i),badflag,&
+                call lh(omegah2_regm,Params%omegah2_rad,omegah2_lambda,omk,hsq,&
+                     &maxion_twiddle,a_arr(i),v_vec(1:2,i),littlehfunc(i),badflag,&
                      &lhsqcont_massless,lhsqcont_massive,Params%Nu_mass_eigenstates,Nu_masses)
 
                 kvec=0.0d0
@@ -819,7 +822,8 @@ contains
                       !!       print*,i,isnan(f_arr(i))
                       !
                       do k=0,10,1
-                         call lh(omegah2_regm,Params%omegah2_rad,omegah2_lambda,omk,hsq,maxion_twiddle,a_arr(i+k),v_vec(1:2,i+k),littlehfunc(i+k),badflag,&
+                         call lh(omegah2_regm,Params%omegah2_rad,omegah2_lambda,omk,hsq,&
+                              &maxion_twiddle,a_arr(i+k),v_vec(1:2,i+k),littlehfunc(i+k),badflag,&
                               &lhsqcont_massless,lhsqcont_massive,Params%Nu_mass_eigenstates,Nu_masses)
                          if (((isnan(f_arr(i+k))).or.(isnan(v_vec(1,i+k))) ).or.(isnan(v_vec(2,i+k))))then
                             print*,i,k,littlehfunc(i+k),v_vec(1,i+k),v_vec(2,i+k),a_arr(i+k),dexp(laosc)
@@ -851,8 +855,10 @@ contains
                 !d1=(v_vec(2,2)-v_vec(2,1))/(loga_table(2)-loga_table(1))
                 !d2=(v_vec(2,ntable)-v_vec(2,ntable-1))/(loga_table(ntable)-loga_table(ntable-1))
                 !RL replacing it with the analytical derivatives - note here it's natural log, not log 10!!----------------
-                d1 = -(2.0d0*v_vec(2,1) + ((maxion_twiddle*dexp(loga_table(1)))**2.0d0)*v_vec(1,1)*hnot/littlehfunc(1))
-                d2 = -(2.0d0*v_vec(2,ntable) + ((maxion_twiddle*dexp(loga_table(ntable)))**2.0d0)*v_vec(1,ntable)*hnot/littlehfunc(ntable))
+                d1 = -(2.0d0*v_vec(2,1) + &
+                     & ((maxion_twiddle*dexp(loga_table(1)))**2.0d0)*v_vec(1,1)*hnot/littlehfunc(1))
+                d2 = -(2.0d0*v_vec(2,ntable) + &
+                     &((maxion_twiddle*dexp(loga_table(ntable)))**2.0d0)*v_vec(1,ntable)*hnot/littlehfunc(ntable))
                 !---------------------
                 call spline(loga_table(1:ntable),v_vec(2,1:ntable),ntable,d1,d2,v_buff(1:ntable))   
                 call spline_out(loga_table(1:ntable),v_vec(2,1:ntable),&
@@ -867,7 +873,10 @@ contains
                 !end if
 
                 !RL: Compute the auxiliary initial conditions
-                call auxiIC(Params, omegah2_regm,Params%omegah2_rad,omegah2_lambda,omk,hnot,maxion_twiddle,aosc_guess(j), (/phiosc, phidosc/), badflag,lhsqcont_massless,lhsqcont_massive,Params%Nu_mass_eigenstates,Nu_masses, littlehauxi, Params%ahosc_ETA, A_coeff, tvarphi_c,tvarphi_cp,tvarphi_s,tvarphi_sp, rhorefp, Prefp)
+                call auxiIC(Params, omegah2_regm,Params%omegah2_rad,omegah2_lambda,omk,hnot,&
+                     &maxion_twiddle,aosc_guess(j), (/phiosc, phidosc/), badflag,lhsqcont_massless,&
+                     &lhsqcont_massive,Params%Nu_mass_eigenstates,Nu_masses, littlehauxi, &
+                     &Params%ahosc_ETA, A_coeff, tvarphi_c,tvarphi_cp,tvarphi_s,tvarphi_sp, rhorefp, Prefp)
                 !RL: rhorefp now is the effective fluid version - the omax(a)h2 at aosc
                 !rhorefp = (maxion_twiddle**2.0d0)*(tvarphi_c**2.0d0 + tvarphi_s**2.0d0 + (tvarphi_cp**2.0d0 + tvarphi_sp**2.0d0)/2.0d0 - tvarphi_c*tvarphi_sp + tvarphi_s*tvarphi_cp)
 
@@ -881,7 +890,8 @@ contains
                 !Here a is taken to be 1.0 to compute the present-day omaxh2
                 !RL 110923
                 !!write(*, *) 'In bisection, Params%wEFA_c', Params%wEFA_c
-                omaxh2_wcorr = rhorefp*(aosc_guess(j)**3.0d0)*dexp((wcorr_coeff**2.0d0)*3.0d0*Params%wEFA_c*(1.0d0 - 1.0d0/(aosc_guess(j)**4.0d0))/4.0d0)                  
+                omaxh2_wcorr = rhorefp*(aosc_guess(j)**3.0d0)*dexp((wcorr_coeff**2.0d0)*3.0d0*&
+                     &Params%wEFA_c*(1.0d0 - 1.0d0/(aosc_guess(j)**4.0d0))/4.0d0)                  
 
                 omaxh2_guess(j) = omaxh2_wcorr
                 !RL fout=omaxh2_wcorr/(omegah2_regm+omaxh2_wcorr)
@@ -890,8 +900,11 @@ contains
                 !RL 022624 modified to obtain Hubble at z = 900 at all times since there's a window to skip before the recombination window which depends on aeq, and aeq can only be evaluated later
 !!!!!!!!if (aosc .lt. Params%a_skip .and. aosc .gt. Params%a_skipst) then
                 !Obtain the ah from EFA at the recombination jump redshift
-                call lh(omegah2_regm,Params%omegah2_rad,omegah2_lambda,omk,hsq,maxion_twiddle,Params%a_skip,v_vec(1:2,i),lh_skip,badflag,&
-                     &lhsqcont_massless,lhsqcont_massive,Params%Nu_mass_eigenstates,Nu_masses,rhorefp*((aosc_guess(j)/Params%a_skip)**3.0d0)*dexp((wcorr_coeff**2.0d0)*3.0d0*Params%wEFA_c*(1.0d0/(Params%a_skip**4.0d0) - 1.0d0/(aosc_guess(j)**4.0d0))/4.0d0))
+                call lh(omegah2_regm,Params%omegah2_rad,omegah2_lambda,omk,hsq,&
+                     &maxion_twiddle,Params%a_skip,v_vec(1:2,i),lh_skip,badflag,&
+                     &lhsqcont_massless,lhsqcont_massive,Params%Nu_mass_eigenstates,Nu_masses,&
+                     &rhorefp*((aosc_guess(j)/Params%a_skip)**3.0d0)*dexp((wcorr_coeff**2.0d0)*3.0d0*&
+                     &Params%wEFA_c*(1.0d0/(Params%a_skip**4.0d0) - 1.0d0/(aosc_guess(j)**4.0d0))/4.0d0))
                 !!write(*, *) 'Rayne, dfac, littlehauxi/aosc, Params%ahosc_ETA/aosc', Params%dfac, littlehauxi/aosc, Params%ahosc_ETA/aosc
                 !write(*, *) 'Rayne, dfac, Params%ahosc_ETA/aosc, m/<H>', Params%dfac, Params%ahosc_ETA/aosc, Params%dfac*(littlehauxi/Params%ahosc_ETA)
                 Params%dfac_skip = min(littlehauxi/Params%ahosc_ETA, 1._dl)*lh_skip
@@ -926,7 +939,11 @@ contains
           !!write(040324, '(36e52.42)') iter_c, aosc, Params%wEFA_c, omaxh2_guess(1), omaxh2_guess(2), omaxh2_guess(3), v1_initguess(1), v1_initguess(2), v1_initguess(3)
           if (iter_c .eq. -1) exit !The previous exit is to exit that if statement if I found the solution, but I still need to exit the while loop
           if (iter_c .eq. nphi - 1) then !Warning sign if iter_c exceeds maximum iteration
-             print*, 'Warning: exceeding the maximum number of iteration for bisection: number of iterations:', iter_c, 'omaxh2 result:', omaxh2_guess(2), 'omaxh2 input:', omegah2_ax, 'fractional error:', omaxh2_guess(2)/omegah2_ax - 1.0d0,'aosc:', aosc_guess(2),'. The code will proceed - possibly wEF was not set to converge accurately enough which is ok, but please do check for unreasonable inputs.'
+             print*, 'Warning: exceeding the maximum number of iteration for bisection: &
+                  &number of iterations:', iter_c, 'omaxh2 result:', omaxh2_guess(2), 'omaxh2 input:', &
+                  &omegah2_ax, 'fractional error:', omaxh2_guess(2)/omegah2_ax - 1.0d0,&
+                  &'aosc:', aosc_guess(2),'. The code will proceed - possibly wEF was not set to converge &
+&accurately enough which is ok, but please do check for unreasonable inputs.'
              vtwiddle_init = v1_initguess(2)
              !Don't forget to assign aosc too
              Params%a_osc= aosc_guess(2)
@@ -1243,8 +1260,10 @@ contains
        !d2v1 = d2
        call spline(loga_table(1:ntable),phinorm_table,ntable,d1,d2,phinorm_table_ddlga)
        !Then v2
-       d1 = -dlog(10._dl) * (2._dl*phidotnorm_table(1) + ((maxion_twiddle*(10._dl**(loga_table(1))))**2._dl)*phinorm_table(1)*hnot/littlehfunc(1))
-       d2 = -dlog(10._dl) * (2._dl*phidotnorm_table(ntable) + ((maxion_twiddle*(10._dl**(loga_table(ntable))))**2._dl)*phinorm_table(ntable)*hnot/littlehfunc(ntable))
+       d1 = -dlog(10._dl) * (2._dl*phidotnorm_table(1) + &
+            &((maxion_twiddle*(10._dl**(loga_table(1))))**2._dl)*phinorm_table(1)*hnot/littlehfunc(1))
+       d2 = -dlog(10._dl) * (2._dl*phidotnorm_table(ntable) + &
+            &((maxion_twiddle*(10._dl**(loga_table(ntable))))**2._dl)*phinorm_table(ntable)*hnot/littlehfunc(ntable))
        !d1v2 = d1
        !d2v2 = d2
 
@@ -1256,7 +1275,10 @@ contains
        !Compute the coefficient the auxiliary initial conditions
        !Since this touches all cosmological components a subroutine is written
        !write(*, *) 'Rayne, before the final auxiIC is called, Params%a_osc, v1_ref, v2_ref', Params%a_osc, v1_ref, v2_ref
-       call auxiIC(Params, omegah2_regm,Params%omegah2_rad,omegah2_lambda,omk,hnot,maxion_twiddle,Params%a_osc, (/v1_ref, v2_ref/), badflag,lhsqcont_massless,lhsqcont_massive,Params%Nu_mass_eigenstates,Nu_masses, littlehauxi, Params%ahosc_ETA, A_coeff, tvarphi_c,tvarphi_cp,tvarphi_s,tvarphi_sp, rhorefp, Prefp)
+       call auxiIC(Params, omegah2_regm,Params%omegah2_rad,omegah2_lambda,omk,hnot,&
+            &maxion_twiddle,Params%a_osc, (/v1_ref, v2_ref/), badflag,lhsqcont_massless,&
+            &lhsqcont_massive,Params%Nu_mass_eigenstates,Nu_masses, littlehauxi, &
+            &Params%ahosc_ETA, A_coeff, tvarphi_c,tvarphi_cp,tvarphi_s,tvarphi_sp, rhorefp, Prefp)
        !write(*, *) 'Rayne, in the background, aosc, adotoa at aosc', Params%a_osc, littlehauxi*Params%H0_in_Mpc_inv/hnot
 
        !Store the background EFA field variables at the switch
@@ -1371,7 +1393,10 @@ contains
        Params%aeq=10._dl**(Params%aeq) !RL fixed 012524
        !Sometimes this spline breaks if a_osc<a_eq, in that case simpler expressions can be used
        regzeq=(Params%omegah2_rad+sum(lhsqcont_massive))/(omegah2_b+omegah2_dm+omegah2_ax)
-       aeq_LCDM = (((Params%TCMB**4.0d0)/(rhocrit))/(c**2.0d0)*a_rad*1.d1/(1.d4))*(1._dl + (Params%nu_massless_degeneracy + sum(Params%Nu_mass_degeneracies(1:Params%Nu_mass_eigenstates)))*(7._dl/8._dl)*((4._dl/11._dl)**(4._dl/3._dl)))/(omegah2_b+omegah2_dm+omegah2_ax) !RL 031724, the approximate aeq assuming a matter scaling of axions, used for phase-finding
+       aeq_LCDM = (((Params%TCMB**4.0d0)/(rhocrit))/(c**2.0d0)*a_rad*1.d1/(1.d4))*&
+            &(1._dl + (Params%nu_massless_degeneracy + &
+            &sum(Params%Nu_mass_degeneracies(1:Params%Nu_mass_eigenstates)))*(7._dl/8._dl)*&
+            &((4._dl/11._dl)**(4._dl/3._dl)))/(omegah2_b+omegah2_dm+omegah2_ax) !RL 031724, the approximate aeq assuming a matter scaling of axions, used for phase-finding
        !!write(*, *) 'regzeq, aeq_LCDM, their fractional difference', regzeq, aeq_LCDM, regzeq/aeq_LCDM - 1._dl
        if (Params%a_osc.lt.regzeq) then
           Params%aeq=regzeq
@@ -1575,7 +1600,9 @@ contains
      end subroutine get_phase_info
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
      !RL added: supply the initial conditions at aosc 
-     subroutine auxiIC(Params, omegah2_regm,omegah2_rad,omegah2_lambda,omk,hnot,maxion_twiddle,a, v, badflag,lhsqcont_massless,lhsqcont_massive,Nu_mass_eigenstates,Numasses, littlehauxi, lhETA, A_coeff, tvarphi_c, tvarphi_cp, tvarphi_s, tvarphi_sp, rhorefp, Prefp)
+     subroutine auxiIC(Params, omegah2_regm,omegah2_rad,omegah2_lambda,omk,hnot,maxion_twiddle,&
+          &a, v, badflag,lhsqcont_massless,lhsqcont_massive,Nu_mass_eigenstates,Numasses, &
+          &littlehauxi, lhETA, A_coeff, tvarphi_c, tvarphi_cp, tvarphi_s, tvarphi_sp, rhorefp, Prefp)
        use ModelParams
        use constants
        use Precision
@@ -1594,7 +1621,8 @@ contains
        !Hubble parameter in eV
        !!H_eV=1.d14*6.5821d-25*hnot/(MPC_in_sec*c)
        !At this point, first compute dimensionless *conformal* hubble including standard matter and axion potential and kinetic energy
-       call lh(omegah2_regm,omegah2_rad,omegah2_lambda,omk,hnot**2.0d0,maxion_twiddle,a,v,littlehauxi,badflag, lhsqcont_massless,lhsqcont_massive,Nu_mass_eigenstates,Numasses)
+       call lh(omegah2_regm,omegah2_rad,omegah2_lambda,omk,hnot**2.0d0,maxion_twiddle,a,v,&
+            &littlehauxi,badflag, lhsqcont_massless,lhsqcont_massive,Nu_mass_eigenstates,Numasses)
        !RL 041024: initial setups - we don't have rhorefp and Prefp yet, so the first step is using H(instantaneous) to construct EFA quantities
        lhETA = littlehauxi
        !write(*, *) 'In auxiIC, initial lhETA = littlehauxi', lhETA
@@ -1652,13 +1680,16 @@ contains
           !write(*, *) 'Rayne, dfac = 10, m/H, v1_ref, tvarphi_c,tvarphi_cp,tvarphi_s,tvarphi_sp'
           !write(040923, '(36e52.42,\)') a, littlehauxi, 1/Hovm, v(1), v(2), tvarphi_c,tvarphi_cp,tvarphi_s,tvarphi_sp, ((v(2)/a)**2.0d0+(maxion_twiddle*v(1))**2.0d0), (maxion_twiddle**2.0d0)*(tvarphi_c**2.0d0 + tvarphi_s**2.0d0 + (tvarphi_cp**2.0d0 + tvarphi_sp**2.0d0)/2.0d0 - tvarphi_c*tvarphi_sp + tvarphi_s*tvarphi_cp)
           !rhorefp now is the effective fluid version
-          rhorefp = (maxion_twiddle**2.0d0)*(tvarphi_c**2.0d0 + tvarphi_s**2.0d0 + (tvarphi_cp**2.0d0 + tvarphi_sp**2.0d0)/2.0d0 - tvarphi_c*tvarphi_sp + tvarphi_s*tvarphi_cp)
+          rhorefp = (maxion_twiddle**2.0d0)*(tvarphi_c**2.0d0 + tvarphi_s**2.0d0 + &
+               &(tvarphi_cp**2.0d0 + tvarphi_sp**2.0d0)/2.0d0 - tvarphi_c*tvarphi_sp + tvarphi_s*tvarphi_cp)
           !also the effective fluid version of the pressure
-          Prefp = (maxion_twiddle**2.0d0)*(tvarphi_cp**2.0d0/2.0d0 + tvarphi_sp**2.0d0/2.0d0 - tvarphi_c*tvarphi_sp + tvarphi_s*tvarphi_cp)
+          Prefp = (maxion_twiddle**2.0d0)*(tvarphi_cp**2.0d0/2.0d0 + tvarphi_sp**2.0d0/2.0d0 -&
+               & tvarphi_c*tvarphi_sp + tvarphi_s*tvarphi_cp)
 
           !Compare the new H and wEFA coefficient
           wEFA_c_upd = (Prefp/rhorefp)/((lhETA/(maxion_twiddle*hnot*a))**2._dl)
-          call lh(omegah2_regm,omegah2_rad,omegah2_lambda,omk,hnot**2.0d0,maxion_twiddle,a,v,lhETA_upd,badflag, lhsqcont_massless,lhsqcont_massive,Nu_mass_eigenstates,Numasses,rhorefp)
+          call lh(omegah2_regm,omegah2_rad,omegah2_lambda,omk,hnot**2.0d0,maxion_twiddle,&
+               &a,v,lhETA_upd,badflag, lhsqcont_massless,lhsqcont_massive,Nu_mass_eigenstates,Numasses,rhorefp)
           !!write(*, *) 'Rayne auxiIC iteration, wEFA_c_upd, Params%wEFA_c, abs(wEFA_c_upd/Params%wEFA_c -1.0_dl), littlehauxi_upd, littlehauxi, littlehauxi_upd/littlehauxi -1.0_dl'
           !!   write(*, *) wEFA_c_upd, Params%wEFA_c, abs(wEFA_c_upd/Params%wEFA_c -1.0_dl), littlehauxi_upd, littlehauxi, littlehauxi_upd/littlehauxi -1.0_dl
           !if the new quantities are sufficiently close to the previous quantity, end the loop; else reassign, and loop again
@@ -1676,7 +1707,9 @@ contains
        !write(*, *) 'Converged Params%wEFA_c, lhETA', Params%wEFA_c, lhETA
 
        if (iter_EFA .eq. maxiter) then !Warning sign if iter_EFA exceeds maximum iteration
-          print '(A, I0, A, E13.5E3, A, E13.5E3)', 'Warning: exceeding the maximum number of iteration (', iter_EFA, ') for bisection: fractional error in w = ', wEFA_c_upd/Params%wEFA_c -1.0_dl, ', fractional error in H_ETA = ', lhETA_upd/lhETA -1.0_dl
+          print '(A, I0, A, E13.5E3, A, E13.5E3)', &
+               &'Warning: exceeding the maximum number of iteration (', iter_EFA, ') for bisection: fractional error in w = ', &
+               &wEFA_c_upd/Params%wEFA_c -1.0_dl, ', fractional error in H_ETA = ', lhETA_upd/lhETA -1.0_dl
           !write(*, *) wEFA_c_upd, Params%wEFA_c, lhETA_upd, lhETA, lhETA_upd/lhETA -1.0_dl
           !RL: note we didn't go ahead and assign the vtwiddle_init and corresponding aosc, hence the code will crash if this error appears (tested with a very small nphi). But under normal circumstances this should not happen
        end if
