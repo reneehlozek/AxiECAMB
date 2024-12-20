@@ -25,7 +25,7 @@ FFLAGS= -O3 -qopenmp #-g -warn all -check all # ##-O3  # #RL 08012023 -ip -WB  -
 #The options here work in v4.5, delete from RHS in earlier versions (15% slower)
 #if pre v4.3 add -D__GFORTRAN__
 #With v4.6+ try -Ofast -march=native -fopenmp
-#On my machine v4.5 is about 20% slower than ifort
+#A local machine test indicates that v4.5 can be about 20% slower than ifort
 #F90C     = gfortran #-ffast-math
 #Below are suggested fflags for gfortran users that suppress harmless warnings at runtime but trap serious exceptions  
 #FFLAGS = -O3 -fopenmp -ffixed-line-length-300 -ffpe-trap=invalid,zero,overflow -ffpe-summary=none  
