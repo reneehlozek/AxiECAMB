@@ -24,20 +24,20 @@ If cloned to local for the first time, run make to compile the code. You can mod
 ----------------------------------------------------------------------
 #### <a name="physics"></a>Method
 
-AxiECAMB adopts ULAs with a quadratic potential and operates in synchronous gauge. It solves the exact Klein-Gordon (KG) equation from the start time to m/H = 10, and switches to an effective fluid approximation that accurately tracks the time-average of the fast oscillations in the ULA KG system. For light axion masses where m/H~10 is around equality, m/H is raised above 10 and the switch is prevented from occuring around recombination.  
+AxiECAMB adopts ULAs with a quadratic potential and operates in synchronous gauge. It solves the exact Klein-Gordon (KG) equation from the start time to m/H = 10, and switches to an effective fluid approximation that accurately tracks the time-average of the fast oscillations in the ULA KG system. For light axion masses where m/H~10 is around equality, m/H is raised above 10 and the switch is prevented from occuring around recombination.  For the lightest ULAs m/H0<10, which is around 1.4e-32 eV, KG is solved to the present day.
 
-In addition to these methods, AxiECAMB fixes numerous bugs and inaccuracies in AxionCAMB such that it is in general ~50% faster. 
+In addition to these methods, AxiECAMB fixes numerous bugs and inaccuracies in AxionCAMB such that it is typically ~50% faster. 
 
-With default settings for accuracy and k<1E3 Mpc-1, AxiECAMB produces accurate results for m<~1e-18eV. For the lightest ULAs, KG is solved to the present day; for heavier ones ULA effects only appear at higher k, and fitting functions for matter power spectra specified in https://arxiv.org/abs/2412.15192 is more efficient. 
+With default settings for accuracy and k<1E3 Mpc-1, AxiECAMB produces accurate results for m<~1e-18eV. For heavier ones ULA effects only appear at higher k, and fitting functions for matter power spectra specified in https://arxiv.org/abs/2201.10238 is more efficient. 
 
-Our threshold for dark matter vs dark energy like ULAs is whether the mass is greater than 10 times the present Hubble, or m/H0 > 10, which is around 1.4e-32 eV. For this category, the axfrac (fraction of ULA-abundance) parameter represents the ULA fraction in dark matter, and ULA contributes to the total matter transfer function. If m/H0 < 10, axfrac refers to the ULA fraction in dark energy instead, and the matter transfer function excludes the ULA.  In this case KG is solved to the present day and present day cosmological parameters are specified as their instantaneous z=0 values not their time average.
+Our threshold for dark matter vs dark energy like ULAs is whether the mass is greater than 10 times the present Hubble, or m/H0 > 10. For this category, the axfrac (fraction of ULA-abundance) parameter represents the ULA fraction in dark matter, and ULA contributes to the total matter transfer function. If m/H0 < 10, axfrac refers to the ULA fraction in dark energy instead, and the matter transfer function excludes the ULA.  In this case KG is solved to the present day and present day cosmological parameters are specified as their instantaneous z=0 values not their time average.
 
 ----------------------------------------------------------------------
 #### <a name="warnings"></a>Warnings
 
-This release (v. 1.0) only pertains to adiabatic perturbations. Isocurvature is temporarily disabled and deferred to future work.
+This release (v. 1.0) only pertains to adiabatic perturbations. Isocurvature is currently disabled.
 
-The code currently works at the default accuracy (accuracy_boost, l_accuracy_boost = 1) as extensively tested in https://arxiv.org/abs/2412.15192. Higher accuracy boost settings than default are currently under development to integrate with the accuracy of our ULA method, or higher m/H_* values at the switch. The current code accepts higher accuracy boost input if desired but will not be as accurate as the fully integrated version.
+The code currently works at the default accuracy (accuracy_boost, l_accuracy_boost = 1) as extensively tested in https://arxiv.org/abs/2412.15192. Higher accuracy boost settings than default are currently under development to integrate with the accuracy of our ULA method, or higher m/H_* values at the switch. The current code accepts higher accuracy boost input but it is applied to non ULA related accuracy settings as specified by CAMB. 
 
 The ULA GrowthRate subroutine pertaining to SZ analysis (and other measures of the growth rate, e.g. redshift-space distortions) is currently disabled.
 
