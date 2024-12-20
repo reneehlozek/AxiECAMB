@@ -109,6 +109,10 @@ program driver
   HighAccuracyDefault = Ini_Read_Logical('high_accuracy_default',HighAccuracyDefault)
 
   P%NonLinear = Ini_Read_Int('do_nonlinear',NonLinear_none)
+  if (P%NonLinear == 1 .or. P%NonLinear == 2) then
+     write(*, *) 'do_nonlinear is temporarily disabled in this version, setting back to 0.'
+     P%NonLinear = 0
+  end if
 
   P%DoLensing = .false.
   if (P%WantCls) then
@@ -161,7 +165,8 @@ program driver
      P%omegan = Ini_Read_Double('omega_neutrino')
   end if
      
-  P%dfac = Ini_Read_Double('movH_switch') !RL 092623 switch time
+  !!P%dfac = Ini_Read_Double('movH_switch') !RL 092623 switch time
+  P%dfac = 10._dl !RL 121924 making movH internal
   ntable = nint(P%dfac*100) + 1 !RL 111123
 
   P%tcmb   = Ini_Read_Double('temp_cmb',COBE_CMBTemp)

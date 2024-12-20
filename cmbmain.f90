@@ -1262,7 +1262,10 @@ contains
     !write(*, *) 'RL writing the k values in CalcScalarSources'
 
     !write(*, *) 'Rayne, is tautf changed successfully?', tautf !tested that I successfully changed it
-
+  !!  if (CP%WantTransfer) then
+   !!    write(*, *) 'Axion growth rate disabled in this version and set to zero' !RL 121924
+   !! end if
+    
     do j=2,TimeSteps%npoints
        tauend=TimeSteps%points(j)
 

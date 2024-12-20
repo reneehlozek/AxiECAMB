@@ -3462,8 +3462,10 @@ contains
     ! DM: output the growth rate
 
     !!write(*, *) 'RL, in outtransf, before calling GrowthRate, EV%oscillation_started, CP%a_osc', EV%oscillation_started, CP%a_osc
-    call GrowthRate(EV,y,tau,k,a,growth,clxtot)
+    !call GrowthRate(EV,y,tau,k,a,growth,clxtot)
     !!write(*, *) 'RL, in outtransf, after calling GrowthRate'
+    
+    growth = 0._dl
     Arr(Transfer_f) = growth
     Arr(Transfer_tot) = dgrho/grho/k2
 
