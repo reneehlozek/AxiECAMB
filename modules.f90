@@ -2237,7 +2237,11 @@ contains
     integer j_PK
     real(dl) z_osc !RL 121924 for comparison
     z_osc = 1._dl/CP%a_osc - 1._dl
-    !!write(*, *) 'z_osc', z_osc
+    if (z_osc .lt. 0._dl) then
+       z_osc = 0._dl
+    end if
+    
+    !!write(*, *) 'CP%a_osc, z_osc', CP%a_osc, z_osc
     !!!real(dl) omegam_0 !RL 091924 temporary
 
     !!!omegam_0 = CP%omegac + CP%omegab + CP%omegan !RL 091924
@@ -2251,7 +2255,7 @@ contains
        do j_PK=1, CP%Transfer%PK_num_redshifts
           j = CP%Transfer%PK_redshifts_index(j_PK)
           write(*,*) 'at z = ',real(CP%Transfer%redshifts(j)), ' sigma8 (all matter)=', real(MTrans%sigma_8(j_PK,in))
-          if (1._dl/(1._dl + real(CP%Transfer%redshifts(j))) .lt. CP%a_osc) then
+          if (real(CP%Transfer%redshifts(j)) .gt. z_osc) then
              write(*, '(A, F9.5, A, F9.5, A)') 'Note: z = ', real(CP%Transfer%redshifts(j)), &
                   &' is before the axion switch point z = ', z_osc, &
                   &', hence T(k) is defined differently from that after the switch point.'

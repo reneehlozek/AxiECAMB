@@ -43,6 +43,6 @@ The ULA GrowthRate subroutine pertaining to SZ analysis (and other measures of t
 
 If the matter power spectra or transfer function is needed for z>0, one needs to be careful regarding whether z is before or after the switch point to fluid approximation, given that they are defined differently before and after the switch. The code will display a warning sign if a z>0 is requested that is before the switch.
 
-The warning in AxionCAMB regarding non-linear options still applies.
+The non-linear mode of the code is not extensively tested and is disabled for this release.
 
 accurateBB in params.ini should be assigned as T if accurate BB polarization power spectra are needed.
