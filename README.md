@@ -1,4 +1,4 @@
-# <a name="top"></a>AxiECAMB 2.0
+# <a name="top"></a>AxiECAMB
 
 *[AxiECAMB, AxionCAMB, CAMB](#intro)
 
