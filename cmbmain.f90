@@ -747,7 +747,7 @@ contains
     else
        !Fixed spacing
        !RL hacking for test 07/14/2023 SHOULD DELETE AFTER TEST PHASE-------
-       qmin = 1.e-5_dl
+       !qmin = 1.e-5_dl
        !qmin = 2.e-4_dl
        !qmin = 1._dl
        !----------------------
@@ -1013,6 +1013,7 @@ contains
           tautf(itf)=min(TimeOfz(CP%Transfer%redshifts(itf)),CP%tau0)
           if (itf>1) then
              if (tautf(itf) <= tautf(itf-1)) then
+                !write(*,*) 'itf, tautf(itf), tautf(itf-1), TimeOfz(CP%Transfer%redshifts(itf)),CP%tau0',itf, tautf(itf), tautf(itf-1), TimeOfz(CP%Transfer%redshifts(itf)),CP%tau0 
                 stop 'Transfer redshifts not set or out of order'
              end if
           end if

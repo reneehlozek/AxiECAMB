@@ -2235,6 +2235,9 @@ contains
     integer in, j
     !JD 08/13 Changes in here to PK arrays and variables
     integer j_PK
+    real(dl) z_osc !RL 121924 for comparison
+    z_osc = 1._dl/CP%a_osc - 1._dl
+    !!write(*, *) 'z_osc', z_osc
     !!!real(dl) omegam_0 !RL 091924 temporary
 
     !!!omegam_0 = CP%omegac + CP%omegab + CP%omegan !RL 091924
@@ -2248,6 +2251,11 @@ contains
        do j_PK=1, CP%Transfer%PK_num_redshifts
           j = CP%Transfer%PK_redshifts_index(j_PK)
           write(*,*) 'at z = ',real(CP%Transfer%redshifts(j)), ' sigma8 (all matter)=', real(MTrans%sigma_8(j_PK,in))
+          if (1._dl/(1._dl + real(CP%Transfer%redshifts(j))) .lt. CP%a_osc) then
+             write(*, '(A, F9.5, A, F9.5, A)') 'Note: z = ', real(CP%Transfer%redshifts(j)), &
+                  &' is before the axion switch point z = ', z_osc, &
+                  &', hence T(k) is defined differently from that after the switch point.'
+          end if         
           !!!write(*, *) 'Writing both sigma_8 and Omega_m(z=0) to file, please make sure only z=0 is involved'
           !!!write(*, '(36e52.42e3)') ThermoDerivedParams( derived_zstar ), ThermoDerivedParams( derived_rstar ),  ThermoDerivedParams( derived_thetastar ), real(MTrans%sigma_8(j_PK,in)), real(MTrans%sigma_8(j_PK,in))*sqrt(omegam_0/0.3_dl)
           !!write(02222404, '(36e52.42e3)') ThermoDerivedParams( derived_zstar ), ThermoDerivedParams( derived_rstar ),  ThermoDerivedParams( derived_thetastar ), real(MTrans%sigma_8(j_PK,in)), omegam_0

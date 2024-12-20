@@ -360,6 +360,7 @@ program driver
   else
      P%Transfer%PK_num_redshifts = 1
      P%Transfer%PK_redshifts = 0
+     write(*, *) 'P%Transfer%PK_num_redshifts, P%Transfer%PK_redshifts', P%Transfer%PK_num_redshifts, P%Transfer%PK_redshifts
   end if
 
 
