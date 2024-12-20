@@ -28,7 +28,7 @@ AxiECAMB adopts ULAs with a quadratic potential and operates in synchronous gaug
 
 In addition to these methods, AxiECAMB fixes numerous bugs and inaccuracies in AxionCAMB such that it is in general ~50% faster. 
 
-With default settings for accuracy and k<1E3 Mpc-1, AxiECAMB will produce accurate results between m =1e-33 and 1e-18 eV.  For the lightest ULAs, KG is solved to the present day; for heavier ones ULA effects only appear at higher k. 
+With default settings for accuracy and k<1E3 Mpc-1, AxiECAMB produces accurate results for m<~1e-18eV. For the lightest ULAs, KG is solved to the present day; for heavier ones ULA effects only appear at higher k, and fitting functions for matter power spectra specified in https://arxiv.org/abs/2412.15192 is more efficient. 
 
 Our threshold for dark matter vs dark energy like ULAs is whether the mass is greater than 10 times the present Hubble, or m/H0 > 10, which is around 1.4e-32 eV. For this category, the axfrac (fraction of ULA-abundance) parameter represents the ULA fraction in dark matter, and ULA contributes to the total matter transfer function. If m/H0 < 10, axfrac refers to the ULA fraction in dark energy instead, and the matter transfer function excludes the ULA.  In this case KG is solved to the present day and present day cosmological parameters are specified as their instantaneous z=0 values not their time average.
 

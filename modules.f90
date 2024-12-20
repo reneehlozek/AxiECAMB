@@ -542,11 +542,11 @@ contains
        write(*,'("Om_c h^2             = ",f9.6)') CP%omegac*(CP%H0/100)**2
        write(*,'("Om_nu h^2            = ",f9.6)') CP%omegan*(CP%H0/100)**2
        write(*,'("Om_Lambda            = ",f9.6)') CP%omegav
-       write(*, '("H0                   = ", f9.6)') CP%H0
+       write(*,'("H0                   = ",f9.6)') CP%H0
        !Axions                                                                                                                    
        write(*,'("Om_ax h^2            = ",f9.6)') CP%omegaax*(CP%H0/100)**2
-       write(*,'("a_osc                = ",e9.2)')  a_osc
-       write(*,'("tau_osc/Mpc          = ",f9.3)') CP%tau_osc
+       !write(*,'("a_osc                = ",e9.2)')  a_osc
+       !write(*,'("tau_osc/Mpc          = ",f9.3)') CP%tau_osc
 
 
 !!!!!!!!
@@ -556,7 +556,7 @@ contains
 
 
 
-       write(*,'("ma/eV                 = ",e9.2)')  CP%ma !!/(100/.3e5)
+       write(*,'("m_ax/eV              = ",e9.2)')  CP%ma !!/(100/.3e5)
 
        !DG 5/25/2015 Use updated omegak that includes massless and massive neutrinos self consistently
        !correction in the 5th decimal place but now completely includes this
