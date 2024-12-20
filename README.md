@@ -10,11 +10,11 @@ Axion Effective-method in CAMB: a CAMB-based Boltzmann code with effective metho
 ----------------------------------------------------------------------
 #### <a name="intro"></a>AxiECAMB, AxionCAMB, CAMB
 
-AxiECAMB (Axion Effective-method in CAMB) executes the effective method for ultralight axions in <24xx.xxxxx>.  The method is an extension of (Passaglia and Hu 2022, https://arxiv.org/abs/2201.10238) to treat corrections for metric perturbations and the CMB, so that linear observables such as the CMB and matter power spectra can achieve subpercent accuracy for ULA parameter estimation.
+AxiECAMB (Axion Effective-method in CAMB) executes the effective method for ultralight axions in https://arxiv.org/abs/2412.15192. The method is an extension of (Passaglia and Hu 2022, https://arxiv.org/abs/2201.10238) to treat corrections for metric perturbations and the CMB, so that linear observables such as the CMB and matter power spectra can achieve subpercent accuracy for ULA parameter estimation.
 
 AxiECAMB heavily modifies the existing ultralight axion Boltzmann code AxionCAMB (https://github.com/dgrin1/axionCAMB), which itself is based on CAMB (http://camb.info/, https://github.com/cmbant/CAMB) version Nov 2013. 
 
-When using AxiECAMB, please cite <24xx.xxxxx>.
+When using AxiECAMB, please cite https://arxiv.org/abs/2412.15192.
 
 ----------------------------------------------------------------------
 #### <a name="basics"></a>Getting Started
@@ -35,9 +35,9 @@ Our threshold for dark matter vs dark energy like ULAs is whether the mass is gr
 ----------------------------------------------------------------------
 #### <a name="warnings"></a>Warnings
 
-This release (v. XX) only pertains to adiabatic perturbations. Isocurvature is temporarily disabled and deferred to future work.
+This release (v. 1.0) only pertains to adiabatic perturbations. Isocurvature is temporarily disabled and deferred to future work.
 
-The code currently works at the default accuracy (accuracy_boost, l_accuracy_boost = 1) as extensively tested in <xxxx.xxxxx>. Higher accuracy boost settings than default are currently under development to integrate with the accuracy of our ULA method, or higher m/H_* values at the switch. The current code accepts higher accuracy boost input if desired but will not be as accurate as the fully integrated version.
+The code currently works at the default accuracy (accuracy_boost, l_accuracy_boost = 1) as extensively tested in https://arxiv.org/abs/2412.15192. Higher accuracy boost settings than default are currently under development to integrate with the accuracy of our ULA method, or higher m/H_* values at the switch. The current code accepts higher accuracy boost input if desired but will not be as accurate as the fully integrated version.
 
 The ULA GrowthRate subroutine pertaining to SZ analysis (and other measures of the growth rate, e.g. redshift-space distortions) is currently disabled.
 
