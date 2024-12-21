@@ -646,11 +646,22 @@ contains
   subroutine SourceToTransfers(q_ix) 
     integer q_ix
     type(IntegrationVars) :: IV
+    ! Initialize allocation status !RL 122124
+    IV%Source_q => null()
+    IV%metricdeltas_q => null()
+    IV%ddSource_q => null()
 
     allocate(IV%Source_q(TimeSteps%npoints,SourceNum))
     !write(*, *) 'Rayne, in SourceToTransfers, CP%tau_osc, CP%tau0', CP%tau_osc, CP%tau0
-    if (CP%tau_osc .lt. CP%tau0) allocate(IV%metricdeltas_q(2,SourceNum)) !RL 090323
-    if (.not.CP%flat) allocate(IV%ddSource_q(TimeSteps%npoints,SourceNum))
+    if (CP%tau_osc .lt. CP%tau0) then
+       allocate(IV%metricdeltas_q(2,SourceNum)) !RL 090323
+       !!print *, "Allocated IV%metricdeltas_q with shape: ", shape(IV%metricdeltas_q)
+    end if !RL 122124
+    if (CP%tau_osc .lt. CP%tau0 .and. .not.CP%flat) then
+       allocate(IV%ddSource_q(TimeSteps%npoints,SourceNum))
+!!       print *, "Allocated IV%ddSource_q with shape: ", shape(IV%ddSource_q)
+    end if !RL 122124
+    
 
     call IntegrationVars_init(IV)
 
@@ -662,9 +673,21 @@ contains
 
     call DoSourceIntegration(IV)
 
-    if (.not.CP%flat) deallocate(IV%ddSource_q)
+    !if (CP%tau_osc .lt. CP%tau0 .and. .not.CP%flat) then
+    if (associated(IV%ddSource_q)) then
+       deallocate(IV%ddSource_q)
+!!       print *, "Deallocated IV%ddSource_q."
+!!    else
+!!       print *, "IV%ddSource_q was not allocated."
+    end if
+    
     deallocate(IV%Source_q)
-    if (associated(IV%metricdeltas_q)) deallocate(IV%metricdeltas_q) !RL 090323 - "associated" is for pointers
+    if (associated(IV%metricdeltas_q)) then
+       deallocate(IV%metricdeltas_q) !RL 090323 - "associated" is for pointers
+       !!print *, "Deallocated IV%metricdeltas_q." !RL 122124
+    !!else
+    !!    print *, "IV%metricdeltas_q was not allocated."
+    end if
 
   end subroutine SourceToTransfers
 
@@ -756,7 +779,7 @@ contains
        do q_ix=1, MT%num_q_trans
           q_transfer(q_ix) = qmin*exp(real(q_ix)/CP%Transfer%k_per_logint)
        end do
-       !!!write(*, *) 'TRY: CP%Transfer%kmax, qmin, MT%num_q_trans, q_transfer(MT%num_q_trans)?', CP%Transfer%kmax, qmin, MT%num_q_trans, q_transfer(MT%num_q_trans)
+!!!write(*, *) 'TRY: CP%Transfer%kmax, qmin, MT%num_q_trans, q_transfer(MT%num_q_trans)?', CP%Transfer%kmax, qmin, MT%num_q_trans, q_transfer(MT%num_q_trans)
     end if
 
     if (CP%closed) then
@@ -775,7 +798,7 @@ contains
     !write(*, *) 'Rayne, what is MT%num_q_trans if I do not want Cls?', MT%num_q_trans
 
     if (CP%WantCls) then
-       !!!write(*, *) 'Rayne, CP%WantCls = T', CP%WantCls
+!!!write(*, *) 'Rayne, CP%WantCls = T', CP%WantCls
        ntodo = MT%num_q_trans
        first_i = ntodo+1
        do q_ix = 1,ntodo
@@ -1053,7 +1076,7 @@ contains
     end if
 
     qmax_log = dkn1/dlnk0
-    !!!write(*, *) 'taurst', taurst
+!!!write(*, *) 'taurst', taurst
     q_switch = 2*6.3/taurst
     !Want linear spacing for wavenumbers which come inside horizon
     !Could use sound horizon, but for tensors that is not relevant
@@ -1065,16 +1088,16 @@ contains
     if (CP%Want_CMB) dksmooth = dksmooth/6
 
     call Ranges_Init(Evolve_q)
-    !!!write(*, *) 'RAd 1'
+!!!write(*, *) 'RAd 1'
     call Ranges_Add_delta(Evolve_q, qmin, qmax_log, dlnk0, IsLog = .true.)
-    !!!write(*, *) 'RAd 2'
+!!!write(*, *) 'RAd 2'
     call Ranges_Add_delta(Evolve_q, qmax_log, min(qmax,q_switch), dkn1)
     if (qmax > q_switch) then
-       !!!write(*, *) 'RAd 3'
+!!!write(*, *) 'RAd 3'
        call Ranges_Add_delta(Evolve_q, q_switch, min(q_cmb,qmax), dkn2)
        if (qmax > q_cmb) then
           dksmooth = log(1 + dksmooth/q_cmb)
-          !!!write(*, *) 'RAd 4'
+!!!write(*, *) 'RAd 4'
           call Ranges_Add_delta(Evolve_q, q_cmb, qmax, dksmooth, IsLog = .true.)
        end if
     end if
@@ -1211,15 +1234,15 @@ contains
        !tauend = TimeSteps%points(j)
        do j=1,100000   !originally 100000, RL changing to small number for test purposes REMEMBER TO CHANGE TWO PLACES!!
           !tauend = taustart+(j-1)*(CP%tau0-taustart)/100000 !RL: this seems to be the linear scale
-       !if (j .lt. 5000) then
-       !    tauend = taustart* (CP%tau_osc/taustart)**((j-1)/5000._dl) !RL: forces a tauend to be tau_osc
-       ! else
-       !    tauend = CP%tau_osc* (CP%tau0/(CP%tau_osc))**((j-5000)/95000._dl)
-       ! end if
-       !do j=2,TimeSteps%npoints
-       !   tauend=TimeSteps%points(j)
+          !if (j .lt. 5000) then
+          !    tauend = taustart* (CP%tau_osc/taustart)**((j-1)/5000._dl) !RL: forces a tauend to be tau_osc
+          ! else
+          !    tauend = CP%tau_osc* (CP%tau0/(CP%tau_osc))**((j-5000)/95000._dl)
+          ! end if
+          !do j=2,TimeSteps%npoints
+          !   tauend=TimeSteps%points(j)
           tauend = taustart * (CP%tau0/taustart)**((j-1)/100000._dl) !RL: remember to change back to 100000 (this seems to be the log scale) !RL used a fixed tau0 for comparison purposes 011323 - 14483 pertains to m_ax = 1e-30eV
-        !  write(*, *) 'tauend:', tauend
+          !  write(*, *) 'tauend:', tauend
           !tauend = taustart* (CP%tau0/taustart)**((j-0.5_dl)/100000._dl) !RL tampering with the tau spacing
           !write(*, *) EV%oscillation_started 
 
@@ -1263,10 +1286,10 @@ contains
     !write(*, *) 'RL writing the k values in CalcScalarSources'
 
     !write(*, *) 'Rayne, is tautf changed successfully?', tautf !tested that I successfully changed it
-  !!  if (CP%WantTransfer) then
-   !!    write(*, *) 'Axion growth rate disabled in this version and set to zero' !RL 121924
-   !! end if
-    
+    !!  if (CP%WantTransfer) then
+    !!    write(*, *) 'Axion growth rate disabled in this version and set to zero' !RL 121924
+    !! end if
+
     do j=2,TimeSteps%npoints
        tauend=TimeSteps%points(j)
 
@@ -1276,14 +1299,14 @@ contains
        else
           !Integrate over time, calulate end point derivs and calc output
           !!if (j .eq. 2) then !RL 050124
-             !write(*, *) 'cmbmain, j=2, EV%q, tauend', EV%q, tauend
+          !write(*, *) 'cmbmain, j=2, EV%q, tauend', EV%q, tauend
           !!   ind = 2
           !!   c(1) = 2
           !!else
           !!   ind=1
           !!   c(1) = 0
           !!end if
-          
+
           !!write(*, *) 'c(1)?', c(1)
           !!write(*, *) 'GaugeInterface called, EV%q_ix', EV%q_ix
           call GaugeInterface_EvolveScal(EV,tau,y,tauend,tol1,ind,c,w)
@@ -1415,7 +1438,7 @@ contains
 
     !!call CreateTxtFile('../Testdata/auxiCAMB_housecleaning/ompO3_kspan_QSBCon_ab=1_lab=1_lateradtrunc=F_massnuon_transferhighprec=F_C=3d0_max=1e-28eV_fax=1d0_dfac=10d0_ntable=1000_qmin=1de-5_kmax=8_k_tauosc_z_u-ef_P-ef_rho-ef_w-efa_Pefovrhoef-min-wefa_qsbc-corr.dat', 08032023) !
 
-    !!!write(*, *) 'RL, is TransferOut called? and Evolve_q%npoints+1, MT%num_q_trans, MT%q_trans(Evolve_q%npoints+1), MT%q_trans(MT%num_q_trans)?', Evolve_q%npoints+1, MT%num_q_trans, MT%q_trans(Evolve_q%npoints+1), MT%q_trans(MT%num_q_trans)
+!!!write(*, *) 'RL, is TransferOut called? and Evolve_q%npoints+1, MT%num_q_trans, MT%q_trans(Evolve_q%npoints+1), MT%q_trans(MT%num_q_trans)?', Evolve_q%npoints+1, MT%num_q_trans, MT%q_trans(Evolve_q%npoints+1), MT%q_trans(MT%num_q_trans)
 
     if (DebugMsgs .and. Feedbacklevel > 0) &
          write(*,*) MT%num_q_trans-Evolve_q%npoints, 'transfer k values'
@@ -1610,19 +1633,19 @@ contains
 
        dk2 = 0.04/IntSampleBoost  !very small scales
 
-       !!!write(*, *) 'RAd 5'
+!!!write(*, *) 'RAd 5'
        call Ranges_Add_delta(ThisCT%q, qmin, k_max_log, dlnk1, IsLog = .true.)
-       !!!write(*, *) 'RAd 6'
+!!!write(*, *) 'RAd 6'
        call Ranges_Add_delta(ThisCT%q, k_max_log, min(qmax_int,k_max_0), dk0)
 
        if (qmax_int > k_max_0) then
           max_k_dk = max(3000, 2*maximum_l)/CP%tau0
-         !!! write(*, *) 'RAd 7'
+!!! write(*, *) 'RAd 7'
           call Ranges_Add_delta(ThisCT%q, k_max_0, min(qmax_int, max_k_dk), dk)
           if (qmax_int > max_k_dk) then
              !This allows inclusion of high k modes for computing BB lensed spectrum accurately
              !without taking ages to compute.
-            !!! write(*, *) 'RAd 8'
+!!! write(*, *) 'RAd 8'
              call Ranges_Add_delta(ThisCT%q, max_k_dk, qmax_int, dk2)
           end if
        end if
@@ -1711,15 +1734,40 @@ contains
     end do
     IV%SourceSteps = step
     !RL 090323 adding the corresponding interpolation for the boundary conditions
-    if (associated(IV%metricdeltas_q)) then
-       if (CP%WantScalars) then
-          do i=1,2 
-             IV%metricdeltas_q(i,1:SourceNum) = a0*deltaBCSrc(klo,1:SourceNum,i)+ &
-                  b0*deltaBCSrc(khi,1:SourceNum,i) + (a03*dd_deltaBCSrc(klo,1:SourceNum,i) &
-                  +b03*dd_deltaBCSrc(khi,1:SourceNum,i))*ho2o6
-          end do
+!!    print *, "Checking associations and allocations:"
+!!    if (associated(IV%metricdeltas_q)) then
+!!       print *, "IV%metricdeltas_q is associated."
+!!    else
+!!       print *, "IV%metricdeltas_q is NOT associated."
+!!    end if
+
+!!    if (allocated(deltaBCSrc)) then
+!!       print *, "deltaBCSrc is allocated."
+!!    else
+!!       print *, "deltaBCSrc is NOT allocated."
+!!    end if
+
+    ! Ensure SourceNum, klo, and khi are within valid bounds
+    if (CP%WantScalars) then
+       if (associated(IV%metricdeltas_q) .and. allocated(deltaBCSrc)) then
+              do i=1,2 
+                 IV%metricdeltas_q(i,1:SourceNum) = a0*deltaBCSrc(klo,1:SourceNum,i)+ &
+                      b0*deltaBCSrc(khi,1:SourceNum,i) + (a03*dd_deltaBCSrc(klo,1:SourceNum,i) &
+                      +b03*dd_deltaBCSrc(khi,1:SourceNum,i))*ho2o6
+              end do
+       !!else
+       !!   print *, "IV%metricdeltas_q or deltaBCSrc not properly associated or allocated."
        end if
     end if
+    !    if (associated(IV%metricdeltas_q)) then
+    !       if (CP%WantScalars) then
+    !          do i=1,2 
+    !             IV%metricdeltas_q(i,1:SourceNum) = a0*deltaBCSrc(klo,1:SourceNum,i)+ &
+    !                  b0*deltaBCSrc(khi,1:SourceNum,i) + (a03*dd_deltaBCSrc(klo,1:SourceNum,i) &
+    !                  +b03*dd_deltaBCSrc(khi,1:SourceNum,i))*ho2o6
+    !          end do
+    !       end if
+    !    end if
 
 
     if (.not.CP%flat) then
@@ -1871,7 +1919,7 @@ contains
        tmax=CP%tau0-xlim/IV%q
        tmax=min(CP%tau0,tmax)
        tmin=max(TimeSteps%points(2),tmin)
-       
+
        if (tmax < TimeSteps%points(2)) exit
        sums(1:SourceNum) = 0
 
@@ -1949,7 +1997,7 @@ contains
        end if
 
        !RL 090623 adding the boundary conditions at the switch if applicable
-       if (associated(IV%metricdeltas_q)) then
+       if (associated(IV%metricdeltas_q) .and. allocated(deltaBCSrc)) then
           !I only need to precompute the interpolation parameters once for this q
           xf_osc=abs(IV%q*(CP%tau0-CP%tau_osc))
           besix_osc=Ranges_indexOf(BessRanges,xf_osc)
@@ -1965,10 +2013,10 @@ contains
           Jl_osc=aa_osc*ajl(besix_osc,j)+(1-aa_osc)*(ajl(besix_osc+1,j) - ((aa_osc+1) &
                *ajlpr(besix_osc,j)+(2-aa_osc)*ajlpr(besix_osc+1,j))*fac_osc) !cubic spline          
           !!dotJl_osc = IV%q*ajl(besix_osc,j)/delt_osc + (1._dl - aa_osc - IV%q/delt_osc)*ajl(besix_osc+1,j) + (-delt_osc*IV%q/6._dl + (aa_osc**2._dl)*delt_osc*IV%q/6._dl + 2._dl*aa_osc*fac_osc*IV%q/delt_osc)*ajlpr(besix_osc,j) + (-delt_osc*IV%q/3._dl -(aa_osc**2._dl)*delt_osc*IV%q/6._dl + 3._dl*fac_osc*IV%q/delt_osc + aa_osc*(delt_osc*IV%q/2._dl - 2._dl*fac_osc*IV%q/delt_osc))*ajlpr(besix_osc+1,j)!-IV%q*((-aa_osc*fac_osc/3._dl)*((1._dl+aa_osc)*ajlpr(besix_osc,j) - (aa_osc-2._dl)*ajlpr(besix_osc+1,j)))
- !-!-         if (lSamp%l(j) .gt. 2 .and. lSamp%l(j) .lt. 6 .and. IV%q_ix .gt. 20 .and. IV%q_ix .lt. 24) then
- !-!-                  write(*, *) 'Test flat, IV%q_ix, IV%q, lSamp%l(j), xf_osc, Jl_osc, dotJl_osc', IV%q_ix, IV%q, lSamp%l(j), xf_osc, Jl_osc, dotJl_osc
-  !-!-              end if
-          
+          !-!-         if (lSamp%l(j) .gt. 2 .and. lSamp%l(j) .lt. 6 .and. IV%q_ix .gt. 20 .and. IV%q_ix .lt. 24) then
+          !-!-                  write(*, *) 'Test flat, IV%q_ix, IV%q, lSamp%l(j), xf_osc, Jl_osc, dotJl_osc', IV%q_ix, IV%q, lSamp%l(j), xf_osc, Jl_osc, dotJl_osc
+          !-!-              end if
+
           !!Jl_eps = 1.d-6
           !!xf_osc_m=abs(IV%q*(CP%tau0-CP%tau_osc*(1._dl - Jl_eps)))
           !!besix_osc_m=Ranges_indexOf(BessRanges,xf_osc_m)
@@ -2006,8 +2054,8 @@ contains
           !   write(unit_nums(i_output), '(I6, 36E52.42, 36E52.42, 36E52.42)') lSamp%l(j), IV%q, IV%metricdeltas_q(1, 1), CP%opac_tauosc, Jl_osc, dotJl_osc, IV%metricdeltas_q(2, 1), CP%expmmu_tauosc
           !end if
           if (IV%q_ix .eq. 1.and. j .eq. 1) then
-             !!!write(*, *) 'Rayne, output IV%q', IV%q
-             !!!write(*, *) 'Rayne, the compensated boundary scalar source term', CP%expmmu_tauosc*Jl_osc*(IV%metricdeltas_q(1, 1) - CP%opac_tauosc*IV%metricdeltas_q(2, 1)*11._dl/10._dl) + CP%expmmu_tauosc*dotJl_osc*IV%metricdeltas_q(2, 1)
+!!!write(*, *) 'Rayne, output IV%q', IV%q
+!!!write(*, *) 'Rayne, the compensated boundary scalar source term', CP%expmmu_tauosc*Jl_osc*(IV%metricdeltas_q(1, 1) - CP%opac_tauosc*IV%metricdeltas_q(2, 1)*11._dl/10._dl) + CP%expmmu_tauosc*dotJl_osc*IV%metricdeltas_q(2, 1)
           end if
           sums(1) = sums(1) + CP%expmmu_tauosc*Jl_osc*(IV%metricdeltas_q(1, 1) &
                &- CP%opac_tauosc*IV%metricdeltas_q(2, 1)*11._dl/10._dl) &
@@ -2034,9 +2082,9 @@ contains
 
     !!write(*, *) 'Start of IntegrateSourcesBessels, ThisCT%Delta_p_l_k(1:SourceNum,j,IV%q_ix)',  ThisCT%Delta_p_l_k(1:SourceNum,j,IV%q_ix)
     !Calculate chi where for smaller chi it is dissipative
- !-!-         if (l .gt. 2 .and. l .lt. 6 .and. IV%q_ix .gt. 20 .and. IV%q_ix .lt. 24) then
- !-!-            write(*, *) 'IntegrateSourcesBessels calle, IV%q_ix, l', IV%q_ix, l
- !-!-            end if !RL 041924
+    !-!-         if (l .gt. 2 .and. l .lt. 6 .and. IV%q_ix .gt. 20 .and. IV%q_ix .lt. 24) then
+    !-!-            write(*, *) 'IntegrateSourcesBessels calle, IV%q_ix, l', IV%q_ix, l
+    !-!-            end if !RL 041924
     x=sqrt(real(l*(l+1),dl))/nu
 
     ChiDissipative=invsinfunc(x)
@@ -2075,9 +2123,9 @@ contains
        DoInt =  SourceNum/=3 .or. IV%q < qmax_int
        if (DoInt) then
           if ((nstart < min(TimeSteps%npoints-1,IV%SourceSteps)).and.(y1dis > miny1)) then
-!-             if (l .gt. 2 .and. l .lt. 6 .and. IV%q_ix .gt. 20 .and. IV%q_ix .lt. 24) then
-!-       write(*, *) '(nstart < min(TimeSteps%npoints-1,IV%SourceSteps)).and.(y1dis > miny1), IV%q_ix, l',(nstart < min(TimeSteps%npoints-1,IV%SourceSteps)).and.(y1dis > miny1), IV%q_ix, l
-!-       end if 
+             !-             if (l .gt. 2 .and. l .lt. 6 .and. IV%q_ix .gt. 20 .and. IV%q_ix .lt. 24) then
+             !-       write(*, *) '(nstart < min(TimeSteps%npoints-1,IV%SourceSteps)).and.(y1dis > miny1), IV%q_ix, l',(nstart < min(TimeSteps%npoints-1,IV%SourceSteps)).and.(y1dis > miny1), IV%q_ix, l
+             !-       end if 
              y1=y1dis
              y2=y2dis
              nnow=nstart
@@ -2089,10 +2137,10 @@ contains
                    ntop = TimeSteps%R(nrange+1)%start_index
                 end if
                 !write(*, *) 'nrange, nnow, ntop', nrange, nnow, ntop
-                
+
                 if (nnow < ntop) then
 !!!---                     write(*, *) 'nnow, ntop, nnow<ntop, DoRangeInt is called', nnow, ntop
-                 !-!-         write(*, *) 'Before 1st call of DoRangeInt, nrange', nrange
+                   !-!-         write(*, *) 'Before 1st call of DoRangeInt, nrange', nrange
                    call DoRangeInt(IV,chi,ChiDissipative,nnow,ntop,TimeSteps%R(nrange)%delta, &
                         nu,l,y1,y2,out_arr, nrange)!RL 041924 added nrange optional for checks. REMOVE AFTER DONE
                    sums  = sums + out_arr
@@ -2109,13 +2157,13 @@ contains
              y2=y2dis
              chi=ChiStart
              nnow=nstart
- !!!---              write(*, *) 'WantScalarCls, oscillatory region, nstart, l, TimeSteps%Count', nstart, l, TimeSteps%Count
+!!!---              write(*, *) 'WantScalarCls, oscillatory region, nstart, l, TimeSteps%Count', nstart, l, TimeSteps%Count
              do nrange = TimeSteps%Count,1,-1
                 nbot = TimeSteps%R(nrange)%start_index
 !!!---                  write(*, *) 'nrange, nnow, nbot', nrange, nnow, nbot
                 if (nnow >  nbot) then
 !!!---                     write(*, *) 'nnow, nbot, nnow>nbot, DoRangeInt is called', nnow, nbot
-                 !-!-         write(*, *) 'Before 2nd call of DoRangeInt, nrange', nrange
+                   !-!-         write(*, *) 'Before 2nd call of DoRangeInt, nrange', nrange
                    call DoRangeInt(IV,chi,ChiDissipative,nnow,nbot,TimeSteps%R(nrange)%delta, &
                         nu,l,y1,y2,out_arr, nrange) !RL 041924 added nrange optional for checks. REMOVE AFTER DONE
                    sums=sums+out_arr
@@ -2227,7 +2275,7 @@ contains
     real(dl) chi_osc, sh_osc, ujl_osc, dotujl_osc !RL 041824
     integer, optional:: rangecheck !RL 041924 added nrange optional for checks. REMOVE AFTER DONE
 
-    
+
     IntAccuracyBoost=AccuracyBoost
 
     ! atau0 is the array with the time where the sources are stored.
@@ -2313,7 +2361,7 @@ contains
 
     Interpolate = dchisource > dchimax
     !Interpolate = (dchisource > dchimax .and. CP%omegak .gt. 1.e-3_dl)
- !-!-         write(*, *) 'CP%omegak, IV%q, IntAccuracyBoost, Interpolate, dchisource, dchimax', CP%omegak, IV%q, IntAccuracyBoost, Interpolate, dchisource, dchimax
+    !-!-         write(*, *) 'CP%omegak, IV%q, IntAccuracyBoost, Interpolate, dchisource, dchimax', CP%omegak, IV%q, IntAccuracyBoost, Interpolate, dchisource, dchimax
     if (Interpolate) then !split up smaller than source step size
        delchi=dchimax
        Deltachi=sgn*(TimeSteps%points(Startn)-TimeSteps%points(nend))/CP%r
@@ -2399,7 +2447,7 @@ contains
           exit !break when getting  exponentially small in dissipative region
        end if
     end do
- 
+
     out = (out - sources*ujl/2)*delchi*CP%r
 
     !RL testing boundary condition 043024------
@@ -2420,7 +2468,7 @@ contains
 
     !---------------
 
-    
+
   end subroutine DoRangeInt
 
   subroutine DoRangeIntTensor(IV,chi,chiDisp,nstart,nend,dtau,nu,l,y1,y2,out)
