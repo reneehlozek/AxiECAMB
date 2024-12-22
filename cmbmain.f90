@@ -657,10 +657,7 @@ contains
        allocate(IV%metricdeltas_q(2,SourceNum)) !RL 090323
        !!print *, "Allocated IV%metricdeltas_q with shape: ", shape(IV%metricdeltas_q)
     end if !RL 122124
-    if (CP%tau_osc .lt. CP%tau0 .and. .not.CP%flat) then
-       allocate(IV%ddSource_q(TimeSteps%npoints,SourceNum))
-!!       print *, "Allocated IV%ddSource_q with shape: ", shape(IV%ddSource_q)
-    end if !RL 122124
+    if (.not.CP%flat) allocate(IV%ddSource_q(TimeSteps%npoints,SourceNum)) 
     
 
     call IntegrationVars_init(IV)
@@ -673,13 +670,7 @@ contains
 
     call DoSourceIntegration(IV)
 
-    !if (CP%tau_osc .lt. CP%tau0 .and. .not.CP%flat) then
-    if (associated(IV%ddSource_q)) then
-       deallocate(IV%ddSource_q)
-!!       print *, "Deallocated IV%ddSource_q."
-!!    else
-!!       print *, "IV%ddSource_q was not allocated."
-    end if
+    if (.not.CP%flat) deallocate(IV%ddSource_q)
     
     deallocate(IV%Source_q)
     if (associated(IV%metricdeltas_q)) then
