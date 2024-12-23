@@ -647,9 +647,10 @@ contains
     integer q_ix
     type(IntegrationVars) :: IV
     ! Initialize allocation status !RL 122124
+    !write(*, *) 'Rayne, before nullify, associated(IV%Source_q), associated(IV%ddSource_q), associated(IV%metricdeltas_q)', associated(IV%Source_q), associated(IV%ddSource_q), associated(IV%metricdeltas_q)
     IV%Source_q => null()
-    IV%metricdeltas_q => null()
     IV%ddSource_q => null()
+    IV%metricdeltas_q => null()
 
     allocate(IV%Source_q(TimeSteps%npoints,SourceNum))
     !write(*, *) 'Rayne, in SourceToTransfers, CP%tau_osc, CP%tau0', CP%tau_osc, CP%tau0
@@ -941,10 +942,11 @@ contains
     allocate(Src(Evolve_q%npoints,SourceNum,TimeSteps%npoints))
     Src=0
     allocate(ddSrc(Evolve_q%npoints,SourceNum,TimeSteps%npoints))
-    if (CP%tau_osc .le. CP%tau0) then
+    if (CP%tau_osc .lt. CP%tau0) then
        allocate(deltaBCSrc(Evolve_q%npoints,SourceNum,2)) !RL 090323, let the 3rd dimension be 2 for now (the terms that are multiplied by J_l instead of J_ldot before and after the switch)
-       deltaBCSrc = 0
        allocate(dd_deltaBCSrc(Evolve_q%npoints,SourceNum,2))
+       deltaBCSrc = 0
+       dd_deltaBCSrc = 0
     end if
 
   end subroutine GetSourceMem
