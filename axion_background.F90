@@ -1236,11 +1236,6 @@ contains
        !write(*, *) 'Rayne, constructing grhoax from the last entry of a_arr, v_vec(1), v_vec(2)', (v_vec(2,ntable)/a_arr(ntable))**2.0_dl+ (maxion_twiddle * v_vec(1,ntable))**2.0_dl
        !This is the axion energy density *h^2/(3H_0^2/8\pi G), where h is the dimensionless Hubble Parameter
        !so in camb's definitions grhoa2_axion=grhom*grhox_table_internal(i)
-       !RL 121024 for m_ax= 1.84e-28eV, f_ax = 1
-       !if (abs(phinorm_table(1)/0.318349222157240152597523774602450430393000E+00_dl - 1._dl) .gt. 0._dl) then
-       !   write(*, *) 'Initial condition of phi not aligned - stop.', abs(phinorm_table(1)/0.318349222157240152597523774602450430393000E+00_dl - 1._dl)
-       !   stop
-       !       end if
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
        ! Spline final arrays
@@ -1249,7 +1244,7 @@ contains
        !First change the basis of loga_table, since we're doing it anyway
        !write(*, *) 'Rayne, dexp(loga_table(ntable)) before changing basis', dexp(loga_table(ntable))
        loga_table=dlog10(dexp(loga_table))
-       !write(*, *) 'Rayne, loga_table(ntable), 10^loga_table(ntable)', loga_table(ntable), 10.0_dl**(loga_table(ntable))
+       
        !The above change of basis test passed, not this problem
        !Then spline the background field variables
        !RL using analytical derivative at the boundary - v1; switched to log10 base
@@ -1303,10 +1298,8 @@ contains
        Params%Prefp = Prefp !RL: I don't want to rescale with hsq anymore...
        !Temporarily using the background energy density here with finite difference spline boundary conditions
        !Switch to w=0 at aosc
-       !WHEN I'M DONE WITH THE QUASISTATIC STATE STUDY, COME BACK AND DO THIS (TESTING IN NOTE9):
-       !WAYNE: "MY RECOMMENDATION FOR THE FINAL APPROACH FOR YOUR CODE IS: ANALYTIC BOUNDARY DERIVATIVES FOR THE SPLINED VARIABLE (PROBABLY HERE IT IS DLOG(RHOAX)/DLNA, TABLE EXTENDS TO A SUFFICIENT “A" THAT NO PROBLEMS OCCUR IN SPLINING AT A=AOSC, NEVER USE THE LOOKUP TABLE TO DEFINE DENSITY AFTER AOSC."
+       !"MY RECOMMENDATION FOR THE FINAL APPROACH FOR YOUR CODE IS: ANALYTIC BOUNDARY DERIVATIVES FOR THE SPLINED VARIABLE (PROBABLY HERE IT IS DLOG(RHOAX)/DLNA, TABLE EXTENDS TO A SUFFICIENT “A" THAT NO PROBLEMS OCCUR IN SPLINING AT A=AOSC, NEVER USE THE LOOKUP TABLE TO DEFINE DENSITY AFTER AOSC."
 
-       !SCALINGFIX
        !RL: since we don't use the table beyond a_osc, and we need spline tables to be an extension of KG, no rescaling used here
        !do i=1,ntable,1
        !   if (a_arr(i) .gt. Params%a_osc) then
