@@ -9,8 +9,8 @@ FISHER=
 
 #Intel , -openmp toggles mutli-processor:
 #note version 10.0 gives wrong result for lensed when compiled with -openmp [fixed in 10.1]
-F90C     = ifort
-FFLAGS= -O3 -qopenmp #-g -warn all -check all # ##-O3  # #RL 08012023 -ip -WB  -fp-model precise -fp-model fast=2 
+#F90C     = ifort
+#FFLAGS= -O3 -qopenmp #-g -warn all -check all # ##-O3  # #RL 08012023 -ip -WB  -fp-model precise -fp-model fast=2 
 #(-ip means interprocedural optimizations across files. Potentially 
 #FFLAGS = -O2 #3 -ffree-form -x f95-cpp-input
 ## This is flag is passed to the Fortran compiler allowing it to link C++ if required (not usually):
@@ -24,9 +24,9 @@ FFLAGS= -O3 -qopenmp #-g -warn all -check all # ##-O3  # #RL 08012023 -ip -WB  -
 #if pre v4.3 add -D__GFORTRAN__
 #With v4.6+ try -Ofast -march=native -fopenmp
 #A local machine test indicates that v4.5 can be about 20% slower than ifort
-#F90C     = gfortran #-ffast-math
+F90C     = gfortran 
 #Below are suggested fflags for gfortran users that suppress harmless warnings at runtime but trap serious exceptions  
-#FFLAGS = -O3 -fopenmp -ffixed-line-length-300 -ffpe-summary=none
+FFLAGS = -O3 -fopenmp -ffixed-line-length-300 -ffpe-summary=none
 
 
 #Old Intel ifc, add -openmp for multi-processor (some have bugs):
