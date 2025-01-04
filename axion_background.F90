@@ -900,8 +900,9 @@ contains
                 !RL 022624 modified to obtain Hubble at z = 900 at all times since there's a window to skip before the recombination window which depends on aeq, and aeq can only be evaluated later
 !!!!!!!!if (aosc .lt. Params%a_skip .and. aosc .gt. Params%a_skipst) then
                 !Obtain the ah from EFA at the recombination jump redshift
+                !RL 010425: notice here I used v_vec(1:2,1), which is dummy and not used in lh() since rho_EFA is present
                 call lh(omegah2_regm,Params%omegah2_rad,omegah2_lambda,omk,hsq,&
-                     &maxion_twiddle,Params%a_skip,v_vec(1:2,i),lh_skip,badflag,&
+                     &maxion_twiddle,Params%a_skip,v_vec(1:2,1),lh_skip,badflag,&
                      &lhsqcont_massless,lhsqcont_massive,Params%Nu_mass_eigenstates,Nu_masses,&
                      &rhorefp*((aosc_guess(j)/Params%a_skip)**3.0d0)*dexp((wcorr_coeff**2.0d0)*3.0d0*&
                      &Params%wEFA_c*(1.0d0/(Params%a_skip**4.0d0) - 1.0d0/(aosc_guess(j)**4.0d0))/4.0d0))
