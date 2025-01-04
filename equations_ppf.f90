@@ -1076,7 +1076,7 @@ contains
     real(dl) tdP_ef_test, csquared_ax_test, kamnorm_test !RL 042524 - test delta P
     real(dl) pnu, rhonu, dHsqdmt_term_pert, A_coeff_pert!RL testing
     real(dl) tdvarphi_c_altest, tdvarphi_cp_altest, tdvarphi_s_altest, tdvarphi_sp_altest !RL testing
-    real(dl) dgpi_out, dgpiout_out, dgrho_outtest, dgrhoout_outtest, dgq_outtest, dgqout_outtest !RL for the integration by parts boundary condition; DGRHO_OUTTEST STUFF SHOULD BE REMOVED AFTER TESTING
+    real(dl) dgpi_out, dgpiout_out
     real(dl) sources_temp(CTransScal%NumSources) !RL for the integration by parts boundary condition (though not very useful)
     real(dl) metricdelta_test(2) !RL 102723
 
@@ -2154,7 +2154,7 @@ contains
 
   !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
   !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-  subroutine output(EV,y,j,tau,sources,dgpi_out, dgrho_outtest) !RL 091023: dgpi_out is optional; dgrho_outtest is also optional and should delete when test finishes
+  subroutine output(EV,y,j,tau,sources,dgpi_out)
     use ThermoData
     use lvalues
     use constants
@@ -2167,7 +2167,7 @@ contains
 
     real(dl) dgq,grhob_t,grhor_t,grhoc_t,grhog_t,grhov_t,sigma,polter
     real(dl) qgdot,pigdot,pirdot,vbdot,dgrho, dgp !RL added dgp for testing
-    real(dl), optional, intent(out) :: dgpi_out, dgrho_outtest !RL 091023 for switch boundary condition of source integration
+    real(dl), optional, intent(out) :: dgpi_out !RL 091023 for switch boundary condition of source integration
     real(dl) a,a2,dz,z,clxc,clxb,vb,clxg,qg,pig,clxr,qr,pir
 
     real(dl) tau,x,divfac
@@ -2590,14 +2590,14 @@ contains
     !!write(032823, '(36e52.42,\)') CP%m_ovH0, k, a, CP%a_osc, tau, CP%tau_osc, adotoa, hLddot_forquasitest, z, v1_bg, v2_bg, v2dot_forquasitest, dv1, dv1_quasitest, dv2, dv2_quasitest, clxax_kg, clxax_quasitest, 2.0d0*v2_bg*dv2/a2, 2.0d0*(CP%m_ovH0**2.0d0)*v1_bg*dv1 !dgrho, dgp, clxax_kg, dgpaxa2_kg, dgpnumass_temp, grhoax_t*clxax_kg, grhoc_t*clxc, grhob_t*clxb, grhog_t*clxg, grhor_t*clxr, dgrhonumass_temp
     !write(033123, '(36e52.42,\)') CP%m_ovH0, k, k/(CP%m_ovH0*CP%H0_in_Mpc_inv), a, CP%a_osc, tau, CP%tau_osc, adotoa, CP%m_ovH0*CP%H0_in_Mpc_inv/(adotoa/a), v1_bg, v2_bg, dv1, dv1_quasitest, dv2, dv2_quasitest, clxax_kg, clxax_quasitest, delta_rho_sync_quasitest, delta_p_sync_quasitest, delta_rho_rest_quasitest, delta_p_rest_quasitest, delta_p_rest_quasitest/delta_rho_rest_quasitest, ((k/mnorm)**2.0d0)/(1.0d0+(k/mnorm)**2.0d0)
     kamnorm = k2/(a2*((CP%m_ovH0*CP%H0_in_Mpc_inv)**2.0_dl)) !RL testing
-  if (kamnorm .lt. 1.e-13_dl) then!orbifolia  
+  if (kamnorm .lt. 1.e-13_dl) then
     !!write(*, *) 'Rayne, machine precision', kamnorm
     !RL dealing with machine precision issue - Taylor expand to leading order
    csquared_ax = kamnorm/4.0_dl + 5.0_dl*(adotoa**2.0_dl)/(4.0_dl*(k2/kamnorm))!orbifolia    
-  else !orbifolia 
+  else  
      csquared_ax = (sqrt(1.0_dl + kamnorm) - 1.0_dl)**2.0_dl/(kamnorm) + 5.0_dl*(adotoa**2.0_dl)/(4.0_dl*(k2/kamnorm))    !orbifolia  
      !csquared_ax = (sqrt(1.0_dl + kamnorm) - 1.0_dl)**2.0_dl/(kamnorm) + 1.1_dl*(adotoa**2.0_dl)/((k2/kamnorm))
-   end if!orbifolia 
+   end if
     !write(*, *) 'Rayne, at the end of output, w_ax_p1', w_ax_p1
     !write(041923, '(36e52.42,\)') CP%m_ovH0, k, k/(CP%m_ovH0*CP%H0_in_Mpc_inv), a, CP%a_osc, tau, CP%tau_osc, adotoa, CP%m_ovH0*CP%H0_in_Mpc_inv/(adotoa/a), v1_bg, v2_bg, dorp*(CP%H0**2.0d0/1.0d4)/grhom, cad2, dv1, dv2, drhoax_kg, clxc, clxax_kg, csquared_ax, csquared_ax - 5.0_dl*(adotoa**2.0_dl)/(4.0_dl*(k2/kamnorm)), (kamnorm/4.0_dl)/(1.0d0+kamnorm/4.0_dl)
     !write(050223, '(36e52.42,\)') CP%m_ovH0, k, k/(CP%m_ovH0*CP%H0_in_Mpc_inv), a, CP%a_osc, tau, CP%tau_osc, adotoa, CP%m_ovH0*CP%H0_in_Mpc_inv/(adotoa/a), v1_bg, v2_bg, dorp*(CP%H0**2.0d0/1.0d4)/grhom, cad2, dv1, dv2, drhoax_kg, clxc, clxax_kg, csquared_ax, csquared_ax - 5.0_dl*(adotoa**2.0_dl)/(4.0_dl*(k2/kamnorm)), (kamnorm/4.0_dl)/(1.0d0+kamnorm/4.0_dl)
@@ -2627,11 +2627,6 @@ contains
     !write(*, *) 'Rayne, 
     !write(*, *) 'Rayne, constructed sigma, your sigma, their fractional difference', sigma, sigma_test, sigma/sigma_test - 1.0_dl
     !write(*, '(A, 36E52.42)') 'Rayne, in output, etak', etak
-    if (present(dgrho_outtest)) then !RL 091023
-       dgrho_outtest = dgrho
-    !!else  !RL 092123
-       !write(092023, '(36e52.42)') a, CP%a_osc, tau, CP%tau_osc, adotoa/H0_in_Mpc_inv, dorp*(CP%H0**2.0d0/1.0d4)/grhom, clxax_kg
-    end if
     !if (EV%oscillation_started == .true. .and. EV%output_done == .false. ) then !
     !   write(*, *) 'Rayne, same time, first in output [EFA], dgrho/2, adotoa*dgq*3/2, etaT, sigma', dgrho/2._dl, (yprime(1)/a)*(yprime(2) - CP%curv*z)*3._dl, y(2)/(k*EV%Kf(1)), sigma
     !   EV%output_done = .true.
@@ -3807,7 +3802,7 @@ contains
          csquared_ax = (sqrt(1.0_dl + kamnorm) - 1.0_dl)**2.0_dl/(kamnorm) + 5.0_dl*(adotoa**2.0_dl)/(4.0_dl*(k2/kamnorm))
          !csquared_ax = (sqrt(1.0_dl + kamnorm) - 1.0_dl)**2.0_dl/(kamnorm) + 3.0_dl*(adotoa**2.0_dl)/(2.0_dl*(k2/kamnorm))
 !           csquared_ax = (sqrt(1.0_dl + kamnorm) - 1.0_dl)**2.0_dl/(kamnorm) + 1.1_dl*(adotoa**2.0_dl)/((k2/kamnorm))
-     end if!orbifolia  
+     end if
        !RL replaced w_ax with w_ax_p1 - 1.0_dl, 1.0_dl-w_ax with 2.0_dl-w_axp1, 1.0_dl+w_ax with w_ax_p1; all the clxax, etc. below are from the KG     
        !clxax_kg_dot = -w_ax_p1*(thetaax_kg+k*z) - 3.0_dl*(csquared_ax-w_ax)*adotoa*clxax_kg - 9.0_dl*w_ax_p1*(csquared_ax-cad2)*(adotoa**2.0_dl)*thetaax_kg/k2
        !thetaax_kg_dot= -(1.0_dl-3.0_dl*csquared_ax)*adotoa*thetaax_kg + csquared_ax*k2*clxax_kg/w_ax_p1
