@@ -706,7 +706,7 @@ program driver
 
   do iter_dfac = 1, 500
      !!!write(*, *) 'P%a_osc, P%a_skip*(1._dl - 1.e-2_dl), P%a_skipst', P%a_osc, P%a_skip*(1._dl - 1.e-2_dl), P%a_skipst
-     if (P%a_osc .lt. P%a_skip*(1._dl - 1.e-2_dl) .and. P%a_osc .gt. P%a_skipst) then !
+     if (P%a_osc .lt. P%a_skip*(1._dl - 1.e-2_dl) .and. P%a_osc .ge. P%a_skipst) then !
         !RL 032024: 1e-2 is the tolerence to eliminate additional loops if we don't skip to exactly after a_skip due to numerical factors
         P%dfac = P%dfac_skip
         ntable = nint(P%dfac*100) + 1

@@ -768,8 +768,8 @@ contains
                          endif
                       endif
                    endif
-                   !RL 020124 - also find rough guess for dfac at z = 900. There's no need to be very precise since it's just a threshold and the conservativeness of the skip will be taken care of in the inidriver_axion.F90 iteration
-                   !Note that I can't use the condition aosc .eq. 15.0d0 but have to use the condition iter_c = 0, since a_arr(ntable) will be changed according to the aosc found in this iteration (but aosc might still be 15.0 due to the reassignment of omaxh2 in the end, since we had wanted to recalculate aosc), and you'll run into trouble when a_arr(ntable) < z=900
+                   !RL 020124 - also find rough guess for dfac at z = 800. There's no need to be very precise since it's just a threshold and the conservativeness of the skip will be taken care of in the inidriver_axion.F90 iteration
+                   !Note that I can't use the condition aosc .eq. 15.0d0 but have to use the condition iter_c = 0, since a_arr(ntable) will be changed according to the aosc found in this iteration (but aosc might still be 15.0 due to the reassignment of omaxh2 in the end, since we had wanted to recalculate aosc), and you'll run into trouble when a_arr(ntable) < z=800
 !!!!if (iter_c .eq. 0) then
 !!!!   if (1._dl/901._dl .ge. (a_arr(i-1) - 1._dl/ntable) .and. 1._dl/901._dl .lt. (a_arr(i-1) - 1._dl/ntable)) then
                    ! The 1._dl/ntable is to account
@@ -896,27 +896,30 @@ contains
                 omaxh2_guess(j) = omaxh2_wcorr
                 !RL fout=omaxh2_wcorr/(omegah2_regm+omaxh2_wcorr)
                 
-                !RL 020124 obtain Hubble at z = 900 if that's later than aosc
-                !RL 022624 modified to obtain Hubble at z = 900 at all times since there's a window to skip before the recombination window which depends on aeq, and aeq can only be evaluated later
+                !RL 020124 obtain Hubble at z = 800 if that's later than aosc
+                !RL 022624 modified to obtain Hubble at z = 800 at all times since there's a window to skip before the recombination window which depends on aeq, and aeq can only be evaluated later
+                !RL 010425 modified again to restrain the evaluation to later than aosc since now we use aeq_LCDM
 !!!!!!!!if (aosc .lt. Params%a_skip .and. aosc .gt. Params%a_skipst) then
                 !Obtain the ah from EFA at the recombination jump redshift
                 !RL 010425: notice here I used v_vec(1:2,1), which is dummy and not used in lh() since rho_EFA is present
-                call lh(omegah2_regm,Params%omegah2_rad,omegah2_lambda,omk,hsq,&
-                     &maxion_twiddle,Params%a_skip,v_vec(1:2,1),lh_skip,badflag,&
-                     &lhsqcont_massless,lhsqcont_massive,Params%Nu_mass_eigenstates,Nu_masses,&
-                     &rhorefp*((aosc_guess(j)/Params%a_skip)**3.0d0)*dexp((wcorr_coeff**2.0d0)*3.0d0*&
-                     &Params%wEFA_c*(1.0d0/(Params%a_skip**4.0d0) - 1.0d0/(aosc_guess(j)**4.0d0))/4.0d0))
-                !!write(*, *) 'Rayne, dfac, littlehauxi/aosc, Params%ahosc_ETA/aosc', Params%dfac, littlehauxi/aosc, Params%ahosc_ETA/aosc
-                !write(*, *) 'Rayne, dfac, Params%ahosc_ETA/aosc, m/<H>', Params%dfac, Params%ahosc_ETA/aosc, Params%dfac*(littlehauxi/Params%ahosc_ETA)
-                Params%dfac_skip = min(littlehauxi/Params%ahosc_ETA, 1._dl)*lh_skip
-                !Immediately reuse to get the skip dfac
-                Params%dfac_skip = (maxion_twiddle*Params%a_skip*hnot/Params%dfac_skip)
+                if (aosc_guess(j) .lt. Params%a_skip .and. aosc_guess(j) .ge. Params%a_skipst) then
+                   call lh(omegah2_regm,Params%omegah2_rad,omegah2_lambda,omk,hsq,&
+                        &maxion_twiddle,Params%a_skip,v_vec(1:2,1),lh_skip,badflag,&
+                        &lhsqcont_massless,lhsqcont_massive,Params%Nu_mass_eigenstates,Nu_masses,&
+                        &rhorefp*((aosc_guess(j)/Params%a_skip)**3.0d0)*dexp((wcorr_coeff**2.0d0)*3.0d0*&
+                        &Params%wEFA_c*(1.0d0/(Params%a_skip**4.0d0) - 1.0d0/(aosc_guess(j)**4.0d0))/4.0d0))
+                   !!write(*, *) 'Rayne, dfac, littlehauxi/aosc, Params%ahosc_ETA/aosc', Params%dfac, littlehauxi/aosc, Params%ahosc_ETA/aosc
+                   !write(*, *) 'Rayne, dfac, Params%ahosc_ETA/aosc, m/<H>', Params%dfac, Params%ahosc_ETA/aosc, Params%dfac*(littlehauxi/Params%ahosc_ETA)
+                   Params%dfac_skip = min(littlehauxi/Params%ahosc_ETA, 1._dl)*lh_skip
+                   !Immediately reuse to get the skip dfac
+                   Params%dfac_skip = (maxion_twiddle*Params%a_skip*hnot/Params%dfac_skip)
 
-                !1.01 is a conservative scaling to prevent infinite loops in inidriver_axion.F90
-                !!write(*, *) 'Rayne, in background, aosc, Params%a_skip, Params%dfac, Params%dfac_skip, rhof', aosc, Params%a_skip, Params%dfac, Params%dfac_skip, rhorefp*((aosc/Params%a_skip)**3.0d0)*dexp((wcorr_coeff**2.0d0)*3.0d0*Params%wEFA_c*(1.0d0/(Params%a_skip**4.0d0) - 1.0d0/(aosc**4.0d0))/4.0d0)
+                   !1.01 is a conservative scaling to prevent infinite loops in inidriver_axion.F90
+                   !!write(*, *) 'Rayne, in background, aosc, Params%a_skip, Params%dfac, Params%dfac_skip, rhof', aosc, Params%a_skip, Params%dfac, Params%dfac_skip, rhorefp*((aosc/Params%a_skip)**3.0d0)*dexp((wcorr_coeff**2.0d0)*3.0d0*Params%wEFA_c*(1.0d0/(Params%a_skip**4.0d0) - 1.0d0/(aosc**4.0d0))/4.0d0)
 !!!!!!!else
 !!!!!!!   Params%dfac_skip = 0._dl
 !!!!!!!end if
+                end if                
 
              end if
           end if
@@ -1398,7 +1401,7 @@ contains
 !!!!!!!
        deallocate(eq_arr, eq_arr_buff) !RL 111623
        
-       !! RL 012524 - spline littlehfunc to find the dfac at z~900 to skip recombination. We only need a rough number so fininte differencing the boundary condition should be fine for our purposes
+       !! RL 012524 - spline littlehfunc to find the dfac at z~800 to skip recombination. We only need a rough number so fininte differencing the boundary condition should be fine for our purposes
        !! RL 012524 - the reason why I put the spline interpolation here is that it almost completely reflects the spline interpolation above for aeq, though aeq might not end up useful and might be deleted
 !!!!    d1 = (littlehfunc(2)-littlehfunc(1))/(loga_table(2)-loga_table(1))
 !!!!    d2 = (littlehfunc(ntable)-littlehfunc(ntable-1))/(loga_table(ntable)-loga_table(ntable-1))
