@@ -233,46 +233,10 @@ subroutine init_background
   integer :: i_check
   real(dl) dtauda, a_check !RL testing the difference between the two dtauda's in DeltaTime
   external dtauda
-  !!real(dl) a_table_bgtest(ntable), adotoa_table_bgtest(ntable), tau_table_bgtest(ntable), dphidtau_table_bgtest(ntable), dphidotdtau_table_bgtest(ntable), d1_bgtest(ntable), d2_bgtest(ntable), d1_buff(ntable), d2_buff(ntable) !RL testing the background
-  integer i_bgtest !RL testing the background
-  character(len=500) :: filename !RL092023 temporary
   !This is only called once per model, and is a good point to do any extra initialization.
-  !It is called before first call to dtauda, but after
-  !massive neutrinos are initialized and after GetOmegak
+  !It is called before first call to dtauda, but after massive neutrinos are initialized and after GetOmegak
   is_cosmological_constant = .not. use_tabulated_w .and. w_lam==-1_dl .and. wa_ppf==0._dl
-  !!write(*, *) 'In init_background, CP%WantScalars', CP%WantScalars
-!!  write(filename, '(A,I0,A,I0,A,I0,A,I0,A)') '../Testdata/auxiCAMB_housecleaning/wEFA=9ov8_hyb9_ef=efa_Ct_m3d44e-28_fax1d0_m-nuon_aB', int(AccuracyBoost), '_laB', int(lAccuracyBoost), '_ratruncF_dfac', int(CP%dfac), 'd0_ntab', 100*int(CP%dfac), '_k0d1_a_a*_tau_tau*_adotoa_waxp1_cs2ax_cad2_graxt_clxax_uax_vax_z_clxaxdot_opac_dgrhoov2_1d5dgq_etaT_sigma_vb_S(1)_S(2)_S(3).dat'
-  !!write(filename, '(A)') '../Testdata/auxiCAMB_housecleaning/wEFA=9ov8_hyb9_ef=efa_Ct_m3d44e-28_fax1d0_m-nuon_aB6_laB8_ratruncF_dfac30d0_ntab3000_k0d1_a_a*_tau_tau*_adotoa_waxp1_cs2ax_cad2_graxt_clxax_uax_vax_z_clxaxdot_opac_dgrhoov2_1d5dgq_etaT_sigma_vb_S(1)_S(2)_S(3).dat'
-  !!  call CreateTxtFile(filename,10042301)
-  !!!write(filename, '(A)') '../Testdata/auxiCAMB_housecleaning/weirdLCDM_herionstartz=6_level1_tau_a_sources(1)_ISW_s1_s2_s3.dat'
-  !!!call CreateTxtFile(filename,01102402)
-  !!write(filename, '(A,I0,A,I0,A,I0,A,I0,A,I0,A)') '../Testdata/auxiCAMB_housecleaning/hyb9_ef=efa_Ct_wEFAtowEF_m1de-28_fax=1d0_m-nuon_aB', int(AccuracyBoost), '_laB', int(lAccuracyBoost), '_ratruncF_dfac', int(CP%dfac), 'd0_ntab', 100*int(CP%dfac), '_k0d025_atswitchC_dfac_wEF_wEFA_v1ini_100thetastar_rstar_DAstar.dat'
-  !!write(filename, '(A,I0,A,I0,A,I0,A,I0,A,I0,A)') '../Testdata/auxiCAMB_housecleaning/tsov10_hyb9_ef=efa_Ct6tau*t12hw6_wEFAtowEF_m1de-26_fax=1de-6_m-nuon_aB', int(AccuracyBoost), '_laB', int(lAccuracyBoost), '_ratcF_dfac',int(CP%dfac), 'd0_ntab', 100*int(CP%dfac)+1, '_k8de-2_a_a*_tau_tau*_adotoa_waxp1_cs2ax_cad2_graxt_clxax_uax_vax_z_clxaxdot_opac_dgrhoov2_1d5dgq_etaT_sigma_vb_S(1)_dvs1_vs2_ddvs3_vs4_S(2)_S(3).dat' !  
-  !!call CreateTxtFile(filename,02062401)
-!!  write(filename, '(A,I0,A,I0,A,I0,A,I0,A)') '../Testdata/auxiCAMB_housecleaning/tsov10_aH4C1_ef=efa_Ct6tau*t12hw6_wEFAtowEF_m1de-26_fax=1d0_m-nuon_aB', int(AccuracyBoost), '_laB', int(lAccuracyBoost), '_ratcF_dfac',int(CP%dfac), 'd0_k0d09_a_a*_tau_tau*_adotoa_waxp1_cs2ax_cad2_graxt_clxax_clxc_uax_vax_clxg_clxb_z_qg_qgdot_clxaxdot_opac_dgrho_1d5dgq_etaT_sigma_vb_S1_dvs1_vs2_ddvs3_vs4_S2_S3.dat' !  
-!!  call CreateTxtFile(filename,02062402)
-  !!write(filename, '(A,I0,A,I0,A,I0,A,I0,A,I0,A)') '../Testdata/auxiCAMB_housecleaning/tsov10_hyb2ktau4_ef=efa_Ct6tau*t12hw6_wEFAtowEF_m1d1e-25_fax=1d0_m-nuon_aB', int(AccuracyBoost), '_laB', int(lAccuracyBoost), '_ratcF_dfac',int(CP%dfac), 'd0_ntab', 100*int(CP%dfac)+1, '_k0d1_a_a*_tau_tau*_adotoa_moverH_graxt_clxax_clxg_qg_z_sigma_etaT_vb_S(1)_ISW_ISWm_Psi-Phi.dat' !
-  !!call CreateTxtFile(filename,02282404)
-  !!write(filename, '(A,I0,A,I0,A,I0,A,I0,A,I0,A)') '../Testdata/auxiCAMB_housecleaning/newdens_rescaledphifixedorigvar-after_m1d00e-22_fax=1de-6_m-nuon_aB', int(AccuracyBoost), '_laB', int(lAccuracyBoost), '_ratcF_dfac',int(CP%dfac), 'd0_ntab', 100*int(CP%dfac)+1, '_k2d189281413133309E-005_a_a*_tau_tau*_adotoa_moverH_v1_v2_graxt_dv1_dv2_clxax_uax.dat' !
-  !!call CreateTxtFile(filename,05022407)
-!!  write(filename, '(A)') '../Testdata/auxiCAMB_housecleaning/dens_test22HsigmaafterH-ETAiter_1e-22eV_fax=1e-6_dfac=100d0_k0d02563682641469507_a_a*_tau_tau*_adotoa_moverH_graxt_dv1_dv2_clxax_clxg_qg_z_sigma_etaT.dat' !
-!!  call CreateTxtFile(filename,042924)
-  !!write(filename, '(A, I0, A)') '../Testdata/auxiCAMB_housecleaning/newtest10cs2_1e-22eV_fax=1e-06_k1de-5_tc_ts_tcp_tsp_tdc_tds_tdcp_tdsp_tdrhoef_tdPef_csquaredaxtest.dat' !
-  !!call CreateTxtFile(filename,042524)
-  !!CP%output_hold = .false.
-  !call CreateTxtFile('../Testdata/auxiCAMB_housecleaning/testingdiscontinuity_max=1e-28eV_fax=1d0_dfac=8d0_ntable=800_100ktimestep_k=0d1_a_aosc_tau_tauosc_adotoaoverH0_dorph2ovgrhom_clxaxkg.dat', 092023)
-  !!call CreateTxtFile('../Testdata/auxiCAMB_housecleaning/metricdeltasfromswitch_max=1e-28eV_fax=1d0_k_metricdelta1_metricdelta2.dat', 090423)
-!!  call CreateTxtFile('../Testdata/auxiCAMB_housecleaning/inflooptest_dfac=10d0_EVmax_a_aosc_tau_tauosc_adotoaoverH0.dat', 02012400)
-  !write(*, *) 'Rayne, starting to record the dtauda in init_background after the fix'
-  !call CreateTxtFile('../Testdata/auxiCAMB_testdata_KGpert/massiveneutrinoson_afterfix_DeltaTimeinit_test_max1e-24.dat', 111110) !RL testing whether I can move the test data elsewhere
-  !do i_check = 1, 100000
-  !   if (i_check == 1) then
-  !     a_check = 0._dl
-  !   else if (i_check .gt. 1) then
-  !      a_check = 1.0d-10 * (1.0_dl/1.0d-10)**((i_check-1)/100000._dl)
-  !   end if
-  !   write(111110, *) a_check, dtauda(a_check)
-  !end do
+  
   CP%tau0=TimeOfz(0._dl) !RL 061924 moved tau0 here so to initialte tau_osc
 
   if (CP%a_osc .gt. 1._dl) then
@@ -288,8 +252,6 @@ subroutine init_background
      CP%tau_osc = min(CP%tau_osc, CP%tau0)
   end if
   
-  !RL testing the background
-  !a_table_bgtest = 1.0d1**(loga_table)
 
 end  subroutine init_background
 
@@ -2627,70 +2589,7 @@ contains
     !!else  !RL 092123
        !write(092023, '(36e52.42)') a, CP%a_osc, tau, CP%tau_osc, adotoa/H0_in_Mpc_inv, dorp*(CP%H0**2.0d0/1.0d4)/grhom, clxax_kg
     end if
-    sigma_test = ((dgrho + 3._dl*dgq/k*adotoa)/(2._dl*k2*EV%Kf(1)) + etak/(k*EV%Kf(1)))*k/adotoa
-    !sigma=(z+1.5_dl*dgq/k2)/EV%Kf(1)
-    !write(*, *) 'Rayne, EV%Kf(1)', EV%Kf(1)
-    !write(*, *) 'Rayne, 
-    !write(*, *) 'Rayne, constructed sigma, your sigma, their fractional difference', sigma, sigma_test, sigma/sigma_test - 1.0_dl
-    !write(*, '(A, 36E52.42)') 'Rayne, in output, etak', etak
-    !if (EV%oscillation_started == .true. .and. EV%output_done == .false. ) then !
-    !   write(*, *) 'Rayne, same time, first in output [EFA], dgrho/2, adotoa*dgq*3/2, etaT, sigma', dgrho/2._dl, (yprime(1)/a)*(yprime(2) - CP%curv*z)*3._dl, y(2)/(k*EV%Kf(1)), sigma
-    !   EV%output_done = .true.
-    !end if
-!!    do j2_spline = 1, TimeSteps%npoints, 1
-!!       if (TimeSteps%points(j2_spline).lt. tau .and. TimeSteps%points(j2_spline + 1) .gt. tau) then
-          !!write(*, *) 'Rayne, found j2_spline, TimeSteps%points(j2_spline), tau,  TimeSteps%points(j2_spline + 1)', j2_spline, TimeSteps%points(j2_spline), tau,  TimeSteps%points(j2_spline + 1)
-!!          d_spline = tau - TimeSteps%points(j2_spline)
-!!          fac_spline = TimeSteps%points(j2_spline + 1) - TimeSteps%points(j2_spline)
-!!          aa_spline = (TimeSteps%points(j2_spline + 1) - tau)/fac_spline
-!!          fac_spline = fac_spline**2._dl*aa_spline/6._dl
-
-          !Cubic spline
-          !write(*, *) 'Rayne, vis(j2_spline), dvis(j2_spline), ddvis(j2_spline)', vis(j2_spline), dvis(j2_spline), ddvis(j2_spline)
-!!          vis_spline = aa_spline*vis(j2_spline)+(1-aa_spline)*(vis(j2_spline+1) - ((aa_spline+1) &
-!!               *ddvis(j2_spline)+(2-aa_spline)*ddvis(j2_spline+1))*fac_spline) !cubic spline
-
- !!         write(*, *) 'Rayne, opacity_use, opac_spline, their fractional difference', opac_tau*expmmu_tau, vis_spline, opac_tau*expmmu_tau/vis_spline - 1._dl
- !!      end if
-    !!   end do
-!!!if (.not. CP%output_hold) then
-
-!!    write(02012400, '(36E52.42E3)') CP%m_ovH0, a, CP%a_osc, tau, CP%tau_osc, adotoa/H0_in_Mpc_inv
-!!     write(02062402, '(36E52.42E3)') k, a, CP%a_osc, tau, CP%tau_osc, adotoa, w_ax_p1, csquared_ax, cad2, grhoax_t, clxax_kg, clxc, u_ax_kg, v_ax_test, clxg, clxb, z, qg, qgdot, -k*(u_ax_kg + z*w_ax_p1)-3.0_dl*(csquared_ax-w_ax)*adotoa*clxax_kg-9.0_dl*(csquared_ax-cad2)*(adotoa**2.0_dl)*u_ax_kg/k, opacity_use, dgrho, (yprime(1)/a)*(yprime(2) - CP%curv*z)*3._dl, y(2)/(k*EV%Kf(1)), sigma, vb, sources(1), dvis(j)*(-180.D0*ypolprime(2)-30.D0*pigdot)/k**2/160.D0, vis(j)*27.D0/80.D0*dopacity_use*ypol(2)/k**2, (3.D0/16.D0*ddvis(j)*pig+9.D0/8.D0*ddvis(j)*ypol(2))/k**2, 21.D0/10.D0/k/EV%Kf(1)*vis(j)*etak, sources(2), sources(3)
-!!    write(*, *) 'Rayne, what is going on with sources', EV%q, tau, a, sources(1)
-!         write(02062402, '(36E52.42E3)') k, a, CP%a_osc, tau, CP%tau_osc, adotoa, clxax_kg, sources(1), ISW, ISW/expmmu(j), ((-9.D0/160.D0*pig-27.D0/80.D0*ypol(2))/k**2*opacity_use+ &
-!         (11.D0/10.D0*sigma- 3.D0/8.D0*EV%Kf(2)*ypol(3)+vb-9.D0/80.D0*EV%Kf(2)*octg+3.D0/40.D0*qg)/k- &
-!         (-180.D0*ypolprime(2)-30.D0*pigdot)/k**2/160.D0)*dvis(j), (-(9.D0*pigdot+ 54.D0*ypolprime(2))/k**2*opacity_use/160.D0+pig/16.D0+clxg/4.D0+3.D0/8.D0*ypol(2) + &
-!         (-21.D0/5.D0*adotoa*sigma-3.D0/8.D0*EV%Kf(2)*ypolprime(3) + &
-!         vbdot+3.D0/40.D0*qgdot- 9.D0/80.D0*EV%Kf(2)*octgprime)/k + &
- !        (-9.D0/160.D0*dopacity_use*pig-21.D0/10.D0*dgpi-27.D0/80.D0*dopacity_use*ypol(2))/k**2)*vis(j), (3.D0/16.D0*ddvis(j)*pig+9.D0/8.D0*ddvis(j)*ypol(2))/k**2, 21.D0/10.D0/k/EV%Kf(1)*vis(j)*etak
-
-!         write(02062403, '(36E52.42E3)') k, a, CP%a_osc, tau, CP%tau_osc, adotoa, clxax_kg, sources(1), ISW, ISW/expmmu(j), ((-9.D0/160.D0*pig-27.D0/80.D0*ypol(2))/k**2*opacity_use+ &
-!         (11.D0/10.D0*sigma- 3.D0/8.D0*EV%Kf(2)*ypol(3)+vb-9.D0/80.D0*EV%Kf(2)*octg+3.D0/40.D0*qg)/k- &
-!         (-180.D0*ypolprime(2)-30.D0*pigdot)/k**2/160.D0)*dvis(j), (-(9.D0*pigdot+ 54.D0*ypolprime(2))/k**2*opacity_use/160.D0+pig/16.D0+clxg/4.D0+3.D0/8.D0*ypol(2) + &
-!         (-21.D0/5.D0*adotoa*sigma-3.D0/8.D0*EV%Kf(2)*ypolprime(3) + &
-!         vbdot+3.D0/40.D0*qgdot- 9.D0/80.D0*EV%Kf(2)*octgprime)/k + &
-!         (-9.D0/160.D0*dopacity_use*pig-21.D0/10.D0*dgpi-27.D0/80.D0*dopacity_use*ypol(2))/k**2)*vis(j), 21.D0/10.D0/k/EV%Kf(1)*vis(j)*etak
-
-    !!write(02282404, '(36E52.42E3)') k, a, CP%a_osc, tau, CP%tau_osc, adotoa,CP%m_ovH0*CP%H0_in_Mpc_inv/(adotoa/a), grhoax_t, clxax_kg, clxg, qg, z, sigma, etak/(k*EV%Kf(1)), vb, sources(1), ISW, ISW/expmmu(j), -2._dl*adotoa*sigma/k + 2._dl*etak/(k*EV%Kf(1)) - dgpi/(k**2._dl)
-    !!write(05022407, '(36E52.42E3)') k, a, CP%a_osc, tau, CP%tau_osc, adotoa, CP%m_ovH0*CP%H0_in_Mpc_inv/(adotoa/a), v1_bg, v2_bg, grhoax_t, dv1, dv2, clxax_kg, u_ax_kg
-!!    write(*, *) 'a:', a
-
-!!grhog_t, clxg, grhor_t, clxr, grhob_t, clxb, grhoc_t, clxc, dgrhonumass_temp, 
-!! else
-    !if (.not. EV%oscillation_started) then
     
-!!       write(*, *) 'At KG side, c_s, vax, sigma, vax+sigma, w_ax_p1, adotoa', sqrt(csquared_ax), v_ax_test, sigma, v_ax_test + sigma, w_ax_p1, adotoa
-!!    else
-!!       write(*, *) 'At EFA side, cs, vax, sigma, vax+sigma, w_ax_p1, adotoa', sqrt(csquared_ax), v_ax_test, sigma, v_ax_test + sigma, w_ax_p1, adotoa
- !!   end if
-    
- !end if
-
-!! if (abs((tau - CP%tau_osc)*(k*0.978614357332445)-1.0) .lt. 2.e-2_dl) then
-!!     write(*, *) 'cs threshold', tau, CP%tau_osc, abs((tau - CP%tau_osc)*(k*0.978614357332445)-1.0)
-!!    write(*, *) 'v_osc', v_ax_test
-!! end if
  
   end subroutine output
 

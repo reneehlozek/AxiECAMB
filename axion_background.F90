@@ -1340,39 +1340,14 @@ contains
        !rhorefp=dexp(rhorefp)
        !write(*, *) 'Rayne, what is aosc and the exponent of the last entry of the loga_table, at this log interpolation thing?', Params%a_osc, dexp(loga_table(ntable))
 
-       !Replace putative scalar field solution with a^-3 solution at match point
-       !for CAMB+CosmoMC (or Cosmosis) adequate time griddings, scalar field EOMs cannot be solved exactly
-       !Thus we switch to this scaling
-       !do i=1,ntable,1
-       !   if (a_arr(i) .gt. Params%a_osc) then
-       !      rhoaxh2_ov_rhom(i)=rhorefp*((Params%a_osc/a_arr(i))**3.0d0)
-       !   endif
-       !enddo
+       
        !rhoaxh2ovrhom_logtable=dlog(rhoaxh2_ov_rhom)
        !write(*, *) 'Rayne, test the last entry of rhoaxh2_ov_rhom after this post-asoc rescaling', rhoaxh2_ov_rhom(ntable)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!calculate axion adiabatic sound speed Pdot/rhodot, asymptoting to constant (physical) value at low a, when small machine numbers start to behave badly
-       !!Apply analytic expression for Pdot/rdhot so that
-       !!noisy numerical derivatives need no be used
-       !call CreateTxtfile('../Testdata/auxiCAMB_testdata_KGpert/BG_a_mtwiddle_htwiddle_max=1e-30eV', 09192201)
-       !call CreateTxtfile('../Testdata/auxiCAMB_EFA/massivnuon_dfac=30d0_ntable=5000_max=1e-22eV_k=4d9Mpcinv_fax=1d0_mtilde_a_ah_movH_v1bg_v2bg_grhoaxinternal.dat', 042923)
-       !!call CreateTxtfile('../Testdata/auxiCAMB_EFA/fixnuRL_afterbisectionbgadjustboth1d1_aB=2_dv2bcfixed_naturalsplineformovH_dfac=10d0_ntable=1000_max=1e-28eV_omaxh2=0d3_mtilde_a_aosc_ahoverh0_movH_v1bg_v2bg_grhoaxinternal.dat', 070423)
-       !call CreateTxtfile('../Testdata/auxiCAMB_EFA/dHsqdmtcheck_dfac=10d0_ntable=5000_max=1e-22eV_k=2d0Mpcinv_fax=1d0_a_ah_v1bg_v2bg_dH2dmtterm.dat', 040623) 
-
-
-       !write(*, *) 'Rayne, what is the value of dsqrt(hsq) here?', dsqrt(hsq)
-       !Params%cs2_table(1)=Params%cs2_table(2) !RL UPDATE: might still need removing the fossil cs2 table spline procedure - we can do spline using the full table now that we use the field expression for the adiabatic sound speed
+       
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-!!!!!Use WKB averages of cs2_adiabatic and w_axion after a>a_osc
-       !do i=1,ntable,1
-       !   if (a_arr(i) .gt. Params%a_osc) then
-       !      Params%cs2_table(i)=0.0d0
-       !   endif
-       !enddo
-!!!!!!!!!
-
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!
        !use same spline method used in rest of subroutine to find new aeq value in this cosmological history (will be needed in initial condition code to normalize, time, scale factor, etc, in particular for isocurvature mode
