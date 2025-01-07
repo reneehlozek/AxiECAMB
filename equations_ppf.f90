@@ -296,28 +296,32 @@ end  subroutine init_background
 
 !Background evolution
   !RL 07312023 - constructing a background evolution function
-function grhoax_frac(a)
+function grhoax_frac(a_in)
   !rho_ax(a)/rho_crit.
   use precision
   use constants
   use ModelParams
   implicit none
   real(dl) grhoax_frac
-  real(dl), intent(IN) :: a
+  real(dl), intent(IN) :: a_in
+  real(dl) a, a_min
   real(dl) a2, v1_bg, v2_bg, grhoaxh2_ov_grhom, grhoaxh2_ov_grhom_test, wcorr_coeff !RL added grhoax_kg, wcorr_coeff
-  !!double precision H_eV
-  !get hubble in units of eV in terms of standard formula
-  !!H_eV=1.d14*6.5821d-27*dble(CP%H0)/(MPC_in_sec*c)
+  !RL 010625
+  a = a_in
+  a_min = 10._dl**(loga_table(1))
 
   a2 = a**2.0d0
   
   if (a .lt. CP%a_osc) then
-     !Background KG
-     
-     !!call spline_out(loga_table,phinorm_table,phinorm_table_ddlga,ntable,dlog10(a),v1_bg)
-     !!call spline_out(loga_table,phidotnorm_table,phidotnorm_table_ddlga,ntable,dlog10(a),v2_bg)
-     !Note that in the background the spline table is log10(rho)
-     call spline_out(loga_table,rhoaxh2ovrhom_logtable,rhoaxh2ovrhom_logtable_buff,ntable,dlog10(a),grhoaxh2_ov_grhom)
+      if (a .lt. a_min) then
+         grhoaxh2_ov_grhom = rhoaxh2ovrhom_logtable(1)
+      else         
+         !!call spline_out(loga_table,phinorm_table,phinorm_table_ddlga,ntable,dlog10(a),v1_bg)
+         !!call spline_out(loga_table,phidotnorm_table,phidotnorm_table_ddlga,ntable,dlog10(a),v2_bg)
+         !Note that in the background the spline table is log10(rho)
+         call spline_out(loga_table,rhoaxh2ovrhom_logtable,rhoaxh2ovrhom_logtable_buff,ntable,dlog10(a),grhoaxh2_ov_grhom)
+      end if
+      
      !!if (v1_bg .eq. v1_bg .and. v2_bg .eq. v2_bg) then
         !Get the grhoax from field variables - note there is a h^2 normalization factor to take care of
      !!grhoaxh2_ov_grhom = (v2_bg)**2.0_dl/a2+(CP%m_ovH0*v1_bg)**2.0_dl 
@@ -333,6 +337,8 @@ function grhoax_frac(a)
      else
        !! write(*, *) 'Rayne is this for NaN issues?', a, CP%a_osc, grhoaxh2_ov_grhom
         grhoax_frac=0.0d0
+        write(*, *) 'Error in grhoax_frac'
+        stop
      endif
         
 

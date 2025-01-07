@@ -185,7 +185,7 @@ contains
     !RL real(dl) vtwiddle_init_arr(nphi)
     !initial guess of v1 and their corresponding omaxh2s (RL)
     real(dl) v1_initguess(3), omaxh2_guess(3), aosc_guess(3) !RL 082924
-    real(dl) iter_c
+    integer iter_c
     logical bisec_bracketed !RL 033124
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
