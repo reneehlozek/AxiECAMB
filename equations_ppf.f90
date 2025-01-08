@@ -293,16 +293,7 @@ function grhoax_frac(a_in)
      !!else
      !!   grhoax_frac=0.0d0
      !!endif
-     if (grhoaxh2_ov_grhom .eq. grhoaxh2_ov_grhom) then
-        !!write(*, *) 'Rayne, grhoaxh2_ov_grhom normally', a, CP%a_osc, grhoaxh2_ov_grhom
-        grhoax_frac = (10._dl**grhoaxh2_ov_grhom)/(CP%H0**2.0d0/1.0d4)
-     else
-       !! write(*, *) 'Rayne is this for NaN issues?', a, CP%a_osc, grhoaxh2_ov_grhom
-        grhoax_frac=0.0d0
-        write(*, *) 'Error in grhoax_frac'
-        stop
-     endif
-        
+     grhoax_frac = (10._dl**grhoaxh2_ov_grhom)/(CP%H0**2.0d0/1.0d4)        
 
   else
      !RL: Initialize the unused variables just to be sane
