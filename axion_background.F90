@@ -817,19 +817,19 @@ contains
                    !d1=(v_vec(1,2)-v_vec(1,1))/(loga_table(2)-loga_table(1))
                    !d2=(v_vec(1,ntable)-v_vec(1,ntable-1))/(loga_table(ntable)-loga_table(ntable-1))
 
-
-                   do i=1,ntable-10,1
+                   !RL 010925 comment out the NaN check here. The isnan function here is not part of the standard library, and this block isn't particularly useful
+!!!!!!                   do i=1,ntable-10,1
                       !!       print*,i,isnan(f_arr(i))
                       !
-                      do k=0,10,1
-                         call lh(omegah2_regm,Params%omegah2_rad,omegah2_lambda,omk,hsq,&
-                              &maxion_twiddle,a_arr(i+k),v_vec(1:2,i+k),littlehfunc(i+k),badflag,&
-                              &lhsqcont_massless,lhsqcont_massive,Params%Nu_mass_eigenstates,Nu_masses)
-                         if (((isnan(f_arr(i+k))).or.(isnan(v_vec(1,i+k))) ).or.(isnan(v_vec(2,i+k))))then
-                            print*,i,k,littlehfunc(i+k),v_vec(1,i+k),v_vec(2,i+k),a_arr(i+k),dexp(laosc)
-                         endif
-                      enddo
-                   enddo
+!!!!!!                      do k=0,10,1
+!!!!!!                         call lh(omegah2_regm,Params%omegah2_rad,omegah2_lambda,omk,hsq,&
+!!!!!!                              &maxion_twiddle,a_arr(i+k),v_vec(1:2,i+k),littlehfunc(i+k),badflag,&
+!!!!!!                              &lhsqcont_massless,lhsqcont_massive,Params%Nu_mass_eigenstates,Nu_masses)
+!!!!!!                         if (((isnan(f_arr(i+k))).or.(isnan(v_vec(1,i+k))) ).or.(isnan(v_vec(2,i+k))))then
+!!!!!!                            print*,i,k,littlehfunc(i+k),v_vec(1,i+k),v_vec(2,i+k),a_arr(i+k),dexp(laosc)
+!!!!!!                         endif
+!!!!!!                      enddo
+!!!!!!                   enddo
 
                 else 
                    !!write(*, *) 'Switch is after the present day, switching at a = 1.0 - 1e-3 instead'!RL 061124
@@ -1733,7 +1733,8 @@ contains
        if (littlehfunc .le. 0.0d0) then
           badflag=1
        endif
-       if (isnan(littlehfunc)) then 
+       !if (isnan(littlehfunc)) then !RL 010925 isnan is not available here, change to old NaN check methods
+       if (.not. littlehfunc == littlehfunc) then
           badflag = 1
        endif
        !
@@ -1751,11 +1752,10 @@ contains
        use constants
        use Precision
        implicit none
-
+       integer nstep,cp,m,badflag
        real(dl) hsq,a,v(1:2),kvec(1:nstep,1:2),omegah2_regm,omegah2_rad,omegah2_lambda,maxion_twiddle,dloga,omk
        real(dl) vfeed(1:2),cmat(1:nstep,1:nstep),kfinal(1:2),avec(1:nstep)
        integer Nu_mass_eigenstates
-       integer nstep,cp,m,badflag
        real(dl) lhsqcont_massless,lhsqcont_massive(Nu_mass_eigenstates)
        real(dl) Nu_masses(Nu_mass_eigenstates)
 
