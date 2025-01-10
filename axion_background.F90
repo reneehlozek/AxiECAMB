@@ -369,7 +369,7 @@ contains
     !(NASA Huntsville, 1968)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!
     !Constant matrix
-    allocate(cmat(16,16), kvec(16,2)) 
+    allocate(cmat(16,16), kvec(2,16)) !RL011024
     allocate(kfinal(2), svec(16), avec(16))
     avec=0.0d0
     kvec=0.0d0
@@ -707,7 +707,7 @@ contains
              !Compute first step parameters for the pair of first-order ODEs being solved
              kvec=0.0d0
              kfinal=0.0d0
-             call next_step(a_arr(1),v_vec(1:2,1),kvec(1:16,1:2),kfinal(1:2),avec(1:16),&
+             call next_step(a_arr(1),v_vec(1:2,1),kvec(1:2,1:16),kfinal(1:2),avec(1:16),&
                   &omegah2_regm,Params%omegah2_rad,&
                   &omegah2_lambda,omk,hsq,&
                   &maxion_twiddle,badflag,dloga,16,cmat(1:16,1:16),lhsqcont_massless,lhsqcont_massive,&
@@ -736,9 +736,9 @@ contains
              do i=2,ntable,1
 !!!!integrate ODE using 16 pt (8th order Runge-Kutta) rule
                 !increment fluid (homogeneous values) using precomputed steps
-                v_vec(:,i)=v_vec(:,i-1)+(svec(1)*kvec(1,:)+svec(9)*kvec(9,:)+svec(10)*kvec(10,:)&
-                     &+svec(11)*kvec(11,:)+svec(12)*kvec(12,:)+svec(13)*kvec(13,:)&
-                     &+svec(14)*kvec(14,:)+svec(15)*kvec(15,:))
+                v_vec(:,i)=v_vec(:,i-1)+(svec(1)*kvec(:,1)+svec(9)*kvec(:,9)+svec(10)*kvec(:,10)&
+                     &+svec(11)*kvec(:,11)+svec(12)*kvec(:,12)+svec(13)*kvec(:,13)&
+                     &+svec(14)*kvec(:,14)+svec(15)*kvec(:,15))
 !!!!
                 !calculate hubble for next step
                 call lh(omegah2_regm,Params%omegah2_rad,omegah2_lambda,omk,hsq,&
@@ -749,7 +749,7 @@ contains
                 kfinal=0.0d0
 
                 !Compute next steps in scalar field and its derivative
-                call next_step(a_arr(i),v_vec(1:2,i),kvec(1:16,1:2),kfinal(1:2),&
+                call next_step(a_arr(i),v_vec(1:2,i),kvec(1:2,1:16),kfinal(1:2),&
                      &avec(1:16),omegah2_regm,Params%omegah2_rad,omegah2_lambda,omk,hsq,&
                      &maxion_twiddle,badflag,dloga,16,cmat(1:16,1:16),&
                      &lhsqcont_massless,lhsqcont_massive,Params%Nu_mass_eigenstates,Nu_masses)
@@ -1753,7 +1753,7 @@ contains
        use Precision
        implicit none
        integer nstep,cp,m,badflag
-       real(dl) hsq,a,v(1:2),kvec(1:nstep,1:2),omegah2_regm,omegah2_rad,omegah2_lambda,maxion_twiddle,dloga,omk
+       real(dl) hsq,a,v(1:2),kvec(1:2,1:nstep),omegah2_regm,omegah2_rad,omegah2_lambda,maxion_twiddle,dloga,omk
        real(dl) vfeed(1:2),cmat(1:nstep,1:nstep),kfinal(1:2),avec(1:nstep)
        integer Nu_mass_eigenstates
        real(dl) lhsqcont_massless,lhsqcont_massive(Nu_mass_eigenstates)
@@ -1761,19 +1761,19 @@ contains
 
        kvec=0.0d0
        kfinal=0.0d0
-       call derivs_bg(a,v(1:2),kvec(1,1:2),omegah2_regm,omegah2_rad,omegah2_lambda,omk,hsq,maxion_twiddle,badflag,&
+       call derivs_bg(a,v(1:2),kvec(1:2,1),omegah2_regm,omegah2_rad,omegah2_lambda,omk,hsq,maxion_twiddle,badflag,&
             &lhsqcont_massless,lhsqcont_massive,Nu_mass_eigenstates,Nu_masses)
-       kvec(1,1:2)=kvec(1,1:2)*dloga
+       kvec(1:2,1)=kvec(1:2,1)*dloga
        do m=1,nstep,1
           do cp=1,2,1
-             vfeed(cp)=dot_product(cmat(m,1:m),kvec(1:m,cp))
+             vfeed(cp) = dot_product(cmat(m, 1:m), kvec(cp, 1:m)) !RL 011025 reverse kvec order
 
           enddo
           if (m .le. (nstep-1)) then
              call derivs_bg(a*dexp(dloga*avec(m)),v(1:2)+vfeed(1:2),&
-                  &kvec(m+1,1:2),omegah2_regm,omegah2_rad,omegah2_lambda,omk,hsq&
+                  &kvec(1:2,m+1),omegah2_regm,omegah2_rad,omegah2_lambda,omk,hsq&
                   &,maxion_twiddle,badflag,lhsqcont_massless,lhsqcont_massive,Nu_mass_eigenstates,Nu_masses)
-             kvec(m+1,1:2)=kvec(m+1,1:2)*dloga
+             kvec(1:2,m+1)=kvec(1:2,m+1)*dloga
           else
              call derivs_bg(a*dexp(dloga*avec(m)),v(1:2)+vfeed(1:2),&
                   &kfinal(1:2),omegah2_regm,omegah2_rad,omegah2_lambda,omk,hsq&
