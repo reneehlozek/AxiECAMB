@@ -95,8 +95,7 @@ contains
     !Details in Hlozek et al 2014. arXiv:1410.2896
     real(dl) dfac
     !how much past a_osc to go in the final a integration at the end (a_osc is defined later as the time of scalar field oscillation)
-    !real(dl),parameter::eps=0.005 !RL testing, default value 0.001
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
 
@@ -258,23 +257,11 @@ contains
 
     omegah2_lambda=Params%omegav*(hnot**2.0d0)  
     omegah2_ax=Params%omegaax*(hnot**2.0d0)   
-    !maxion_twiddle= Params%ma
-    maxion_twiddle = Params%m_ovH0
-    !Hubble parameter in eV
-    !!H_eV=1.d14*6.5821d-25*hnot/(MPC_in_sec*c)
-    !convert axion mass units from eV to H
-    !maxion_twiddle = maxion_twiddle/Params%H0_eV
-    !RL: testing the bug poster's thread by actually using 100km/s/Mpc instead of H_eV
-    !maxion_twiddle = maxion_twiddle*hnot/H_eV
-    !Total densities to juggle and use later
+    maxion_twiddle = Params%m_ovH0    
+    !Total densities
     omegah2_regm=omegah2_dm+omegah2_b
-    !write(*, *) 'Rayne, maxion_twiddle, Params%m_ovH0', maxion_twiddle, Params%m_ovH0
     omegah2_m=omegah2_regm+omegah2_ax
-    !Axion Mass Fraction
-    !fax=omegah2_ax/omegah2_m
-    !write(*, *) 'Rayne, what is the value of G here?', G
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     !Initialize massive and massless neutrino variables
     !!write(*, *) 'Rayne, before call Nu_init in axion_background, ntable', ntable
     !!call CreateTxtfile('../Testdata/auxiCAMB_housecleaning/4d8e-28eVbugcheck3_fax=1d0_iterc_aosc_wEFAc_omaxh2guess123_initialfieldguess123.dat', 040324)
@@ -355,8 +342,6 @@ contains
 !!!Params%wEFA_c = 3._dl/2._dl
     !!end if
 
-
-    !write(*, *) 'Rayne, initializing the wEFA_c here, ntable', Params%wEFA_c, ntable !RL 110923: may change in the future
 !!!!!!!!!!!!!
     !!    write(*, *) 'RL 06/27/2023 try printing lhsqcont_massive', lhsqcont_massive
 
@@ -369,7 +354,7 @@ contains
     !(NASA Huntsville, 1968)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!
     !Constant matrix
-    allocate(cmat(16,16), kvec(2,16)) !RL011024
+    allocate(cmat(16,16), kvec(2,16)) !RL011025 
     allocate(kfinal(2), svec(16), avec(16))
     avec=0.0d0
     kvec=0.0d0
@@ -632,14 +617,7 @@ contains
     !v1_initguess(3) = v1_initguess(2)*2.1d0
     !Reassign the middle entry to be the average of the two ends of the guess range
     v1_initguess(2) = (v1_initguess(1) + v1_initguess(3))/2.0d0
-!!!TEST 040324
-    !!v1_initguess(2) = 0.270878988067646432225909964268794283271000E+00        
-    !!v1_initguess(1) = 0.270878988067646431225909964268794283271000E+00
-    !!v1_initguess(3) = 0.270878988067646486737061195526621304452000E+00
-    !!v1_initguess(2) = 0.318349222157240152597523774602450430393000E+00_dl
-    !!v1_initguess(1) = 0.318349222157240152597523774602450430393000E+00_dl
-    !!v1_initguess(3) = 0.318349222157240152597523774602450430393000E+00_dl !RL 121024 test
-!!!TEST 040324
+
     !Initiate the omaxh2_guesses to be unreasonable values to signal that we haven't computed it
     omaxh2_guess = (/42.0d0, 42.0d0, 42.0d0/)
     !RL 113023: initialize ah_osc as well, to be used as the iterating H^EF. Initially, set to an impossible value, under which case the instantaneous Hubble is computed. Once this is done, littlehauxi will be updated to H^EF and will be used in auxiIC
@@ -770,13 +748,6 @@ contains
                    endif
                    !RL 020124 - also find rough guess for dfac at z = 800. There's no need to be very precise since it's just a threshold and the conservativeness of the skip will be taken care of in the inidriver_axion.F90 iteration
                    !Note that I can't use the condition aosc .eq. 15.0d0 but have to use the condition iter_c = 0, since a_arr(ntable) will be changed according to the aosc found in this iteration (but aosc might still be 15.0 due to the reassignment of omaxh2 in the end, since we had wanted to recalculate aosc), and you'll run into trouble when a_arr(ntable) < z=800
-!!!!if (iter_c .eq. 0) then
-!!!!   if (1._dl/901._dl .ge. (a_arr(i-1) - 1._dl/ntable) .and. 1._dl/901._dl .lt. (a_arr(i-1) - 1._dl/ntable)) then
-                   ! The 1._dl/ntable is to account
-!!!!      Params%dfac_skip = maxion_twiddle*a_arr(i)*hnot/littlehfunc(i)
-!!!!   end if
-!!!!   write(*, *) 'Rayne, first guess trial, a_arr(i), maxion_twiddle, hnot, littlehfunc(i), Params%dfac_skip', a_arr(i), maxion_twiddle, hnot, littlehfunc(i), Params%dfac_skip
-!!!!end if
                 endif
                 !RL printing to see how the ODE solver is called
                 !write(*, *) 'from the Runge-Kutta block'
