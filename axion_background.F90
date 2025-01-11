@@ -843,9 +843,9 @@ contains
                 !---------------------
 
                 !Find scalar field value at moment of m=nH (fiducial onset of coherent oscillation)
-                call spline(loga_table(1:ntable),v_vec(1,1:ntable),ntable,d1,d2,&
+                call spline(loga_table(1:ntable),(v_vec(1,1:ntable)),ntable,d1,d2,&
                      v_buff(1:ntable))
-                call spline_out(loga_table(1:ntable),v_vec(1,1:ntable),&
+                call spline_out(loga_table(1:ntable),(v_vec(1,1:ntable)),&
                      &v_buff(1:ntable)&
                      &,ntable,laosc,phiosc)  
 
@@ -860,8 +860,8 @@ contains
                 d2 = -(2.0d0*v_vec(2,ntable) + &
                      &((maxion_twiddle*dexp(loga_table(ntable)))**2.0d0)*v_vec(1,ntable)*hnot/littlehfunc(ntable))
                 !---------------------
-                call spline(loga_table(1:ntable),v_vec(2,1:ntable),ntable,d1,d2,v_buff(1:ntable))   
-                call spline_out(loga_table(1:ntable),v_vec(2,1:ntable),&
+                call spline(loga_table(1:ntable),(v_vec(2,1:ntable)),ntable,d1,d2,v_buff(1:ntable))   
+                call spline_out(loga_table(1:ntable),(v_vec(2,1:ntable)),&
                      &v_buff(1:ntable)&
                      &,ntable,laosc,phidosc)
                 aosc_guess(j)=dexp(laosc)
