@@ -26,13 +26,6 @@
 !     E. Bertschinger.  See the lICENSE file of the COSMICS distribution
 !     for restrictions on the modification and distribution of this software.
 
-module assignjlfiles !RL 092023 for inputting multiple files - SHOULD REMOVE AFTER TESTING PHASE
-  implicit none
-  integer, allocatable :: l_outputs(:), unit_nums(:)
-  integer :: movHstar
-  integer :: ntableused
-end module assignjlfiles
-
 module CAMBmain
 
   !     This code evolves the linearized perturbation equations of general relativity,
@@ -132,7 +125,6 @@ module CAMBmain
 contains
 
   subroutine cmbmain
-    use assignjlfiles !RL 092023 - SHOULD REMOVE AFTER TEST IS DONE
     integer q_ix
     real clock_start, clock_stop ! RH timing   
     real clock_totstart, clock_totstop ! RH timing   
@@ -1166,7 +1158,6 @@ contains
 
   subroutine CalcScalarSources(EV,taustart)
     use Transfer
-    use ThermoData !!! RL TESTING, SHOULD REMOVE AFTER FINISH 011024
     implicit none
     type(EvolutionVars) EV
     real(dl) tau,tol1,tauend, taustart
@@ -2135,7 +2126,7 @@ contains
 !!!---                     write(*, *) 'nnow, ntop, nnow<ntop, DoRangeInt is called', nnow, ntop
                    !-!-         write(*, *) 'Before 1st call of DoRangeInt, nrange', nrange
                    call DoRangeInt(IV,chi,ChiDissipative,nnow,ntop,TimeSteps%R(nrange)%delta, &
-                        nu,l,y1,y2,out_arr, nrange)!RL 041924 added nrange optional for checks. REMOVE AFTER DONE
+                        nu,l,y1,y2,out_arr)
                    sums  = sums + out_arr
                    !!write(*, *) 'dissipative region, sums', sums
                    nnow = ntop
@@ -2158,7 +2149,7 @@ contains
 !!!---                     write(*, *) 'nnow, nbot, nnow>nbot, DoRangeInt is called', nnow, nbot
                    !-!-         write(*, *) 'Before 2nd call of DoRangeInt, nrange', nrange
                    call DoRangeInt(IV,chi,ChiDissipative,nnow,nbot,TimeSteps%R(nrange)%delta, &
-                        nu,l,y1,y2,out_arr, nrange) !RL 041924 added nrange optional for checks. REMOVE AFTER DONE
+                        nu,l,y1,y2,out_arr) 
                    sums=sums+out_arr
                    !!write(*, *) 'oscillatory region, sums', sums
                    if (chi==0) exit !small for remaining region
@@ -2241,7 +2232,7 @@ contains
 
 
 
-  subroutine DoRangeInt(IV,chi,chiDisp,nstart,nend,dtau,nu,l,y1,y2,out, rangecheck)
+  subroutine DoRangeInt(IV,chi,chiDisp,nstart,nend,dtau,nu,l,y1,y2,out)
     !Non-flat version
 
     !returns chi at end of integral (where integral stops, not neccessarily end)
@@ -2266,8 +2257,6 @@ contains
     real(dl) IntAccuracyBoost
     real(dl) sources(SourceNum), out(SourceNum)
     real(dl) chi_osc, sh_osc, ujl_osc, dotujl_osc !RL 041824
-    integer, optional:: rangecheck !RL 041924 added nrange optional for checks. REMOVE AFTER DONE
-
 
     IntAccuracyBoost=AccuracyBoost
 
