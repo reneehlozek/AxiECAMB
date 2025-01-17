@@ -92,7 +92,6 @@ program driver
   call CAMB_SetDefParams(P)
 
   P%WantScalars = Ini_Read_Logical('get_scalar_cls')
-  !!!write(*, *) 'In inidriver_axion, P%WantScalars?', P%WantScalars
   P%WantVectors = Ini_Read_Logical('get_vector_cls',.false.)
   P%WantTensors = Ini_Read_Logical('get_tensor_cls',.false.)
 
@@ -104,7 +103,6 @@ program driver
   P%PK_WantTransfer=Ini_Read_Logical('get_transfer')
 
   AccuracyBoost  = Ini_Read_Double('accuracy_boost',AccuracyBoost)
-  !write(*, *) 'Rayne, AccuracyBoost is set here', AccuracyBoost
   lAccuracyBoost = Ini_Read_Real('l_accuracy_boost',lAccuracyBoost)
   HighAccuracyDefault = Ini_Read_Logical('high_accuracy_default',HighAccuracyDefault)
 
@@ -170,7 +168,6 @@ program driver
   ntable = nint(P%dfac*100) + 1 !RL 111123
 
   P%tcmb   = Ini_Read_Double('temp_cmb',COBE_CMBTemp)
-  !write(*, *) 'Rayne, does P%tcmb follow COBE or the input?', P%tcmb !RL tested that it follows the input. COBE is the default (perhaps when the input is not defined)
   P%yhe    = Ini_Read_Double('helium_fraction',0.24_dl)
 
   !Compute  some basic constants
@@ -245,8 +242,7 @@ program driver
   omegah2_rad= omegah2_rad+(rh_Num_Nu_massless*P%grhor*(c**2.0d0)/((1.d5**2.0d0)))/3.0d0     
   P%omegah2_rad = omegah2_rad
   
-  if (Ini_Read_Logical('use_physical',.false.)) then !RL reading: this actually means use_physical is true, don't quite understand why, seems like fortran syntax thing
-     !write(*, *) 'Rayne, what is Ini_Read_Logical(''use_physical'') and (Ini_Read_Logical(''use_physical'',.false.))?',Ini_Read_Logical('use_physical'), (Ini_Read_Logical('use_physical',.false.))
+  if (Ini_Read_Logical('use_physical',.false.)) then 
      P%omegab = Ini_Read_Double('ombh2')/(P%H0/100)**2
 
      P%use_axfrac = Ini_Read_Logical('use_axfrac',.false.)
@@ -254,8 +250,7 @@ program driver
      P%ma     = Ini_Read_Double('m_ax') !! RH axion mass
      if (P%ma < 0) P%ma = 10**P%ma ! RH making this exponential from the inidriver
      P%m_ovH0 = P%ma/P%H0_eV !RL 050724
-     !!!write(*, *) 'P%m_ovH0', P%m_ovH0
-
+     
      if (P%use_axfrac) then
         !! Compute axion fractions rather than densities
         P%omegada = Ini_Read_Double('omdah2')/(P%H0/100)**2
@@ -290,7 +285,6 @@ program driver
      P%omegav = 1._dl-P%omegab-P%omegac - P%omegan -P%omegak-P%omegaax - P%omegah2_rad/((P%H0/1.d2)**2.0d0)
      !!!write(*, *) 'Budget for DE:', P%axfrac*(1._dl-P%omegab-P%omegac - P%omegan -P%omegak - P%omegah2_rad/((P%H0/1.d2)**2.0d0))
      !!!write(*, *) 'P%omegaax', P%omegaax
-     !!!write(*, *) 'Rayne is dark energy of omega zero?', P%omegav
 
      P%Hinf = Ini_Read_Double('Hinf') ! H inflation in GeV 
      P%Hinf = (10**P%Hinf)/mplanck ! computing the ratio of Hinflation to Mplanck
@@ -360,7 +354,6 @@ program driver
   else
      P%Transfer%PK_num_redshifts = 1
      P%Transfer%PK_redshifts = 0
-     write(*, *) 'P%Transfer%PK_num_redshifts, P%Transfer%PK_redshifts', P%Transfer%PK_num_redshifts, P%Transfer%PK_redshifts
   end if
 
 
@@ -443,7 +436,6 @@ program driver
   !optional parameters controlling the computation
 
   P%AccuratePolarization = Ini_Read_Logical('accurate_polarization',.true.)
-  !!!write(*, *) 'In inidriver, P%AccuratePolarization', P%AccuratePolarization
   P%AccurateReionization = Ini_Read_Logical('accurate_reionization',.false.)
   P%AccurateBB = Ini_Read_Logical('accurate_BB',.false.)
   P%DerivedParameters = Ini_Read_Logical('derived_parameters',.true.)
@@ -631,22 +623,20 @@ program driver
         hosc_old2 = P%ah_osc/P%a_osc
         hETA_old2 = P%ahosc_ETA/P%a_osc
         twobeta_old2 = twobeta_new
-        !write(*, *) 'Rayne1, first step in bracket finding, hETA_old1, hETA_old2, hETA_beta', hETA_old1, hETA_old2, hETA_beta
-        !-!-!-!-!write(*, *) 'Rayne1, first step in bracket finding, twobeta_old1, twobeta_old2, twobeta_tgt', twobeta_old1, twobeta_old2, twobeta_tgt
+        
         iter_dfacETA = 1
         do while (iter_dfacETA .lt. 500)
            if (abs(twobeta_new - twobeta_tgt) .lt. beta_tol) then 
-              !write(*, *) 'Rayne1, one of the brackets hit the target, P%dfac*P%ah_osc/P%ahosc_ETA, movHETA_tgt, abs((P%dfac*P%ah_osc/P%ahosc_ETA - movHETA_tgt)/(const_pi/beta_coeff))', P%dfac*P%ah_osc/P%ahosc_ETA, movHETA_tgt, abs((P%dfac*P%ah_osc/P%ahosc_ETA - movHETA_tgt)/(const_pi/beta_coeff))
-              !-!-!-!-!write(*, *) 'Rayne1, one of the brackets hit the target, movHETA_new, twobeta_new, twobeta_tgt, twobeta_new/twobeta_tgt - 1._dl', movHETA_new, twobeta_new, twobeta_tgt, twobeta_new/twobeta_tgt - 1._dl
+              
               iter_dfacETA = -1
               exit
            else if ((twobeta_old2-twobeta_tgt)*(twobeta_old1-twobeta_tgt) .lt. 0._dl) then
-              !-!-!-!-!write(*, *) 'Rayne1, bracket found, twobeta_old1, twobeta_old2, twobeta_tgt', twobeta_old1, twobeta_old2, twobeta_tgt
+              
               exit
            else
               hosc_new = 1._dl*(hETA_beta-hETA_old1)+hosc_old2 !Still use hETA_beta-hETA_old1 to make the shooting step larger, or else the shooting step diminishes each time
               P%dfac = P%dfac * ((P%ah_osc/P%a_osc)/hosc_new)
-              !-!-!-!-!write(*, *) 'Rayne1, repeated shoot, twobeta_old1, twobeta_old2, twobeta_tgt', twobeta_old1, twobeta_old2, twobeta_tgt
+              
               ntable = nint(P%dfac*100) + 1
               call w_evolve(P, badflag)
               call get_phase_info(P, y_phase, beta_coeff, movHETA_new, twobeta_new)
@@ -658,7 +648,6 @@ program driver
 
         !If one of the brackets hit the target (not very likely), no need to proceed with the bisection. Else do bisection
         if (iter_dfacETA .ne. -1) then
-           !-!-!-!-!write(*, *) 'Rayne1, enter bisection process'
            !After bracket is found, do bisection - reuse iter_dfacETA
            ! Calculate new guess as the midpoint of the bracket
            hosc_new = (hosc_old1 + hosc_old2) / 2._dl
@@ -672,7 +661,7 @@ program driver
            iter_dfacETA = 1
            do while (iter_dfacETA .lt.500)
               if (abs(twobeta_new - twobeta_tgt) .lt. beta_tol) then 
-                 !-!-!-!-!write(*, *) 'Rayne1, bisection hit the target, movHETA_new, hosc_old1, hosc_old2, twobeta_new, twobeta_tgt, twobeta_new/twobeta_tgt - 1._dl', movHETA_new, hosc_old1, hosc_old2, twobeta_new, twobeta_tgt, twobeta_new/twobeta_tgt - 1._dl
+                 
                  exit
               else
                  if ((twobeta_new - twobeta_tgt) * (twobeta_old1 - twobeta_tgt) .lt. 0._dl) then
@@ -691,15 +680,11 @@ program driver
                  ntable = nint(P%dfac*100) + 1
                  call w_evolve(P, badflag)
                  call get_phase_info(P, y_phase, beta_coeff, movHETA_new, twobeta_new)
-                 ! Check which side of the target the new guess falls on and update the brackets
-                 !write(*, *) 'Rayne1, bisection process, hETA_old1, hETA_old2, P%ahosc_ETA/P%a_osc, hETA_beta, hosc_old1, hosc_old2, hosc_new, P%dfac, P%dfac*P%ah_osc/P%ahosc_ETA, movHETA_tgt, abs((P%dfac*P%ah_osc/P%ahosc_ETA - movHETA_tgt)/(const_pi/beta_coeff))', hETA_old1, hETA_old2, P%ahosc_ETA/P%a_osc, hETA_beta, hosc_old1, hosc_old2, hosc_new, P%dfac, P%dfac*P%ah_osc/P%ahosc_ETA, movHETA_tgt, abs((P%dfac*P%ah_osc/P%ahosc_ETA - movHETA_tgt)/(const_pi/beta_coeff))
-                 !-!-!-!-!write(*, *) 'Rayne1, bisection process, twobeta_old1, twobeta_old2, twobeta_new', twobeta_old1, twobeta_old2, twobeta_new
+                 
               end if
            end do
-          !-!-!-!-! write(*, *) 'Rayne1, bisection finished'
-        end if
+          end if
      else
-        !-!-!-!-!write(*, *) 'Rayne1, already at target, movHETA_new, movHETA_beta, abs(twobeta_new/twobeta_tgt -1._dl)', movHETA_new, movHETA_beta, abs(twobeta_new/twobeta_tgt -1._dl)
      end if
 
   end if
@@ -722,46 +707,6 @@ program driver
 &P%a_osc, P%a_skip', P%a_osc, P%a_skip
   end if
 
-  !!
-!!!if (P%a_osc .lt. 1._dl/901._dl .and. P%a_osc .gt. 1._dl/1301._dl) then
-  !Bisection to make aosc close to z = 900 - set up initial condition
-!!!dfac_prev2 = 0._dl
-!!!dfac_prev1 = P%dfac
-!!!aosc_prev2 = 0._dl
-!!!aosc_prev1 = P%a_osc
-!!!P%dfac = P%dfac*1.2_dl
-!!!iter_dfac = 0
-!!!do while (iter_dfac .lt. 50)
-!!!   ntable = nint(P%dfac*100) + 1
-
-!!!   call w_evolve(P, badflag)
-!!!   write(*, *) 'Rayne, each call, iter_dfac, dfac_prev1, dfac_prev2, P%dfac, aosc_prev1, aosc_prev2, P%a_osc, abs(P%a_osc*901._dl -1._dl)',  iter_dfac, dfac_prev1, dfac_prev2, P%dfac, aosc_prev1, aosc_prev2, P%a_osc, abs(P%a_osc*901._dl -1._dl)
-!!!   if (abs(P%a_osc*901._dl -1._dl) .lt. 1.e-2_dl .and. P%a_osc*901._dl -1._dl .gt. 0._dl) then
-!!!      write(*, *) 'Rayne, end call, P%a_osc, 1._dl/901._dl', P%a_osc, 1._dl/901._dl
-!!!      iter_dfac = -1
-!!!      exit
-!!!   else if (P%a_osc .lt. 1._dl/901._dl .and. aosc_prev1 .lt. 1._dl/901._dl .and. aosc_prev2 .eq. 0._dl) then
-!!!      dfac_prev1 = P%dfac
-!!!      aosc_prev1 = P%a_osc
-!!!      P%dfac = P%dfac*1.2_dl
-!!!      iter_dfac = iter_dfac+1
-!!!   else if ((aosc_prev1 - 1._dl/901._dl)*(P%a_osc - 1._dl/901._dl) < 0) then
-!!!      dfac_prev2 = dfac_prev1
-!!!      dfac_prev1 = P%dfac
-!!!      aosc_prev2 = aosc_prev1 
-!!!      aosc_prev1 = P%a_osc
-!!!      P%dfac = (dfac_prev1 + dfac_prev2)/2._dl
-!!!      iter_dfac = iter_dfac+1
-!!!   else if ((aosc_prev2 - 1._dl/901._dl)*(P%a_osc - 1._dl/901._dl) < 0) then
-!!!      dfac_prev1 = dfac_prev2
-!!!      dfac_prev2 = P%dfac
-!!!      aosc_prev1 = aosc_prev2
-!!!      aosc_prev2 = P%a_osc
-!!!      P%dfac = (dfac_prev1 + dfac_prev2)/2._dl
-!!!      iter_dfac = iter_dfac+1
-!!!   end if
-!!!end do     
-!!!end if
 
 
   !!!write(*, *) 'Rayne, w_evolve final call, P%dfac, P%dfac*P%ah_osc/P%ahosc_ETA', P%dfac, P%dfac*P%ah_osc/P%ahosc_ETA
@@ -856,7 +801,6 @@ program driver
   !call cpu_time(clock_stop) ! RH timing 
   !print*, 'after getresults', clock_stop - clock_start
   if (P%PK_WantTransfer) then
-     !!!write(*, *) 'Rayne, Transfer_SaveToFiles called'
      call Transfer_SaveToFiles(MT,TransferFileNames)
      call Transfer_SaveMatterPower(MT,MatterPowerFileNames)
      call Transfer_output_sig8(MT)
