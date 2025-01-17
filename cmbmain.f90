@@ -2898,6 +2898,7 @@ contains
           iCl_tensor(j, CT_E:CT_B, in) = iCl_tensor(j, CT_E:CT_B, in)*dbletmp
           iCl_tensor(j, CT_Cross, in)  = iCl_tensor(j, CT_Cross, in)*dbletmp*sqrt(ctnorm)
        end do
+       !$OMP END PARAllEl DO
     end do
 
   end subroutine CalcTensCls
@@ -2945,6 +2946,7 @@ contains
           iCl_vector(j, CT_E:CT_B, in) = iCl_vector(j, CT_E:CT_B, in)*dbletmp*lfac
           iCl_vector(j, CT_Cross, in)  = iCl_vector(j, CT_Cross, in)*dbletmp*sqrt(lfac*ctnorm)
        end do
+       !$OMP END PARAllEl DO
     end do
 
   end subroutine CalcVecCls
