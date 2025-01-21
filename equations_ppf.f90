@@ -423,7 +423,7 @@ module GaugeInterface
   !Vector mode anisotropic stress in units of rho_gamma
   real(dl) :: vec_sig0 = 1._dl
   !Vector mode shear
-  integer, parameter :: max_l_evolve = 1024 !Maximum l we are ever likely propagate
+  integer, parameter :: max_l_evolve = 512 !Maximum l we are ever likely propagate
 
   !Supported scalar initial condition flags
   integer, parameter :: initial_adiabatic=1, initial_iso_CDM=2, &
@@ -1610,7 +1610,7 @@ contains
 
        EV%poltruncfac=real(EV%lmaxgpol,dl)/max(1,(EV%lmaxgpol-2))
        EV%MaxlNeeded=max(EV%lmaxg,EV%lmaxnr,EV%lmaxgpol,EV%lmaxnu)
-       if (EV%MaxlNeeded > max_l_evolve) stop 'Need to increase max_l_evolve'
+       if (EV%MaxlNeeded > max_l_evolve) stop 'Need to increase max_l_evolve; if using openmp, may also need to increase stack size'
        !write(*, *) 'In GetNumEqns, calling SetupScalarArrayIndices once if WantScalars, EV%q_ix, EV%q', EV%q_ix, EV%q
        call SetupScalarArrayIndices(EV,EV%nvar)
        !write(*, *) 'In GetNumEqns, after SetupScalarArrayIndices, EV%q_ix, EV%q', EV%q_ix, EV%q
