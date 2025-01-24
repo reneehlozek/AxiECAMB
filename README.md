@@ -19,7 +19,15 @@ When using AxiECAMB, please cite https://arxiv.org/abs/2412.15192.
 ----------------------------------------------------------------------
 #### <a name="basics"></a>Getting Started
 
-If cloned to local for the first time, run make to compile the code. You can modify Makefile according to your compiler. For basic usage, modify params.ini according to desired cosmology and run ./camb params.ini.
+If cloned to local for the first time, run make to compile the code. You can modify Makefile according to your compiler. For basic usage, modify params.ini according to desired cosmology and run ./camb params.ini. 
+
+The main addition to params.ini due to ULAs, as compared to $\Lambda$CDM, are 
+
+ - m_ax: the ULA mass in units of eV;
+ - omaxh2: the ULA abundance;
+ - axfrac: the ULA fraction -- The code determines internally whether m_ax/H_0 >= 10: if so, axfrac is the ULA fraction of the dark matter, and otherwise the ULA fraction of the dark energy.
+
+The parameter use_axfrac specifies whether to use the ULA fraction parametrization.
 
 ----------------------------------------------------------------------
 #### <a name="physics"></a>Method
