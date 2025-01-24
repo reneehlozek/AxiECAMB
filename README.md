@@ -21,7 +21,7 @@ When using AxiECAMB, please cite https://arxiv.org/abs/2412.15192.
 
 If cloned to local for the first time, run make to compile the code. You can modify Makefile according to your compiler. For basic usage, modify params.ini according to desired cosmology and run ./camb params.ini. 
 
-The main addition to params.ini due to ULAs, as compared to $\Lambda$CDM, are 
+The main addition to params.ini due to ULAs, as compared to LCDM, are 
 
  - m_ax: the ULA mass in units of eV;
  - omaxh2: the ULA abundance;
