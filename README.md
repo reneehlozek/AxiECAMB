@@ -25,7 +25,7 @@ The main addition to params.ini due to ULAs, as compared to LCDM, are
 
  - m_ax: the ULA mass in units of eV;
  - omaxh2: the ULA abundance;
- - axfrac: the ULA fraction -- The code determines internally whether m_ax/H_0 >= 10: if so, axfrac is the ULA fraction of the dark matter, and otherwise the ULA fraction of the dark energy.
+ - axfrac: the ULA fraction -- the code determines internally whether m_ax/H_0 >= 10 which assigns this fraction to that of the dark matter or dark energy (see "Method" section below)
 
 The parameter use_axfrac specifies whether to use the ULA fraction parametrization.
 
