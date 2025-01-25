@@ -575,11 +575,6 @@ program driver
   P%a_skipst = 1._dl/(1300._dl + 1._dl) !lower threshold of recombination skip
   P%dfac_skip = 0._dl !RL initializing P%dfac_skip just to make sure it doesn't get assigned to some random numbers
   call w_evolve(P, badflag)
-  !!!write(*, *) 'Rayne, first call to w_evolve, P%dfac, P%dfac_skip', P%dfac, P%dfac_skip
-  !!!write(*, *) 'Rayne, still first call to w_evolve, P%a_osc, P%a_osc*P%axfrac/P%aeq', P%a_osc, P%a_osc*P%axfrac/P%aeq
-  !!!write(*, *) 'aeq_CDM, P%aeq', aeq_LCDM, P%aeq
-
-  !!!write(*, *) 'P%a_osc*(P%omegaax/(P%omegac+P%omegaax))/aeq_LCDM, P%a_osc*(P%omegaax/(P%omegac+P%omegaax))/P%aeq', P%a_osc*(P%omegaax/(P%omegac+P%omegaax))/aeq_LCDM, P%a_osc*(P%omegaax/(P%omegac+P%omegaax))/P%aeq
   
   !First check if we're in the window before recombination where the photon ETA is an issue
   if (P%dfac .lt. 23._dl .and. P%m_ovH0 .ge. 10._dl .and. P%ma .lt. 1.e-25_dl &
@@ -591,23 +586,14 @@ program driver
      P%dfac = twobeta_tgt + 0.75_dl*const_pi - twobeta_tgt**2/&
           &(4._dl*(twobeta_tgt + 2._dl*P%m_ovH0*(aeq_LCDM**1.5_dl)/&
           &sqrt(2._dl*(P%omegac + P%omegab + P%omegan + P%omegaax)))) !First guess considering matter-radiation equality in LCDM
-     !P%dfac = min(23.1_dl, P%dfac_skip) !RL 022624 - First obtain an initial guess of 23.1 to obtain y and find the best phase for the axion mass and cosmology in question. 23.1 is also a tuned number based on 1e-26eV for this mass range that minimizes the error due to the axion mass osicllations' effect on photons
      ntable = nint(P%dfac*100) + 1     
      call w_evolve(P, badflag)
      call get_phase_info(P, y_phase, beta_coeff, movHETA_new, twobeta_new)
-     !!!write(*, *) 'Rayne, first guess of P%dfac, movHETA_new', P%dfac, movHETA_new
      
      !Rough guess of target ETA values using beta. This is useful in bracket finding
      movHETA_beta = (twobeta_tgt + const_pi*3._dl*(1.0_dl + y_phase)/(4.0_dl + 3.0_dl*y_phase))/beta_coeff
      hETA_beta = (P%dfac/movHETA_beta) * (P%ah_osc/P%a_osc)
      beta_tol = 2.e-2_dl*const_pi
-     !y_phase = P%a_osc/P%aeq
-     !beta_coeff = (4._dl*(y_phase**2 - y_phase - 2.0_dl + 2.0_dl*sqrt(1.0_dl + y_phase)))/(3._dl*(y_phase**2))
-      !The target ETA
-     !movHETA_new = P%dfac*P%ah_osc/P%ahosc_ETA
-     !twobeta_new = movHETA_new*beta_coeff - const_pi*3._dl*(1.0_dl + y_phase)/(4.0_dl + 3.0_dl*y_phase)
-     !write(*, *) 'Rayne1, movHETA_tgt, hETA_tgt, P%dfac, P%ah_osc, P%ahosc_ETA, P%dfac*P%ah_osc/P%ahosc_ETA:', movHETA_tgt, hETA_tgt, P%dfac, P%ah_osc, P%ahosc_ETA, P%dfac*P%ah_osc/P%ahosc_ETA
-     !if (abs((P%dfac*P%ah_osc/P%ahosc_ETA - movHETA_tgt)/(const_pi/beta_coeff)) .gt. 1.e-1_dl) then !RL: if not, we initiate the shooting and bisecting process
      if (abs(twobeta_new - twobeta_tgt) .gt. beta_tol) then !RL: if so, we initiate the shooting and bisecting process
 
         !First we find the bracket
@@ -616,7 +602,6 @@ program driver
         twobeta_old1 = twobeta_new
         hosc_new = 2._dl*(hETA_beta-hETA_old1)+hosc_old1
         P%dfac = P%dfac * ((P%ah_osc/P%a_osc)/hosc_new)
-        !!!write(*, *) 'Rayne1, first shoot, P%dfac, movHETA_beta', P%dfac, movHETA_beta
         ntable = nint(P%dfac*100) + 1
         call w_evolve(P, badflag)
         call get_phase_info(P, y_phase, beta_coeff, movHETA_new, twobeta_new)
@@ -656,7 +641,6 @@ program driver
            call w_evolve(P, badflag)
            call get_phase_info(P, y_phase, beta_coeff, movHETA_new, twobeta_new)
            ! Check which side of the target the new guess falls on and update the brackets
-           !write(*, *) 'Rayne1, bisection first step, hETA_old1, hETA_old2, P%ahosc_ETA/P%a_osc, P%dfac*P%ah_osc/P%ahosc_ETA, hosc_old1, hosc_old2, hosc_new, P%dfac, movHETA_tgt, abs((P%dfac*P%ah_osc/P%ahosc_ETA - movHETA_tgt)/(const_pi/beta_coeff))', hETA_old1, hETA_old2, P%ahosc_ETA/P%a_osc, P%dfac*P%ah_osc/P%ahosc_ETA, hosc_old1, hosc_old2, hosc_new, P%dfac, movHETA_tgt, abs((P%dfac*P%ah_osc/P%ahosc_ETA - movHETA_tgt)/(const_pi/beta_coeff))
 
            iter_dfacETA = 1
            do while (iter_dfacETA .lt.500)
@@ -708,14 +692,6 @@ program driver
   end if
 
 
-
-  !!!write(*, *) 'Rayne, w_evolve final call, P%dfac, P%dfac*P%ah_osc/P%ahosc_ETA', P%dfac, P%dfac*P%ah_osc/P%ahosc_ETA
-  !!!write(*, *) 'Rayne, w_evolve final call, P%dfac, P%dfac*P%ah_osc/P%ahosc_ETA, movHETA_tgt, P%rhorefp_ovh2*((P%H0/100.0d0)**2)*(P%a_osc**3), ntable, P%dfac_skip, P%a_osc, P%a_skip, y_phase_fixed, y_phase_final, twobeta_final', P%dfac, P%dfac*P%ah_osc/P%ahosc_ETA, movHETA_tgt, P%rhorefp_ovh2*((P%H0/100.0d0)**2)*(P%a_osc**3), ntable, P%dfac_skip, P%a_osc, P%a_skip, y_phase, P%a_osc/aeq_LCDM, (P%dfac*P%ah_osc/P%ahosc_ETA)*(4._dl*((P%a_osc/aeq_LCDM)**2 - (P%a_osc/aeq_LCDM) - 2.0_dl + 2.0_dl*sqrt(1.0_dl + (P%a_osc/aeq_LCDM))))/(3._dl*((P%a_osc/aeq_LCDM)**2))- const_pi*3._dl*(1.0_dl + (P%a_osc/aeq_LCDM))/(4.0_dl + 3.0_dl*(P%a_osc/aeq_LCDM))
-  !!!write(*, *) 'Rayne, w_evolve final call, P%dfac, movHETA_new, P%rhorefp_ovh2*((P%H0/100.0d0)**2)*(P%a_osc**3), ntable, P%dfac_skip, P%a_osc, P%a_skip, twobeta_new, twobeta_tgt, abs(twobeta_new - twobeta_tgt)/const_pi', P%dfac, movHETA_new, P%rhorefp_ovh2*((P%H0/100.0d0)**2)*(P%a_osc**3), ntable, P%dfac_skip, P%a_osc, P%a_skip, twobeta_new, twobeta_tgt, abs(twobeta_new - twobeta_tgt)/const_pi
-
-!!!!! RL testing 060224
-
-  !!write(*, *) 'Rayne, max_str(1:1), max_str(7:9)', max_str(1:1), max_str(7:9)
   !!write(*, *) CP%dfac, dfac_str
   !!write(*, *) 'omk_str', omk_str ', '_omk', omk_str'
   !!write(testthetafilename, '(A,A,A,A,A,A,A,A,A,A,A,A,I0,A,I0,A,A,A,I0,A,A,A)') '../Testdata/housecleaning3/AxiEF2_axf', useaxfrac_str, abun_str, '_omdah20d12_H0', H0_str, '_hyb2ktau2_Ct6tau*t12hw6_wEFAtowEF_m', max_str(1:1), 'd', max_str(3:4), 'e-', max_str(8:9), '_m-nuon_aB', int(AccuracyBoost), '_laB', int(lAccuracyBoost), '_Lratc', dolateradtrunc_str, '_dfac', int(P%dfac), 'd', dfac_str(5:5), '_zstar_rs-star_thetastar_sigma8_om0.dat' !_scalclsF_dfac

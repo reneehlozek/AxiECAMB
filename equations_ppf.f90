@@ -127,7 +127,6 @@ contains
     external rombint
     atol=1.d-5
     almin=dlog(amin)
-    !!!write(*, *) 'Rayne, interpolrde is called'
     do i=1,nde
        al=almin-almin/(nde-1)*(i-1)    !interpolate between amin and today
        fint=rombint(drdlna_de, al, 0._dl, atol)+4._dl*al
@@ -278,32 +277,21 @@ function grhoax_frac(a_in)
       if (a .lt. a_min) then
          grhoaxh2_ov_grhom = rhoaxh2ovrhom_logtable(1)
       else         
-         !!call spline_out(loga_table,phinorm_table,phinorm_table_ddlga,ntable,dlog10(a),v1_bg)
-         !!call spline_out(loga_table,phidotnorm_table,phidotnorm_table_ddlga,ntable,dlog10(a),v2_bg)
          !Note that in the background the spline table is log10(rho)
          call spline_out(loga_table,rhoaxh2ovrhom_logtable,rhoaxh2ovrhom_logtable_buff,ntable,dlog10(a),grhoaxh2_ov_grhom)
       end if
       
-     !!if (v1_bg .eq. v1_bg .and. v2_bg .eq. v2_bg) then
-        !Get the grhoax from field variables - note there is a h^2 normalization factor to take care of
-     !!grhoaxh2_ov_grhom = (v2_bg)**2.0_dl/a2+(CP%m_ovH0*v1_bg)**2.0_dl 
-     !!grhoax_frac = grhoaxh2_ov_grhom/(CP%H0**2.0d0/1.0d4)
-     !!   write(*, *) 'Rayne, grhoax, grhoax_test, their fractional difference', grhoaxh2_ov_grhom, 10._dl**(grhoaxh2_ov_grhom_test), grhoaxh2_ov_grhom/(10._dl**(grhoaxh2_ov_grhom_test)) - 1.0d0
-     !!
-     !!else
-     !!   grhoax_frac=0.0d0
-     !!endif
      grhoax_frac = (10._dl**grhoaxh2_ov_grhom)/(CP%H0**2.0d0/1.0d4)        
 
   else
-     !RL: Initialize the unused variables just to be sane
+     !RL: Initialize the unused variables to be safe
      v1_bg = 0.0d0
      v2_bg = 0.0d0
      grhoaxh2_ov_grhom = 0.0d0
-     !RL adding w correction to the background
+     !w correction to the background
      !wcorr_coeff = CP%ah_osc*CP%a_osc/((CP%ma/CP%H0_eV)*(CP%H0/100.0d0))
      wcorr_coeff = CP%ahosc_ETA*CP%a_osc/((CP%ma/CP%H0_eV)*(CP%H0/100.0d0)) !RL082924
-     !!write(*, *) 'In grhoax_frac, CP%rhorefp_hsq*((CP%a_osc/a)**3.0d0)*dexp((wcorr_coeff**2.0d0)*9.0d0*(1.0d0/(a2**2.0d0) - 1.0d0/(CP%a_osc**4.0d0))/8.0d0), CP%rhorefp_hsq*((CP%a_osc/a)**3.0d0)*dexp((wcorr_coeff**2.0d0)*3.0d0*CP%wEFA_c*(1.0d0/(a2**2.0d0) - 1.0d0/(CP%a_osc**4.0d0))/4.0d0), their fractional difference', CP%rhorefp_hsq*((CP%a_osc/a)**3.0d0)*dexp((wcorr_coeff**2.0d0)*9.0d0*(1.0d0/(a2**2.0d0) - 1.0d0/(CP%a_osc**4.0d0))/8.0d0), CP%rhorefp_hsq*((CP%a_osc/a)**3.0d0)*dexp((wcorr_coeff**2.0d0)*3.0d0*CP%wEFA_c*(1.0d0/(a2**2.0d0) - 1.0d0/(CP%a_osc**4.0d0))/4.0d0), (CP%rhorefp_hsq*((CP%a_osc/a)**3.0d0)*dexp((wcorr_coeff**2.0d0)*9.0d0*(1.0d0/(a2**2.0d0) - 1.0d0/(CP%a_osc**4.0d0))/8.0d0))/(CP%rhorefp_hsq*((CP%a_osc/a)**3.0d0)*dexp((wcorr_coeff**2.0d0)*3.0d0*CP%wEFA_c*(1.0d0/(a2**2.0d0) - 1.0d0/(CP%a_osc**4.0d0))/4.0d0)) - 1.0_dl
+
      grhoax_frac=(CP%rhorefp_ovh2)*((CP%a_osc/a)**3.0d0)*dexp((wcorr_coeff**2.0d0)*3.0d0*CP%wEFA_c*(1.0d0/(a2**2.0d0) &
           &- 1.0d0/(CP%a_osc**4.0d0))/4.0d0)
   endif
@@ -321,13 +309,10 @@ function dtauda(a)
   implicit none
   real(dl) dtauda, grhoax_frac !RL
   real(dl), intent(IN) :: a
-  real(dl) rhonu,grhoa2, a2, v1_test, v2_test, grhotest !RL added , dorp,gr , grhoax_kg, wcorr_coeff, grhoa2_test, 
+  real(dl) rhonu,grhoa2, a2, v1_test, v2_test, grhotest 
   integer i
   integer nu_i
   external grhoax_frac
-!!  double precision H_eV
-  !get hubble in units of eV in terms of standard formula
-!!  H_eV=1.d14*6.5821d-27*dble(CP%H0)/(MPC_in_sec*c)
 
   a2=a**2._dl
 
@@ -346,45 +331,6 @@ function dtauda(a)
         grhoa2=grhoa2+rhonu*grhormass(nu_i)
      end do
   end if
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  !Spline for axion energy density of a<aosc, otherwise just use a^-3 scaling
-  !if (a .lt. CP%a_osc) then
-
-  !-------------RL commenting out 07312023
-!!  if (a .le. CP%a_osc) then !RL
-     !!write(*, *) 'Rayne, before aosc in dtauda'
-     !call spline_out(loga_table,rhoaxh2ovrhom_logtable,rhoaxh2ovrhom_logtable_buff,ntable,dlog10(a),gr) !RL PLEASE CHECK WHEN THESE RHO'S ARE DEFINED AND RELOCATE DELTATIME 
-
-     !compute log10 of density use of interpolation
-     !print*,a,grhoc,grhom*(1.0d1**(dble(gr)))/((grhoc+grhob)/(a**3.0d0))
-     !if (gr .eq. gr) then
-     !delog it and multiply by physical units
-     !   dorp=grhom*(1.0d1**(dble(gr)))
-     !else
-     !   dorp=0.0d0
-     !endif
-!!!     if (v1_bg .eq. v1_bg .and. v2_bg .eq. v2_bg) then
-        !Get the grhoax from field variables - note there is a h^2 normalization factor to take care of
-!!!        grhoax_kg = (v2_bg)**2.0_dl/a2+(CP%m_ovH0*v1_bg)**2.0_dl 
-!!        dorp = grhom*grhoax_kg/(CP%H0**2.0d0/1.0d4)
-!!!     else
-!!!        dorp=0.0d0
-!!!     endif
-!!!  else
-     !write(*, *) 'Rayne, else in dtauda'
-     !RL: Initialize the unused variables just to be sane
-!!!     v1_bg = 0.0d0
-!!!     v2_bg = 0.0d0
-!!!     grhoax_kg = 0.0d0
-     !RL adding w correction to the background
-!!!     wcorr_coeff = CP%ah_osc*CP%a_osc/((CP%ma/H_eV)*(CP%H0/100.0d0))
-     !dorp=grhom*CP%rhorefp_hsq*((CP%a_osc/a)**3.0d0)
-!!!     dorp=grhom*CP%rhorefp_hsq*((CP%a_osc/a)**3.0d0)*dexp((wcorr_coeff**2.0d0)*9.0d0*(1.0d0/(a2**2.0d0) - 1.0d0/(CP%a_osc**4.0d0))/8.0d0)
-
-!!  endif
-
   grhoa2 = grhoa2 + grhoax_frac(a)*grhom*(a2**2._dl)
   dtauda=sqrt(3._dl/grhoa2)
 
@@ -627,9 +573,7 @@ contains
           end if
        end do
     end if
-    !write(*, *) 'Rayne, DoLateRadTruncation, tau_switch_no_nu_multpoles, tau_switch_no_phot_multpoles', DoLateRadTruncation, tau_switch_no_nu_multpoles, tau_switch_no_phot_multpoles
 
-    !!write(*, *) 'Rayne, at the switch, DoLateRadTruncation', DoLateRadTruncation
     if (DoLateRadTruncation) then
 
        if (.not. EV%no_nu_multpoles) & !!.and. .not. EV%has_nu_relativistic .and. tau_switch_nu_massless ==noSwitch)  &
@@ -639,78 +583,29 @@ contains
             tau_switch_no_phot_multpoles =max(15/EV%k_buf,taurend)*AccuracyBoost
     end if
 
-    !write(*, *) 'rayne, at the switch time assignment, noSwitch, tau_switch_no_phot_multpoles', noSwitch, tau_switch_no_phot_multpoles
-    !write(*, *) 'rayne, at the switch time assignment, noSwitch, tau_switch_ktau', noSwitch, tau_switch_ktau
-    !write(*, *) 'rayne, at the switch time assignment, tau_switch_oscillation, tau_switch_ktau, tau_switch_nu_massless,EV%TightSwitchoffTime, tau_switch_nu_massive, tau_switch_no_nu_multpoles, tau_switch_no_phot_multpoles, tau_switch_nu_nonrel', tau_switch_oscillation, tau_switch_ktau, tau_switch_nu_massless,EV%TightSwitchoffTime, &
-    !     tau_switch_nu_massive, tau_switch_no_nu_multpoles, tau_switch_no_phot_multpoles, &
-    !     tau_switch_nu_nonrel
     next_switch = min(tau_switch_oscillation, tau_switch_ktau, tau_switch_nu_massless,EV%TightSwitchoffTime, &
          tau_switch_nu_massive, tau_switch_no_nu_multpoles, tau_switch_no_phot_multpoles, &
          tau_switch_nu_nonrel, noSwitch)
-    !!if (EV%q_ix .eq. 1) then !RL 111023
-       !!!!write(*, *) 'Rayne, EV%q, tau_switch_oscillation, tau_switch_ktau, tau_switch_nu_massless,EV%TightSwitchoffTime, &
-      !!!!   tau_switch_nu_massive, tau_switch_no_nu_multpoles, tau_switch_no_phot_multpoles, &
-      !!!!   tau_switch_nu_nonrel', EV%q, tau_switch_oscillation, tau_switch_ktau, tau_switch_nu_massless,EV%TightSwitchoffTime, &
-     !!!!    tau_switch_nu_massive, tau_switch_no_nu_multpoles, tau_switch_no_phot_multpoles, &
-     !!!!    tau_switch_nu_nonrel
-     !!  end if 
 
-    !!write(*, *) 'In GaugeInterface_EvolveScal, before looking at all switches, EV%q, tau, tauend, c(1), next_switch, tau_switch_oscillation, tauend, next_switch < tauend', EV%q, tau, tauend, c(1), next_switch, tau_switch_oscillation, tauend, next_switch < tauend
     if (next_switch < tauend) then
-       !write(*,*) 'c(1) reset 10', c(1)
        if (next_switch > tau+smallTime) then
-          !!if (next_switch == tau_switch_oscillation) then
-             !!write(*, *) 'Rayne, start calling the last dverk to the switch'
-          !!end if
-          !write(*,*) 'c(1) reset 11', c(1)
           call GaugeInterface_ScalEv(EV, y, tau,next_switch,tol1,ind,c,w)
-          !write(*,*) 'c(1) reset 12', c(1)
-          !!if (next_switch == tau_switch_oscillation) then
-             !!write(*, *) 'Rayne, end calling the last dverk to the switch, try test calling derivs'
-             !!call derivs(EV,EV%ScalEqsToPropagate,next_switch,y,yprimetest)
-          !!end if
           if (global_error_flag/=0) return
-         ! write(*,*) 'c(1) reset 13', c(1)
        end if
 
-      ! write(*,*) 'c(1) reset 14', c(1)
        EVout=EV
 
-       !write(*,*) 'c(1) reset 1', c(1)
        if (next_switch == tau_switch_oscillation) then
           EVout%oscillation_started = .true.
-          !!write(*, *) 'Rayne, now in GaugeInterface switch, EVout oscillation started'
           call SetupScalarArrayIndices(EVout)
-          !write(*, *) 'Rayne, in GaugeInterface, right before CopyScalarVariableArray, tau, CP%tau_osc, their fractional difference'
+          !write(*, *) 'In GaugeInterface, right before CopyScalarVariableArray, tau, CP%tau_osc, their fractional difference'
           !write(*, '(36e52.42,\)') tau, CP%tau_osc, tau/CP%tau_osc - 1.0d0
           call CopyScalarVariableArray(y,yout, EV, EVout)
-          !write(*, *) 'At oscillation, output is called additionally (1st time)'
-          !call output(EV, y, 1, tau, sources) !Save the variables at tau
           EV = EVout
           y = yout
-          !!write(*, *) 'Rayne, now finished switching, ind is not reset yet, try test calling derivs for y'
-          !!call derivs(EV,EV%ScalEqsToPropagate,tau_switch_oscillation,y,yprimetest)
-          !call derivs -get access to yprimes - sigma here
-          !write(*, *) 'What is ind here right at the switch?', ind
-          !write(*, *) 'What is the corresponding c?'
-          !write(*, *) c
-          !write(*, *) 'Check again before ind is reset to 1?'
-          !write(*, *) c
-          ind = 1 !RL: this is something for dverk that I have no idea what it really does, but it seems from the documentation that we should reset it to 1
-          !!write(*, *) 'Rayne, now ind is reset to 1'
-          !write(*, *) 'What is the c right after ind is reset to 1?'
-          !write(*, *) c
-          !write(*, *) 'Check again?'
-          !write(*, *) c
-
-          !write(*, *) 'What is y at tau_osc?'
-          !write(*, '(36e52.42,\)') y(:35)
-          !y(EV%a_ix) = 0._dl
-          !y(EV%a_ix + 1) = 0._dl
-          !write(*, *) 'Let''s check that the corresponding y components have been set to zero - output is called additionally'
-          !call output(EV, y, 1, tau, sources) 
-          !EV%oscillation_output_done = .true. !RL testing
-          !write(*,*) 'c(1) reset 2', c(1)
+          
+          ind = 1 
+          
        else if (next_switch == EV%TightSwitchoffTime) then
           !TightCoupling
           EVout%TightCoupling=.false.
@@ -861,10 +756,8 @@ contains
     if (a1>1._dl) then
        t=0
     elseif (a2 > 1._dl) then
-       !!write(*, *) 'Rayne, DeltaTimeMaxed1'
        t = DeltaTime(a1,1.01_dl, tol)
     else
-       !!write(*, *) 'Rayne, DeltaTimeMaxed2'
        t= DeltaTime(a1,a2) 
     end if
   end function DeltaTimeMaxed
@@ -897,7 +790,6 @@ contains
        nu_mass = max(0.1_dl,nu_masses(nu_i))
        a_mass =  1.e-1_dl/nu_mass/lAccuracyBoost
        !if (HighAccuracyDefault) a_mass=a_mass/4
-       !!!write(*, *) 'Rayne, DeltaTime in GaugeInterface_Init'
        time=DeltaTime(0._dl,nu_q(1)*a_mass)
        nu_tau_notmassless(1, nu_i) = time
        do j=2,nqmax
@@ -1055,7 +947,6 @@ contains
 
     if (.not. EV%no_phot_multpoles .and. .not. EVout%no_phot_multpoles) then
        if (.not. EV%oscillation_started .and. EVout%oscillation_started) then
-          !write(*, *) 'Rayne, something else 1 is happening'
        end if
        
        if (EV%TightCoupling .or. EVout%TightCoupling) then
@@ -1072,7 +963,6 @@ contains
 
     if (.not. EV%no_nu_multpoles .and. .not. EVout%no_nu_multpoles) then
        if (.not. EV%oscillation_started .and. EVout%oscillation_started) then
-          !write(*, *) 'Rayne, something else 2 is happening'
        end if
        if (EV%high_ktau_neutrino_approx .or. EVout%high_ktau_neutrino_approx) then
           lmax=2
@@ -1084,7 +974,6 @@ contains
 
     if (CP%Num_Nu_massive /= 0) then
        if (.not. EV%oscillation_started .and. EVout%oscillation_started) then
-          !write(*, *) 'Rayne, something else 3 is happening'
        end if
        do nu_i=1,CP%Nu_mass_eigenstates
           ix_off=EV%nu_ix(nu_i)
@@ -1125,7 +1014,6 @@ contains
 
        if (EVOut%has_nu_relativistic .and. EV%has_nu_relativistic) then
           if (.not. EV%oscillation_started .and. EVout%oscillation_started) then
-          !write(*, *) 'Rayne, something else 4 is happening'
        end if
           lmax = min(EVOut%lmaxnu_pert, EV%lmaxnu_pert)
           yout(EVout%nu_pert_ix:EVout%nu_pert_ix+lmax)=  y(EV%nu_pert_ix:EV%nu_pert_ix+lmax)
@@ -1137,22 +1025,15 @@ contains
     yout(EVout%a_ix+1)=y(EV%a_ix+1)
     ! RL adding KG
     if (.not. EV%oscillation_started .and. EVout%oscillation_started) then !switch, where EV%oscillation_started is false but EVout%oscillation_started is true
-       !write(*, *) 'Rayne, the oscillation switch should appear only once'
-       !write(*, *) 'Rayne, at the pert switch CopyScalarVariablesArray, a, adotoa', a, 1/(a*dtauda(a))
-       !write(*, *) 'Rayne, the a in the last entry of the loga_table in the background', 10**(loga_table(ntable))
-       !write(*, *) 'Rayne, what is dfac at the switch in CopyScalarVariableArray?', CP%m_ovH0*CP%H0_in_Mpc_inv/(1/(a2*dtauda(a)))
        
        call spline_out(loga_table,phinorm_table,phinorm_table_ddlga,ntable,dlog10(a),v1_bg)
        call spline_out(loga_table,phidotnorm_table,phidotnorm_table_ddlga,ntable,dlog10(a),v2_bg)
-       !write(*, *) 'Rayne, at the switch, CP%aosc, v1_bg, v2_bg', CP%a_osc,  v1_bg, v2_bg
        !Add 1+w for the momentum term
        !w_ax_p1 = (2.0d0*(v2_bg**2.0d0)/a2)/((v2_bg**2.0d0)/a2 + (CP%m_ovH0*v1_bg)**2.0d0)
        !Originally, dv1 (i.e. delta_v1) is y(EV%a_kg_ix), and dv2 (i.e. delta_v2) is y(EV%a_kg_ix+1)
        drhoax_kg = (v2_bg*y(EV%a_kg_ix+1)/a2 + (CP%m_ovH0**2.0d0)*v1_bg*y(EV%a_kg_ix)*EV%renorm_c)*2.0d0 !RL 050324
        grhoax_kg = (v2_bg)**2.0d0/a2+(CP%m_ovH0*v1_bg)**2.0d0
        !For EFA, we will need to know hLdot, i.e. 2*k*z here, so some extra variables will be computed again
-       !write(*, *) 'Rayne, derivs called on the KG side from CopyScalarVariableArray'
-       !!!CP%output_hold = .true.
        call derivs(EV,EV%ScalEqsToPropagate,CP%tau_osc,y,yprime)
        !!call output(EV,y,1,CP%tau_osc,sources_temp,dgpi_out, dgrho_outtest) !RL 091023 - j doesn't affect dgpi so let's just assign 1. Calling output shouldn't affect the rest of the evolution. We don't need the sources here
        !write(*, *) 'Rayne, CP%a_osc, y(1), their fractional difference', CP%a_osc, y(1), CP%a_osc/y(1) - 1.0 (RL tested and true)
