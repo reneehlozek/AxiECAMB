@@ -1035,49 +1035,24 @@ contains
        grhoax_kg = (v2_bg)**2.0d0/a2+(CP%m_ovH0*v1_bg)**2.0d0
        !For EFA, we will need to know hLdot, i.e. 2*k*z here, so some extra variables will be computed again
        call derivs(EV,EV%ScalEqsToPropagate,CP%tau_osc,y,yprime)
-       !!call output(EV,y,1,CP%tau_osc,sources_temp,dgpi_out, dgrho_outtest) !RL 091023 - j doesn't affect dgpi so let's just assign 1. Calling output shouldn't affect the rest of the evolution. We don't need the sources here
-       !write(*, *) 'Rayne, CP%a_osc, y(1), their fractional difference', CP%a_osc, y(1), CP%a_osc/y(1) - 1.0 (RL tested and true)
-       !write(*, *) 'Rayne, CP%ah_osc/h0, (yprime(1)/CP%a_osc)/H0, their fractional difference', CP%ah_osc/(CP%H0/100.0d0), yprime(1)/CP%a_osc/CP%H0_in_Mpc_inv, CP%ah_osc/(CP%H0/100.0d0)/(yprime(1)/CP%a_osc/CP%H0_in_Mpc_inv) - 1.0d0 (RL tested and true)
              
        !RL adding w correction to the background 
        !wcorr_coeff = CP%ah_osc*CP%a_osc/(CP%m_ovH0*(CP%H0/100.0d0))
        wcorr_coeff = CP%ahosc_ETA*CP%a_osc/(CP%m_ovH0*(CP%H0/100.0d0)) !RL082924
        !!write(*, *) 'In CopyScalarVariableArrays, CP%wEFA_c', CP%wEFA_c
        w_ax = ((wcorr_coeff/a2)**2.0d0)*CP%wEFA_c !(Not worry about h_in or h_out for low mass axions yet since this construction only works in RD and while the effect is small in late times, the w_ax correction itself is incorrect already)
-       !write(*, *) 'Rayne, at CopyScalarVariablesArray,wcorr_coeff, rhorefp, omaxh2(a=1)', wcorr_coeff, CP%rhorefp_hsq*((CP%H0/100.0d0)**2.0d0), CP%rhorefp_hsq*((CP%H0/100.0d0)**2.0d0)*(CP%a_osc**3.0d0)*dexp((wcorr_coeff**2.0d0)*9.0d0*(1.0d0 - 1.0d0/(CP%a_osc**4.0d0))/8.0d0)
-       !write(*, *) 'Rayne, at the switch, -clxcdot'
-       !write(*, '(36e52.42,\)') -yprime(3)
-       !RL checking the A coefficient by recomputing it similar to what's done for the background-------
- 
-       !dHsqdmt_term_pert = (CP%omegac +CP%omegab)*(-3.0d0)/a +&
-       !     &((grhog + grhornomass)/grhom)*(-4.0d0)/(a2) +&
-       !     &((v2_bg/a)**2.0d0+(CP%m_ovH0*v1_bg)**2.0d0)*(-3.0d0*(w_ax + 1.0d0))*(a2)/((CP%H0/100.0d0)**2.0d0)+&
-       !     &grhok/grhom*(-2.0d0) !Curvature doesn't match the background version but both are ~1e-6 so I doubt how much that would matter...
-       !Compute corrections to neutrino energy density and pressure from massless to massive case !HAKU
-       !do nu_i=1,CP%Nu_mass_eigenstates
-       !   call Nu_background(a*nu_masses(nu_i),rhonu,pnu)
-       !   dHsqdmt_term_pert = dHsqdmt_term_pert + rhonu*grhormass(nu_i)*(-3.0d0*(1.0d0 + pnu/rhonu))/(grhom*a2)
-       !enddo
-       !dHsqdmt_term_pert = dHsqdmt_term_pert/((CP%H0/(a*dtauda(a)*100.0d0*CP%H0_in_Mpc_inv))**2.0d0)
-
-       !A_coeff_pert = (-1/(2.0d0*a2*dtauda(a)*CP%m_ovH0*CP%H0_in_Mpc_inv))*(3.0d0 - dHsqdmt_term_pert*((CP%H0/100.0d0)**2.0d0))
-       !write(*, *) 'Rayne, pert switch, a, A_coeff_pert'
-       !write(*, '(36e52.42,\)') a, A_coeff_pert
-       !--------------------------------------------
-       !!write(*, *) 'Rayne, k^2 delta v1, -hLdot*v2/2*H0', k**2.0d0*y(EV%a_kg_ix), yprime(3)*v2_bg*CP%H0_in_Mpc_inv
+       
        !Compute the U coefficient for constructing the pert EFA variables
        tU = ((-CP%tvarphi_c + CP%tvarphi_sp)*2.0d0*yprime(3) &
             &- 2.0d0*k2*y(EV%a_kg_ix+1)/(a2*(CP%m_ovH0**2.0d0)*CP%H0_in_Mpc_inv))/(a*CP%m_ovH0*CP%H0_in_Mpc_inv)&
             &+ 6.0d0*CP%ah_osc*y(EV%a_kg_ix)*EV%renorm_c/(a*CP%m_ovH0*CP%H0/100.0d0)
-       !write(*, *) 'Rayne, for tU, (-CP%tvarphi_c + CP%tvarphi_sp)*2.0d0*yprime(3)/(a*CP%m_ovH0*CP%H0_in_Mpc_inv), - 2.0d0*k2*y(EV%a_kg_ix+1)/(a2*(CP%m_ovH0**2.0d0)*CP%H0_in_Mpc_inv)/(a*CP%m_ovH0*CP%H0_in_Mpc_inv), + 6.0d0*CP%ah_osc*y(EV%a_kg_ix)/(a*CP%m_ovH0*CP%H0/100.0d0)'
-       !write(*, '(36e52.42,\)') (-CP%tvarphi_c + CP%tvarphi_sp)*2.0d0*yprime(3)/(a*CP%m_ovH0*CP%H0_in_Mpc_inv), - 2.0d0*k2*y(EV%a_kg_ix+1)/(a2*(CP%m_ovH0**2.0d0)*CP%H0_in_Mpc_inv)/(a*CP%m_ovH0*CP%H0_in_Mpc_inv), + 6.0d0*CP%ah_osc*y(EV%a_kg_ix)/(a*CP%m_ovH0*CP%H0/100.0d0)
+       
        !V coefficient
        tV = (-(CP%tvarphi_s + CP%tvarphi_cp)*2.0d0*yprime(3) &
             &+ 2.0d0*k2*y(EV%a_kg_ix)*EV%renorm_c/(a*CP%m_ovH0*CP%H0_in_Mpc_inv))/(a*CP%m_ovH0*CP%H0_in_Mpc_inv) &
             &+ 6.0d0*CP%ah_osc*y(EV%a_kg_ix+1)/(a2*(CP%m_ovH0**2.0d0)*CP%H0/100.0d0)
-       !write(*, *) 'Rayne, for tV, -(CP%tvarphi_s + CP%tvarphi_cp)*2.0d0*yprime(3)/(a*CP%m_ovH0*CP%H0_in_Mpc_inv), + 2.0d0*k2*y(EV%a_kg_ix)/(a*CP%m_ovH0*CP%H0_in_Mpc_inv)/(a*CP%m_ovH0*CP%H0_in_Mpc_inv), + 6.0d0*CP%ah_osc*y(EV%a_kg_ix+1)/(a2*(CP%m_ovH0**2.0d0)*CP%H0/100.0d0)'
-       !write(*, '(36e52.42,\)') -(CP%tvarphi_s + CP%tvarphi_cp)*2.0d0*yprime(3)/(a*CP%m_ovH0*CP%H0_in_Mpc_inv), + 2.0d0*k2*y(EV%a_kg_ix)/(a*CP%m_ovH0*CP%H0_in_Mpc_inv)/(a*CP%m_ovH0*CP%H0_in_Mpc_inv), + 6.0d0*CP%ah_osc*y(EV%a_kg_ix+1)/(a2*(CP%m_ovH0**2.0d0)*CP%H0/100.0d0)
-       !W coefficient untouched
+
+       !W coefficient
        tW = CP%A_coeff**2.0d0 + 3.0d0*CP%A_coeff*CP%ah_osc/(a*CP%m_ovH0*CP%H0/100.0d0) &
             &+ 2.0d0*k2/((a*CP%m_ovH0*CP%H0_in_Mpc_inv)**2.0d0) + 4.0d0
        !RL testing alternative tW with A_alt-------------
@@ -1111,111 +1086,49 @@ contains
             &+ 5.0_dl*((1/(a*dtauda(a)))**2.0_dl)/(4.0_dl*(k2/kamnorm_test))       
        !!csquared_ax_test = (sqrt(1.0_dl + kamnorm_test) - 1.0_dl)**2.0_dl/(kamnorm_test) + 1.1_dl*((1/(a*dtauda(a)))**2.0_dl)/((k2/kamnorm_test))
       end if
-       !!if (EV%q_ix .eq. 200) then
-       !!   write(*, *) 'Rayne, not machine precision, k, kamnorm, csquared_ax_test, csquared_ax_test*dfac^2, kamnorm_test/4.0_dl + 5.0_dl*((1/(a*dtauda(a)))**2.0_dl)/(4.0_dl*(k2/kamnorm_test)), (tdP_ef_test/tdrho_ef)*(CP%dfac**2)', k, kamnorm_test, csquared_ax_test, csquared_ax_test*(CP%dfac**2), kamnorm_test/4.0_dl + 5.0_dl*((1/(a*dtauda(a)))**2.0_dl)/(4.0_dl*(k2/kamnorm_test)), (tdP_ef_test/tdrho_ef)*(CP%dfac**2)
-       !!   end if
-
-       !!write(*, *) 'In debug mode, k, tdvarphi_c, tdvarphi_s, tdvarphi_cp, tdvarphi_sp', k, tdvarphi_c, tdvarphi_s, tdvarphi_cp, tdvarphi_sp
-       
-       !!if (EV%q .gt. 2.3e-6_dl .and. EV%q .lt. 2.4e-6_dl) then
-       !!write(*, *) 'switch, y(EV%a_kg_ix), y(EV%a_kg_ix+1):', k, y(EV%a_kg_ix), y(EV%a_kg_ix+1)
-       !if (EV%q_ix .eq. 1) then
-       !!  write(*, *) '1stk, y(EV%a_kg_ix)*EV%renorm_c, y(EV%a_kg_ix+1)*EV%renorm_c, y(EV%a_kg_ix), y(EV%a_kg_ix+1):', k, y(EV%a_kg_ix)*EV%renorm_c, y(EV%a_kg_ix+1)*EV%renorm_c, y(EV%a_kg_ix), y(EV%a_kg_ix+1)
-          !!write(042824, '(36E52.42E3)') k, v1_bg, v2_bg, y(EV%a_kg_ix), y(EV%a_kg_ix+1), CP%tvarphi_c, CP%tvarphi_s, CP%tvarphi_cp, CP%tvarphi_sp, tdvarphi_c, tdvarphi_s, tdvarphi_cp, tdvarphi_sp, tdrho_ef, tdP_ef_test, csquared_ax_test
-         !! write(050924, '(36E52.42E3)') k, v1_bg, v2_bg, y(EV%a_kg_ix), y(EV%a_kg_ix+1), CP%tvarphi_c, CP%tvarphi_s, CP%tvarphi_cp, CP%tvarphi_sp, tdvarphi_c, tdvarphi_s, tdvarphi_cp, tdvarphi_sp, tdrho_ef, tdP_ef_test, csquared_ax_test
-       !!end if
-       !!write(*, *) 'tdvarphi_c, tdvarphi_s, tdvarphi_cp, tdvarphi_sp, tdrho_ef, tdP_ef_test, csquared_ax_test, tdrho_ef/(CP%rhorefp_hsq*(CP%H0**2.0d0/1.0d4))', tdvarphi_c, tdvarphi_s, tdvarphi_cp, tdvarphi_sp, tdrho_ef, tdP_ef_test, csquared_ax_test, tdrho_ef/(CP%rhorefp_hsq*(CP%H0**2.0d0/1.0d4))
-       !!write(*, *) 'tdvarphi_c, tdvarphi_s, tdvarphi_cp, tdvarphi_sp, tdrho_ef, tdP_ef_test, tdP_ef_test/tdrho_ef', tdvarphi_c, tdvarphi_s, tdvarphi_cp, tdvarphi_sp, tdrho_ef, tdP_ef_test, tdP_ef_test/tdrho_ef
        
        !Normalized u_ax_ef = (1+w)thetaax_ef/k. This is a bit long so declared a variable name for it
        !First just compute the RHS of the equation (without background rho+P)
       u_ax_ef = k*CP%m_ovH0*(tdvarphi_c*(CP%tvarphi_s + CP%tvarphi_cp) &
            &+ tdvarphi_s*(-CP%tvarphi_c + CP%tvarphi_sp))/(a*CP%H0_in_Mpc_inv)
-       !!write(*, *) 'Rayne, theta', u_ax_ef*k/(CP%rhorefp_hsq*(CP%H0**2.0d0/1.0d4) + CP%Prefp)
-       !!write(*, *) 'Rayne, hLdot/2', -yprime(3) 
+       
        !Then take into account the background omaxh2_ef
        u_ax_ef = u_ax_ef/(CP%rhorefp_ovh2*(CP%H0**2.0d0/1.0d4))
        !RL 07/07/2023: add u_ax_efa taking into account the metric
-       !!write(*, *) 'Rayne, CP%Prefp/[CP%rhorefp_hsq*(CP%H0**2.0d0/1.0d4)]*100.0, w_ax*100.0', CP%Prefp*100.0/(CP%rhorefp_hsq*(CP%H0**2.0d0/1.0d4)), w_ax*100.0
-       
-       !!write(11072301, '(36E52.42E3)') CP%dfac, CP%Prefp/(CP%rhorefp_hsq*(CP%H0**2.0d0/1.0d4)), w_ax, phinorm_table(1), CP%test_thetastar, CP%test_rs, CP%test_DA
-       !!write(*, *) 'Rayne, CP%Prefp/[CP%rhorefp_hsq*(CP%H0**2.0d0/1.0d4)] - w_ax, yprime(3), yprime(3)/k', CP%Prefp/(CP%rhorefp_hsq*(CP%H0**2.0d0/1.0d4)) - w_ax, yprime(3), yprime(3)/k
-       !!write(*, *) 'Rayne, u_ax_ef, (CP%Prefp/(CP%rhorefp_hsq*(CP%H0**2.0d0/1.0d4)) - w_ax)*yprime(3)/k', u_ax_ef, (CP%Prefp/(CP%rhorefp_hsq*(CP%H0**2.0d0/1.0d4)) - w_ax)*yprime(3)/k
-       !sup_C = 3.0_dl
-       !weight = (k*CP%tau_osc)**4._dl/(2._dl**4._dl + (k*CP%tau_osc)**4._dl)
-       !weight = (k*CP%tau_osc)**2._dl/(4._dl + (k*CP%tau_osc)**2._dl) !RL 081324
+  
        weight = (k/(CP%ahosc_ETA*CP%H0_in_Mpc_inv/(CP%H0/100.0d0)))**2._dl/&
             &(3._dl + (k/(CP%ahosc_ETA*CP%H0_in_Mpc_inv/(CP%H0/100.0d0)))**2._dl) !RL 082024
-       !weight = (k*CP%tau_osc)**3._dl/(0.3_dl**3._dl + (k*CP%tau_osc)**3._dl)
-       !tau = DeltaTime(0._dl, a)
-       !write(*, *) 'Rayne, tau, CP%tau_osc, their fractional difference', tau, CP%tau_osc, tau/CP%tau_osc-1._dl
-       !write(*, *) 'Rayne, EV%oscillation_started, EVout%oscillation_started, CP%tau_osc', EV%oscillation_started, EVout%oscillation_started, CP%tau_osc
-       !if (tau .ge. 14200._dl) then
-       !   write(*, *) 'Rayne, k, tau, (ktau)^2/((ktau)^2 + C)', k, tau, ((k*tau)**2._dl)/((k*tau)**2._dl + sup_C)
-       !end if
 
-       !!write(10122023,'(36e52.42)') CP%m_ovH0, k, a, CP%a_osc, CP%tau_osc, CP%ah_osc, CP%rhorefp_hsq, w_ax, CP%tvarphi_c, CP%tvarphi_s, CP%tvarphi_cp, CP%tvarphi_sp, tdvarphi_c, tdvarphi_s, tdvarphi_cp, tdvarphi_sp, tdrho_ef, u_ax_ef
-       !!write(08032023,'(36e52.42)') k, CP%tau_osc, -yprime(3)/k, u_ax_ef, CP%Prefp, CP%rhorefp_hsq*(CP%H0**2.0d0/1.0d4), w_ax, CP%Prefp/(CP%rhorefp_hsq*(CP%H0**2.0d0/1.0d4)) - w_ax, - k*(CP%tau_osc**2._dl)*(CP%Prefp/(CP%rhorefp_hsq*(CP%H0**2.0d0/1.0d4)) - w_ax)*yprime(3)/((k*CP%tau_osc)**2._dl + (sup_C)**2._dl) ! RL
        
        u_ax_efa = u_ax_ef*(1._dl + w_ax)/(1._dl + (CP%Prefp/(CP%rhorefp_ovh2*(CP%H0**2.0d0/1.0d4)))) !- k*(CP%tau_osc**2._dl)*(CP%Prefp/(CP%rhorefp_hsq*(CP%H0**2.0d0/1.0d4)) - w_ax)*yprime(3)/((k*CP%tau_osc)**2._dl + (sup_C)**2._dl)
        
-!       write(*, *) 'Rayne, P_ef/rho_ef, w_ax, their fractional difference', (CP%Prefp/(CP%rhorefp_hsq*(CP%H0**2.0d0/1.0d4))), w_ax, (CP%Prefp/(CP%rhorefp_hsq*(CP%H0**2.0d0/1.0d4)))/ w_ax -1._dl
-!       write(*, *) 'Rayne, u_ef, u_efa, their fractional difference', u_ax_ef, u_ax_efa, u_ax_ef/u_ax_efa -1._dl
-       !-(CP%Prefp/(CP%rhorefp_hsq*(CP%H0**2.0d0/1.0d4)) - w_ax)*yprime(3)/(2._dl*k)
-       !!u_ax_efa = u_ax_ef - (CP%Prefp/(CP%rhorefp_hsq*(CP%H0**2.0d0/1.0d4)) - w_ax)*yprime(3)/k
-       !write(*, *) 'Rayne, at the switch, Prefp, w_ax*rhorefp, their fractional difference', CP%Prefp, w_ax*CP%rhorefp_hsq*((CP%H0/100.0d0)**2.0d0), w_ax*CP%rhorefp_hsq*((CP%H0/100.0d0)**2.0d0)/CP%Prefp - 1.0d0
-       !write(*, *) 'Rayne, at the switch, CP%tvarphi_c, CP%tvarphi_cp, CP%tvarphi_cp/CP%tvarphi_c, CP%tvarphi_s, CP%tvarphi_sp, CP%tvarphi_sp/CP%tvarphi_s' 
-       !write(*, '(36e52.42,\)') CP%tvarphi_c, CP%tvarphi_cp, CP%tvarphi_cp/CP%tvarphi_c, CP%tvarphi_s, CP%tvarphi_sp, CP%tvarphi_sp/CP%tvarphi_s
-       !write(*, *) 'Rayne, at the switch, tdvarphi_c, tdvarphi_c_bgtest, tdvarphi_cp, tdvarphi_cp_bgtest, tdvarphi_s, tdvarphi_s_bgtest, tdvarphi_sp, tdvarphi_sp_bgtest'
-       !write(*, '(36e52.42,\)') tdvarphi_c, tdvarphi_c_bgtest, tdvarphi_cp, tdvarphi_cp_bgtest, tdvarphi_s, tdvarphi_s_bgtest, tdvarphi_sp, tdvarphi_sp_bgtest
-       !write(*, *) 'Rayne, at the switch, CP%A_coeff, tU, tV, -tU/tW, tdvarphi_cp, -tV/tW, tdvarphi_sp'
-       !write(*, '(36e52.42,\)') CP%A_coeff, tU, tV, -tU/tW, tdvarphi_cp, -tV/tW, tdvarphi_sp
-       !write(*, *) 'Rayne, at the switch, tdvarphi_c, tdvarphi_cp, tdvarphi_cp/tdvarphi_c, tdvarphi_s, tdvarphi_sp, tdvarphi_sp/tdvarphi_s, drhoax_instantaneous, drhoax_kg, their fractional difference, grhoax_kg, tdrho_ef, rhorefp_ef, clxax_efa, clxax_kg'
-       !
-       !write(*, '(36e52.42,\)') tdvarphi_c, tdvarphi_cp, tdvarphi_cp/tdvarphi_c, tdvarphi_s, tdvarphi_sp, tdvarphi_sp/tdvarphi_s, (CP%m_ovH0**2.0d0)*(CP%tvarphi_c*tdvarphi_c + CP%tvarphi_s*tdvarphi_s + CP%tvarphi_s*tdvarphi_cp + CP%tvarphi_cp*tdvarphi_s + CP%tvarphi_cp*tdvarphi_cp)*2.0d0, drhoax_kg, (CP%m_ovH0**2.0d0)*(CP%tvarphi_c*tdvarphi_c + CP%tvarphi_s*tdvarphi_s + CP%tvarphi_s*tdvarphi_cp + CP%tvarphi_cp*tdvarphi_s + CP%tvarphi_cp*tdvarphi_cp)*2.0d0/drhoax_kg - 1.0d0, grhoax_kg, tdrho_ef, (CP%rhorefp_hsq*(CP%H0**2.0d0/1.0d4)), tdrho_ef/(CP%rhorefp_hsq*(CP%H0**2.0d0/1.0d4)), drhoax_kg/grhoax_kg!, clxax_efa, clxax_efa/y(3) , clxax_efa, clxax_efa/clxc
-       !write(*, *) 'Rayne, at the switch, tdrho_ef, tdrho_ef as constructed identical to the background, their fractional difference'
-       !write(*, '(36e52.42,\)') tdrho_ef, (CP%m_ovH0**2.0d0)*(tdvarphi_c**2.0d0 + tdvarphi_s**2.0d0 + (tdvarphi_cp**2.0d0 + tdvarphi_sp**2.0d0)/2.0d0 - tdvarphi_c*tdvarphi_sp + tdvarphi_s*tdvarphi_cp), tdrho_ef/((CP%m_ovH0**2.0d0)*(tdvarphi_c**2.0d0 + tdvarphi_s**2.0d0 + (tdvarphi_cp**2.0d0 + tdvarphi_sp**2.0d0)/2.0d0 - tdvarphi_c*tdvarphi_sp + tdvarphi_s*tdvarphi_cp)) - 1.0d0
-       !write(*, *) 'Rayne, mtilde*H0_in_Mpc_inv'
-       !write(*, '(36e52.42,\)') CP%m_ovH0*CP%H0_in_Mpc_inv
+!       
        !Now the LHS of the two EoMs are assigned clxax_kg and u_ax_kg
        !RL: change for efa
        yout(EVout%a_kg_ix) = tdrho_ef/(CP%rhorefp_ovh2*(CP%H0**2.0d0/1.0d4)) !deltaax_ef
        !RL 103023: deltaax_efa needs to change in order to keep v_ef = v_efa and sigma_ef = sigma_efa
        yout(EVout%a_kg_ix) = yout(EVout%a_kg_ix) + (3._dl*CP%ah_osc*CP%H0_in_Mpc_inv/(CP%H0/100.0d0))*(u_ax_ef-u_ax_efa)/k
-       !!write(*, *) 'At the switch, CP%ahosc in inverse Mpc, (1._dl + (CP%Prefp/(CP%rhorefp_hsq*(CP%H0**2.0d0/1.0d4))))', CP%ah_osc*CP%H0_in_Mpc_inv/(CP%H0/100.0d0), (1._dl + (CP%Prefp/(CP%rhorefp_hsq*(CP%H0**2.0d0/1.0d4))))
-       yout(EVout%a_kg_ix+1) = u_ax_efa!u_ax_ef !uax_ef, taken to be continuous, i.e. u_ax_efa
-       !!write(*, *) 'Rayne, at CopyScalarVariableArray, CP%Prefp, (CP%rhorefp_hsq*(CP%H0**2.0d0/1.0d4))*w_efa, their fracional difference', CP%Prefp, (CP%rhorefp_hsq*(CP%H0**2.0d0/1.0d4))*w_ax, 1._dl - (CP%rhorefp_hsq*(CP%H0**2.0d0/1.0d4))*w_ax/CP%Prefp
-       !yout(EVout%a_kg_ix) = drhoax_kg/grhoax_kg !clxax_kg
-       !yout(EVout%a_kg_ix+1) = k2*dv1/(CP%H0_in_Mpc_inv*v2_bg) !u_ax_kg
-       !write(*, *) 'Rayne, at the switch, clxax, clxax_kg, their fractional difference', yout(EVout%a_ix), yout(EVout%a_kg_ix), yout(EVout%a_ix)/yout(EVout%a_kg_ix) - 1.0_dl
-       !write(050823, '(36e52.42,\)') k, a, CP%a_osc, CP%tau_osc, CP%ah_osc/(a*CP%m_ovH0*CP%H0/100.0d0), CP%tvarphi_c, CP%tvarphi_cp, CP%tvarphi_s, CP%tvarphi_sp, tU, tV, tW, tdvarphi_c, tdvarphi_cp, tdvarphi_s, tdvarphi_sp
-       !write(050923, '(36e52.42,\)') k, a, CP%a_osc, CP%tau_osc, CP%ah_osc/(a*CP%m_ovH0*CP%H0/100.0d0), CP%tvarphi_c, CP%tvarphi_cp, CP%tvarphi_s, CP%tvarphi_sp, tU, tV, tW, tdvarphi_c_altest, tdvarphi_cp_altest, tdvarphi_s_altest, tdvarphi_sp_altest
+       
+       yout(EVout%a_kg_ix+1) = u_ax_efa!u_ax_ef !uax_ef, taken to be continuous, i.e. u_ax_efa       
        
        !Now we have finished switching to EFA for EVout, call derivs again to get variables on the EFA side
-       !write(*, *) 'Rayne, derivs called at the switch for yout'
+       
        EVout%output_done = .false.
        call derivs(EVout,EVout%ScalEqsToPropagate,CP%tau_osc,yout,yprimeout)
-       !!call output(EVout,yout,1,CP%tau_osc,sources_temp,dgpiout_out, dgrhoout_outtest)
+       
        !We have y and yout variables. Construct the corresponding source boundary values
        if (CP%flat) then
           !Constructing adotoa*sigma out of the eta*k equation and k*z in derivs
           !Note that k and Kf(1) are the same between EV and EVout
-          !write(*, *) 'Rayne, yprime(1)/a', yprime(1)/a
-          !--------assignment of no metric sigma boundary terms
-          !EVout%metric_delta(1)= 0._dl
-          !EVout%metric_delta(2)= 0._dl
-          !--------assignment of all metric sigma boundary terms
+          
           EVout%metric_delta(1)= ((-yprime(3)/k+3._dl*yprime(2)/k2)*(2._dl*(yprime(1)/a))/k &
                &- y(2)/k) - ((-yprimeout(3)/k+3._dl*yprimeout(2)/k2)*(2._dl*(yprimeout(1)/a))/k - yout(2)/k)
           !!EVout%metric_delta(1)= ((-yprime(3)/k+3._dl*yprime(2)/k2)*(2._dl*(yprime(1)/a)-CP%opac_tauosc)/k - y(2)/k + dgpi_out/k2) - ((-yprimeout(3)/k+3._dl*yprimeout(2)/k2)*(2._dl*(yprimeout(1)/a)-CP%opac_tauosc)/k - yout(2)/k + dgpiout_out/k2)
           EVout%metric_delta(2)= (-yprime(3)/k+3._dl*yprime(2)/k2)/k - &
                &(-yprimeout(3)/k+3._dl*yprimeout(2)/k2)/k
-          !--------------
-          !!write(*, *) 'Rayne, k, (-yprime(3)/k+3._dl*yprime(2)/k2)*(2._dl*(yprime(1)/a)-CP%opac_tauosc)/k - (-yprimeout(3)/k+3._dl*yprimeout(2)/k2)*(2._dl*(yprimeout(1)/a)-CP%opac_tauosc)/k, -y(2)/k-(-yout(2)/k), dgpi_out/k2 - dgpiout_out/k2', k, (-yprime(3)/k+3._dl*yprime(2)/k2)*(2._dl*(yprime(1)/a)-CP%opac_tauosc)/k - (-yprimeout(3)/k+3._dl*yprimeout(2)/k2)*(2._dl*(yprimeout(1)/a)-CP%opac_tauosc)/k, -y(2)/k-(-yout(2)/k), dgpi_out/k2-dgpiout_out/k2
+          
        else
-          !--------assignment of all metric sigma boundary terms
-          !!EVout%metric_delta(1)= 0._dl
-          !!EVout%metric_delta(2)= 0._dl
+          
           EVout%metric_delta(1)= ((-yprime(3)/k+3._dl*(yprime(2)-CP%curv*(-yprime(3)/k))/k2)*&
                &(2._dl*(yprime(1)/a))/(k*EV%Kf(1)) - y(2)/(k*EV%Kf(1))) -&
                & ((-yprimeout(3)/k+3._dl*(yprimeout(2) - CP%curv*(-yprimeout(3)/k))/k2)*&
@@ -1225,65 +1138,19 @@ contains
                &(-yprimeout(3)/k+3._dl*(yprimeout(2) - CP%curv*(-yprimeout(3)/k))/k2)/(k*EV%Kf(1))
           !--------
        end if
-       !!-----------RL testing 101623 for etak EFA version
-       !!write(*, *) 'Rayne, at CopyScalarVariableArray, a, etaTEFAnew', a, (EVout%metric_delta(2)*yprimeout(1)/a) + y(2)/(k*EV%Kf(1))
+       
        yout(2) = (EVout%metric_delta(2)*yprimeout(1)/a)*(k*EV%Kf(1))*weight + y(2) !yout(2) is etaTEFAnew*k
-       !! RL 021524 - forge test photon ETA
-       !!yout(EV%g_ix) = y(EV%g_ix) + 0.009_dl
-       !!yout(EV%g_ix+1) = y(EV%g_ix+1) - 0.003_dl
-       !But after this, I will have to call output again in order to obtain the correct value for the boundary condition (update: no, I just need to change the sigma in the metric deltas) -see derivation in note20 in housecleaning directory, and CURVED UNIVERSE SCENARIO PENDING TEST
-       !!call output(EVout,yout,1,CP%tau_osc,sources_temp,dgpiout_out, dgrhoout_outtest)
-       !if (CP%flat) then
-       !!   metricdelta_test(1) = EVout%metric_delta(1) - weight*(yprimeout(1)/a)*EVout%metric_delta(2)
-          
-       !!   metricdelta_test(2) = EVout%metric_delta(2)*(1._dl -weight)
+       
         EVout%metric_delta(1) = EVout%metric_delta(1) - weight*(yprimeout(1)/a)*EVout%metric_delta(2)
           
         EVout%metric_delta(2) = EVout%metric_delta(2)*(1._dl -weight)
 
-        !write(*, *) 'Rayne, u_ax_ef/(1._dl + (CP%Prefp/(CP%rhorefp_hsq*(CP%H0**2.0d0/1.0d4))))', u_ax_ef/(1._dl + (CP%Prefp/(CP%rhorefp_hsq*(CP%H0**2.0d0/1.0d4))))
-       ! write(*, *) 'Rayne, (-yprime(3)/k+3._dl*yprime(2)/k2) - k*EVout%metric_delta(2)', (-yprime(3)/k+3._dl*yprime(2)/k2) - k*EVout%metric_delta(2)
-        !write(*, *) 'Rayne, their sum', u_ax_ef/(1._dl + (CP%Prefp/(CP%rhorefp_hsq*(CP%H0**2.0d0/1.0d4)))) +(-yprime(3)/k+3._dl*yprime(2)/k2) - k*EVout%metric_delta(2)
-       !!call derivs(EVout,EVout%ScalEqsToPropagate,CP%tau_osc,yout,yprimeout)
-       !!call output(EVout,yout,1,CP%tau_osc,sources_temp,dgpiout_out, dgrhoout_outtest)
-       !!!!CP%output_hold = .false.
-!!       if (CP%flat) then
-          !Constructing adotoa*sigma out of the eta*k equation and k*z in derivs
-          !Note that k and Kf(1) are the same between EV and EVout
-          !write(*, *) 'Rayne, yprime(1)/a', yprime(1)/a
-          !--------assignment of no metric sigma boundary terms
-          !EVout%metric_delta(1)= 0._dl
-          !EVout%metric_delta(2)= 0._dl
-          !--------assignment of all metric sigma boundary terms
-!!          EVout%metric_delta(1)= ((-yprime(3)/k+3._dl*yprime(2)/k2)*(2._dl*(yprime(1)/a))/k - y(2)/k) - ((-yprimeout(3)/k+3._dl*yprimeout(2)/k2)*(2._dl*(yprimeout(1)/a))/k - yout(2)/k)
-!!          write(*, *) 'Rayne, metricdelta_test(1), EVout%metric_delta(1), their fractional difference', metricdelta_test(1), EVout%metric_delta(1), metricdelta_test(1)/EVout%metric_delta(1) - 1._dl
-          !!EVout%metric_delta(1)= ((-yprime(3)/k+3._dl*yprime(2)/k2)*(2._dl*(yprime(1)/a)-CP%opac_tauosc)/k - y(2)/k + dgpi_out/k2) - ((-yprimeout(3)/k+3._dl*yprimeout(2)/k2)*(2._dl*(yprimeout(1)/a)-CP%opac_tauosc)/k - yout(2)/k + dgpiout_out/k2)
-!!          EVout%metric_delta(2)= (-yprime(3)/k+3._dl*yprime(2)/k2)/k - (-yprimeout(3)/k+3._dl*yprimeout(2)/k2)/k
-!!           write(*, *) 'Rayne, metricdelta_test(2), EVout%metric_delta(2), their fractional difference', metricdelta_test(2), EVout%metric_delta(2), metricdelta_test(2)/EVout%metric_delta(2) - 1._dl
-          !--------------
-          !!write(*, *) 'Rayne, k, (-yprime(3)/k+3._dl*yprime(2)/k2)*(2._dl*(yprime(1)/a)-CP%opac_tauosc)/k - (-yprimeout(3)/k+3._dl*yprimeout(2)/k2)*(2._dl*(yprimeout(1)/a)-CP%opac_tauosc)/k, -y(2)/k-(-yout(2)/k), dgpi_out/k2 - dgpiout_out/k2', k, (-yprime(3)/k+3._dl*yprime(2)/k2)*(2._dl*(yprime(1)/a)-CP%opac_tauosc)/k - (-yprimeout(3)/k+3._dl*yprimeout(2)/k2)*(2._dl*(yprimeout(1)/a)-CP%opac_tauosc)/k, -y(2)/k-(-yout(2)/k), dgpi_out/k2-dgpiout_out/k2
-!!       else
-          !--------assignment of all metric sigma boundary terms
-          !!EVout%metric_delta(1)= 0._dl
-          !!EVout%metric_delta(2)= 0._dl
-!!          EVout%metric_delta(1)= ((-yprime(3)/k+3._dl*(yprime(2)-CP%curv*(-yprime(3)/k))/k2)*(2._dl*(yprime(1)/a))/(k*EV%Kf(1)) - y(2)/(k*EV%Kf(1))) - ((-yprimeout(3)/k+3._dl*(yprimeout(2) - CP%curv*(-yprimeout(3)/k))/k2)*(2._dl*(yprimeout(1)/a))/(k*EVout%Kf(1)) - yout(2)/(k*EV%Kf(1)))
-          !!EVout%metric_delta(1)= ((-yprime(3)/k+3._dl*(yprime(2)-CP%curv*(-yprime(3)/k))/k2)*(2._dl*(yprime(1)/a)-CP%opac_tauosc)/(k*EV%Kf(1))+ dgpi_out/k2) - ((-yprimeout(3)/k+3._dl*(yprimeout(2) - CP%curv*(-yprimeout(3)/k))/k2)*(2._dl*(yprimeout(1)/a)-CP%opac_tauosc)/(k*EVout%Kf(1)) - yout(2)/(k*EV%Kf(1)) + dgpiout_out/k2)
-!!          EVout%metric_delta(2)= (-yprime(3)/k+3._dl*(yprime(2)-CP%curv*(-yprime(3)/k))/k2)/(k*EV%Kf(1)) - (-yprimeout(3)/k+3._dl*(yprimeout(2) - CP%curv*(-yprimeout(3)/k))/k2)/(k*EV%Kf(1))
-          !--------
-!!       end if
 
-       !!-----------RL testing 101623 for etak EFA version
-       !write(*, *) 'Rayne, at CopyScalarVariableArray [KG], dgrho/2, adotoa*dgq*3/2, etaT, sigma', dgrho_outtest/2._dl, (yprime(1)/a)*(yprime(2) - CP%curv*(-yprime(3)/k))*3._dl, y(2)/(k*EV%Kf(1)), (-yprime(3)/k+3._dl*yprime(2)/k2)
-      ! write(*, *) 'Rayne, at CopyScalarVariableArray [EFA], dgrho/2, adotoa*dgq*3/2, etaT, sigma', dgrhoout_outtest/2._dl, (yprimeout(1)/a)*(yprimeout(2) - CP%curv*(-yprimeout(3)/k))*3._dl, yout(2)/(k*EV%Kf(1)), (-yprimeout(3)/k+3._dl*yprimeout(2)/k2)
-       !write(09192301, '(36e52.42)') k, yprime(1)/a, yprimeout(1)/a, dgrho_outtest/2._dl, dgrhoout_outtest/2._dl, (yprime(2) - CP%curv*(-yprime(3)/k))*3._dl, (yprimeout(2) - CP%curv*(-yprimeout(3)/k))*3._dl, y(2)/(k*EV%Kf(1)), yout(2)/(k*EV%Kf(1)), (-yprime(3)/k+3._dl*yprime(2)/k2), (-yprimeout(3)/k+3._dl*yprimeout(2)/k2)
-       !write(*, *) 'Rayne, on the EFA side, yout(1)/CP%a_osc - 1.0, (yprimeout(1)/CP%a_osc)/H0', yout(1)/CP%a_osc - 1.0, yprimeout(1)/CP%a_osc/CP%H0_in_Mpc_inv
-       !write(*, *) 'EVout%q_ix, k, EVout%metric_delta', EVout%q_ix, k, EVout%metric_delta
-       !write(09192301, '(36e52.42)') k, yprime(1)/a, yprimeout(1)/a, -yprime(3)/k, 3._dl*yprime(2)/k2, -yprimeout(3)/k, 3._dl*yprimeout(2)/k2, EVout%metric_delta(1), EVout%metric_delta(2)
     else 
        yout(EVout%a_kg_ix) = y(EV%a_kg_ix)
        yout(EVout%a_kg_ix+1) = y(EV%a_kg_ix+1)
     end if
-    !write(*, *) 'Rayne, y(1), yout(1), their fractional difference', y(1), yout(1), y(1)/yout(1) - 1.0_dl
+    
     
   end subroutine CopyScalarVariableArray
 
