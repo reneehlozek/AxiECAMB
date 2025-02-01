@@ -1,0 +1,25 @@
+(w0, wa) = (-1.00000,  0.00000)
+Reion redshift       =   7.204
+Om_b h^2             =  0.022400
+Om_c h^2             =  0.120000
+Om_nu h^2            =  0.000600
+Om_Lambda            =  0.684760
+H0                   = 67.360000
+Om_ax h^2            =  0.000000
+m_ax/eV              =  0.10E-26
+Om_K                 =  0.000000
+Om_m (1-Om_K-Om_L)   =  0.315240
+100 theta (CosmoMC)  =  1.040743
+N_eff (total)        =  3.046000
+ 1 nu, g= 1.0153 m_nu*c^2/k_B/T_nu0=    331.61 (m_nu=  0.056 eV)
+Reion opt depth      =  0.0500
+Age of universe/GYr  =  13.798
+zstar                =  1089.67
+r_s(zstar)/Mpc       = 144.428
+100*theta            =  1.041060
+zdrag                =  1059.82
+r_s(zdrag)/Mpc       =  147.08
+k_D(zstar) Mpc       =  0.1411
+100*theta_D          =  0.160461
+tau_recomb/Mpc       =  280.75  tau_now/Mpc =  14153.7
+ at z =    0.00000000      sigma8 (all matter)=  0.830423355    
