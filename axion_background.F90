@@ -263,8 +263,7 @@ contains
     omegah2_m=omegah2_regm+omegah2_ax
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     !Initialize massive and massless neutrino variables
-    !!write(*, *) 'Rayne, before call Nu_init in axion_background, ntable', ntable
-    !!call CreateTxtfile('../Testdata/auxiCAMB_housecleaning/4d8e-28eVbugcheck3_fax=1d0_iterc_aosc_wEFAc_omaxh2guess123_initialfieldguess123.dat', 040324)
+    
     !!    call Nu_init !RL moved to inidriver_axion
     !06/27/2023, RL incorporating 2nd batch of DG's neutrino fix-------------------
     !!    nu_massless_degeneracy = Params%Num_Nu_massless !N_eff for massless neutrinos
@@ -290,14 +289,13 @@ contains
     !   print*,Params%Nu_massless_degeneracy,nu_massless_degeneracy
     !print*,'nu_massless_degneracy',nu_massless_degeneracy
     !RL 06/27/2023--------------------
-    !!write(*, *) 'Rayne, 06282023, in background, Params%Nu_massless_degeneracy', Params%Nu_massless_degeneracy!, nu_massless_degeneracy
+    
 
     grhom = 3.0d0*(hsq*1.d10)/(c**2.0d0) 
     grhog = ((kappa/(c**2.0d0)*4.0d0*sigma_boltz)/(c**3.0d0))*(Params%TCMB**4.0d0)*(Mpc**2.0d0) !RL replaced the COBE_CMBTemp
     grhor = (7.0d0/8.0d0)*((4.0d0/11.0d0)**(4.0d0/3.0d0))*grhog 
     !calculate critical density
     rhocrit=(8.0d0*const_pi*G*1.d3/(3.0d0*((1.d7/(MPC_in_sec*c*1.d2))**(2.0d0))))**(-1.0d0)
-    !write(*, *) 'Rayne, what is the rhocrit value here?', rhocrit
     Params%omegah2_rad=((Params%TCMB**4.0d0)/(rhocrit))/(c**2.0d0) !RL replaced the COBE_CMBTemp
     Params%omegah2_rad=Params%omegah2_rad*a_rad*1.d1/(1.d4)
     !calculate omega rad using standard formula
@@ -308,8 +306,6 @@ contains
 
 
     Params%omegah2_rad=Params%omegah2_rad+lhsqcont_massless
-    !write(*, *) 'Rayne, and omegah2_rad?', Params%omegah2_rad
-    !print*, 'hi renee', Params%omegah2_rad
     !const from modules.f90
     nu_constant=(7.0d0/120.0d0)*(const_pi**4.0d0)/(zeta3*1.5d0)
     nu_constant=nu_constant*omnuh2*(grhom/grhor)/hsq
@@ -983,7 +979,7 @@ contains
           aosc_guess(2) = 15.0d0
           !Adjust the end value of a if the higher omaxh2 guess is close to the true value by approx. 10%
           if (omaxh2_guess(3)/omegah2_ax .lt. 1.1d0 .and. a_final .eq. 1.0d0 .and. aosc_guess(3)*1.1d0 .lt. 1.0d0) then
-             !!write(*, *) 'Rayne is your omaxh2_guess(3) reasonable???', omaxh2_guess(3)
+             
              !!write(*, *) 'Rayne threshold aosc*1.1d0', aosc*1.1d0
              a_final=aosc_guess(3)*1.1d0 !multiply that aosc by 1.1 just to be safe
              !reassign the log_a_final
@@ -1015,180 +1011,11 @@ contains
        deallocate(cmat, kvec, kfinal, svec, avec) !RL 112223
 
 
-
-       !RL commenting out the spline method involving fout******************
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-       ! End of sweep through different evolutions
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-       !DM
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-       ! Spline results of shooting method
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-       !vtwiddle_init_arr=dlog(vtwiddle_init_arr)
-       !fout_check_arr=dlog(fout_check_arr)
-       !fout_arr=dlog(fout_arr)
-
-
-       !Exclude histories that crashed
-       !nstop=0
-       !do j=1,nphi,1
-       !   if (j .lt. nphi) then
-       !      if ((dexp(fout_check_arr(j+1)).eq.dexp(fout_check_arr(j)))) then
-       !         if (nstop.eq.0) then
-       !            nstop=j
-       !         endif
-       !     endif
-       !   endif
-       !   print*,j,fout_check_arr(j)
-       !enddo
-       !if (nstop .eq. 0) then
-       !   nstop=nphi
-       !endif
-       !
-!!!cubic spline to find best initial phi value to get axion energy fraction that is desired
-       !d1=(vtwiddle_init_arr(2)-vtwiddle_init_arr(1))/(fout_check_arr(2)-fout_check_arr(1))
-       !d2=(vtwiddle_init_arr(nstop)-vtwiddle_init_arr(nstop-1))
-       !d2=d2/(fout_check_arr(nstop)-fout_check_arr(nstop-1))
-       !call spline(fout_check_arr(1:nstop),vtwiddle_init_arr(1:nstop),nstop,d1,d2,vtwiddle_init_arr_buff(1:nstop))
-       !call spline_out(fout_check_arr(1:nstop),vtwiddle_init_arr(1:nstop),&
-       !     &vtwiddle_init_arr_buff(1:nstop)&
-       !     &,nstop,0.0d0,vtw) 
-
-
-
-!!!use a cubic spline to check that correct axion energy fraction is indeed achieved here
-       !d1=(vtwiddle_init_arr(2)-vtwiddle_init_arr(1))/(fout_arr(2)-fout_arr(1))
-       !d1=1.d0/d1
-       !d2=(vtwiddle_init_arr(nstop)-vtwiddle_init_arr(nstop-1))
-       !d2=d2/(fout_arr(nstop)-fout_arr(nstop-1))       
-       !d2=1.0d0/d2
-!!!             
-       !call spline(vtwiddle_init_arr(1:nstop),fout_arr(1:nstop),nstop,d1,d2,vtwiddle_init_arr_buff(1:nstop))   
-       !call spline_out(vtwiddle_init_arr(1:nstop),fout_arr(1:nstop),&
-       !     &vtwiddle_init_arr_buff(1:nstop)&
-       !     &,nstop,vtw,final_fout_check)
-       !write(*, *) 'Rayne, using this old print check', dexp(final_fout_check)*omegah2_regm/(1.0d0-dexp(final_fout_check)),fax*omegah2_regm/(1.0d0-(fax))
-       !write(*, *) 'Rayne, is the omaxh2 array covering the target value?', fout_arr(1)*omegah2_regm/(1.0d0-(fout_arr(1))), dexp(fout_arr(nstop))*omegah2_regm/(1.0d0-dexp(fout_arr(nstop))), dexp(final_fout_check)*omegah2_regm/(1.0d0-dexp(final_fout_check))
-       !write(*, *) 'Rayne, is the fout array covering the target value?', fout_arr(1)*omegah2_regm/(1.0d0-(fout_arr(1))), dexp(fout_arr(nstop))*omegah2_regm/(1.0d0-dexp(fout_arr(nstop))), dexp(final_fout_check)*omegah2_regm/(1.0d0-dexp(final_fout_check))
        !write(*, *) 'Rayne, final_fout_check, fax, ratio', final_fout_check, fax, final_fout_check/fax
-       !call CreateTxtfile('../Testdata/auxiCAMB_EFA/auxiCAMBdfac=3d0_nphi=500_ntable=5000_max=1e-30eV_fax=1d0_bugloop_viniarr_foutarr_omaxh2arr_vtw_finalfoutcheck_omaxh2fin.dat', 051723)
-
-
-       !   end do 
+       
        !print*,dexp(final_fout_check)*omegah2_regm/(1.0d0-dexp(final_fout_check)),fax*omegah2_regm/(1.0d0-(fax))
 
-       !RL commenting out this cubic spline to use bisection************
-       !Use cubic spline to get aosc for this best (and chosen history)
-       !laosc_arr=dlog(aosc_arr)
-       !d1=(vtwiddle_init_arr(2)-vtwiddle_init_arr(1))/(laosc_arr(2)-laosc_arr(1))!RL fixed laosc typo
-       !d1=1.d0/d1
-       !d2=(vtwiddle_init_arr(nstop)-vtwiddle_init_arr(nstop-1))
-       !d2=d2/(laosc_arr(nstop)-laosc_arr(nstop-1))       
-       !d2=1.0d0/d2
-       !call spline(vtwiddle_init_arr(1:nstop),laosc_arr(1:nstop),nstop,d1,d2,vtwiddle_init_arr_buff(1:nstop))   
-       !call spline_out(vtwiddle_init_arr(1:nstop),laosc_arr(1:nstop),&
-       !     &vtwiddle_init_arr_buff(1:nstop)&
-       !     &,nstop,vtw,Params%a_osc)
-       !vtw=dexp(vtw)
-       !Params%a_osc=dexp(Params%a_osc)
-       !if (Params%a_osc .ge. 1.0d0) then
-       !   Params%a_osc=1.0d0
-       !endif
 
-       !*******************
-!!!!!!!!!!!!!!!!!!!!!!!!!
-       ! DM log a integration at best fit initial field value for output
-!!!!!!!!!!!!!!!!!!!!!!!!
-
-
-       !Do same log scale factor integration at bestfit phi value to get history of fluid variables
-       !!Set scale factor integration range
-       !RL commented out 06/20/23----------
-       !a_init=dexp(log_a_init)
-       !if (Params%a_osc .le. 1.0d0) then
-       !   a_final=Params%a_osc*(1.0d0+eps)
-       !else
-       !   a_final=1.0d0
-       !endif
-       !log_a_final=dlog(a_final)
-       !dloga=(log_a_final-log_a_init)/dble(ntable-1)
-       !------------
-
-       !Set intial value
-       !vtwiddle_init=vtw
-       !write(*, *) 'Rayne, where you think the final version of the initial v1 is'
-       !write(*, '(36e52.42,\)') vtwiddle_init
-       !RL hacking to normalize to the initial field value of dfac=1000 case
-       !vtwiddle_init = 0.151276599300116665336446430956129916012000E-01_dl
-       !The value after the w correction
-       !vtwiddle_init = 0.151276684345080288801588253022600838449000E-01_dl
-       !The value after the w correction for dfac=300
-       !vtwiddle_init = 0.151311703858301380143380754361714934930000E-01_dl
-
-       !dfac = 300 for 1e-27, fax = 1
-       !vtwiddle_init = 0.260037011053131816851191615569405257702000E+00
-       !Turning massive neutrinos off
-       !vtwiddle_init = 0.184149072174605715757067514459777157754000E-01_dl
-       !-------------------------------
-       !write(*, *) 'Rayne, fixing it to the dfac=300 value'
-       !write(*, '(36e52.42,\)') vtwiddle_init
-       !write(*, *) 'Rayne, fixing it to the dfac=1000 value'
-       !write(*, '(36e52.42,\)') vtwiddle_init
-
-
-       !initial loga and a value ---RL commented out 06/20/23
-       !loga_table(i)=log_a_init
-       !a_arr(1)=dexp(loga_table(i))
-       !---RL commented out 06/20/23
-       !start axion at rest at top of hill, with phi guessed at current guess
-       !v_vec(1,1)=vtwiddle_init
-       !v_vec(2,1)=0.0d0 !axionCAMB original, 2nd place (more accurate initial condition)
-       !!Compute initial Hubble
-       !call lh(omegah2_regm,Params%omegah2_rad,omegah2_lambda,omk,hsq,maxion_twiddle,a_arr(1),v_vec(1:2,1),littlehfunc(1),badflag,&
-       !     &lhsqcont_massless,lhsqcont_massive,Params%Nu_mass_eigenstates,Nu_masses)
-       !RL modifying v_vec(2,1) after obtaining the initial Hubble
-       ! v_vec(2,1)= - vtwiddle_init * (a_arr(1)**2.0d0) * (maxion_twiddle**2.0d0) * hnot/(5.0d0 * littlehfunc(1)) 
-       !write(*, *) 'Rayne what is the final verison of IC of v_vec(2,1)?', v_vec(2, 1)
-
-       !Compute first step parameters
-       !kvec=0.0d0
-       !kfinal=0.0d0
-       !call next_step(a_arr(1),v_vec(1:2,1),kvec(1:16,1:2),kfinal(1:2),avec(1:16),omegah2_regm,Params%omegah2_rad,omegah2_lambda,omk,hsq,maxion_twiddle,badflag,dloga,16,cmat(1:16,1:16),lhsqcont_massless,lhsqcont_massive,Params%Nu_mass_eigenstates,Nu_masses)
-
-
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-       ! DM: do loop for pulling out values at correct initial phi
-       !time integration, pull out same values at each time step
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-       !badflag=0
-
-       !forall(i=2:ntable)
-       !   loga_table(i)=log_a_init+dloga*dble(i-1)
-       !   a_arr(i)=dexp(loga_table(i))
-       !end forall
-
-       !do i=2,ntable,1
-       !Take step using previously computed step parameters   
-       !   v_vec(1:2,i)=v_vec(1:2,i-1)+(svec(1)*kvec(1,1:2)+svec(9)*kvec(9,1:2)+svec(10)*kvec(10,1:2)&
-       !        &+svec(11)*kvec(11,1:2)+svec(12)*kvec(12,1:2)+svec(13)*kvec(13,1:2)&
-       !        &+svec(14)*kvec(14,1:2)+svec(15)*kvec(15,1:2))
-
-       !Compute Hubble/(km/s/Mpc)
-       !   call lh(omegah2_regm,Params%omegah2_rad,omegah2_lambda,omk,hsq,maxion_twiddle,a_arr(i),v_vec(1:2,i),littlehfunc(i),badflag,lhsqcont_massless,lhsqcont_massive,Params%Nu_mass_eigenstates,Nu_masses)
-
-       !   kvec=0.0d0
-       !   kfinal=0.0d0
-       !compute next step parameters
-
-       !   call next_step(a_arr(i),v_vec(1:2,i),kvec(1:16,1:2),kfinal(1:2),avec(1:16),omegah2_regm,&
-       !        &Params%omegah2_rad,omegah2_lambda,omk,hsq,&
-       !        &maxion_twiddle,badflag,dloga,16,cmat(1:16,1:16),&
-       !        &lhsqcont_massless,lhsqcont_massive,Params%Nu_mass_eigenstates,Nu_masses)
-       !enddo
-       !---RL commented out 06/20/23
        !Compute m/3H as a function of scale factor, as well as the scalar field equation of state
        !and appropriately normalized energy density
        allocate(rhoaxh2_ov_rhom(ntable))
@@ -1309,8 +1136,7 @@ contains
 
        !Params%a_osc=dexp(Params%a_osc)
        !rhorefp=dexp(rhorefp)
-       !write(*, *) 'Rayne, what is aosc and the exponent of the last entry of the loga_table, at this log interpolation thing?', Params%a_osc, dexp(loga_table(ntable))
-
+       
        
        !rhoaxh2ovrhom_logtable=dlog(rhoaxh2_ov_rhom)
        !write(*, *) 'Rayne, test the last entry of rhoaxh2_ov_rhom after this post-asoc rescaling', rhoaxh2_ov_rhom(ntable)
@@ -1347,79 +1173,7 @@ contains
 !!!!!!!
        deallocate(eq_arr, eq_arr_buff) !RL 111623
        
-       !! RL 012524 - spline littlehfunc to find the dfac at z~800 to skip recombination. We only need a rough number so fininte differencing the boundary condition should be fine for our purposes
-       !! RL 012524 - the reason why I put the spline interpolation here is that it almost completely reflects the spline interpolation above for aeq, though aeq might not end up useful and might be deleted
-!!!!    d1 = (littlehfunc(2)-littlehfunc(1))/(loga_table(2)-loga_table(1))
-!!!!    d2 = (littlehfunc(ntable)-littlehfunc(ntable-1))/(loga_table(ntable)-loga_table(ntable-1))
-!!!!    call spline(loga_table(1:ntable),(littlehfunc(1:ntable)),ntable,d1,d2,littlehfunc_buff(1:ntable))
-!!!!    call spline_out(loga_table(1:ntable),littlehfunc(1:ntable),&
-!!!!         &littlehfunc_buff(1:ntable)&
-!!!!         &,ntable,dlog10(1._dl/901._dl),Params%dfac_skip)
-       !! RL 020124 - here Params%dfac_skip is a placeholder so that I don't declare another variable. It is immediately reassigned to the dfac I need to skip to in the following step
-!!!!    write(*, *) 'Rayne, in background module, loga_table(ntable)', loga_table(ntable)
-!!!!    Params%dfac_skip = maxion_twiddle*(1._dl/901._dl)*hnot/Params%dfac_skip
-!!!!    write(*, *) 'Rayne, dlog10(Params%a_osc),dlog10(1._dl/1101._dl), Params%dfac, Params%dfac_skip', dlog10(Params%a_osc),dlog10(1._dl/1101._dl), Params%dfac, Params%dfac_skip
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!put axion energy density in units used in camb time integrations
-       !forall(i=1:ntable)
-       !   rhoaxh2ovrhom_logtable(i)=rhoaxh2ovrhom_logtable(i)-dlog(hsq)
-       !end forall
-       !Params%rhorefp_hsq=rhorefp/hsq
-       !rhoaxh2ovrhom_logtable=dlog10(dexp(rhoaxh2ovrhom_logtable))
 
-       ! Now moved to equations_ppf.f90
-!!! For the fisher code for later:
-       !open(unit=983, file="/Users/reneehlozek/Code/OxFishDec15_axion/results/cambOutput/grhoax.dat", action="write", status="replace")
-       !do i=1,ntable
-       !   write(983,*) dexp(loga_table(i)), rhoaxh2ovrhom_logtable(i)
-       !end do
-
-       !close(983)
-!!! RH
-       !loga_table=dlog10(dexp(loga_table))
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-       !!create spline buffer arrays for all quatntities of interest as a function of time in code, this will allow camb to calculate via interpolation any of the quantities of interest at any time
-
-       !adiabatic sound speed of axions
-       !d1=(Params%cs2_table(3)-Params%cs2_table(2))/(loga_table(2)-loga_table(1))
-       !d2=(Params%cs2_table(ntable)-Params%cs2_table(ntable-1))/(loga_table(ntable)-loga_table(ntable-1))
-       !call spline(loga_table(2:ntable),(Params%cs2_table(2:ntable)),ntable-1,d1,d2,Params%cs2_table_buff(2:ntable))
-       !SPINE SCALAR FIELD ENERGY DENSITY FOR LATER USE IN CAMB
-       !d1=(rhoaxh2ovrhom_logtable(2)-rhoaxh2ovrhom_logtable(1))/(loga_table(2)-loga_table(1))
-       !d2=(rhoaxh2ovrhom_logtable(ntable)-rhoaxh2ovrhom_logtable(ntable-1))/(loga_table(ntable)-loga_table(ntable-1))
-       !call spline(loga_table(1:ntable),rhoaxh2ovrhom_logtable(1:ntable),ntable,d1,d2,rhoaxh2ovrhom_logtable_buff(1:ntable))
-       !RL splining adotoa from the background
-       !d1=(Params%adotoa_background(2)-Params%adotoa_background(1))/(loga_table(2)-loga_table(1))
-       !d2=(Params%adotoa_background(ntable)-Params%adotoa_background(ntable-1))/(loga_table(ntable)-loga_table(ntable-1))
-       !call spline(loga_table(1:ntable),Params%adotoa_background(1:ntable),ntable,d1,d2,Params%adotoa_background_buff)
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-       ! UPDATE: RL moved to after the logatable has been rescaled to base 10
-       ! RL splining phi and phidot. Note that although there's a lot of logs for a and grhoax, there's none for w_ax and cad2, and unless we find it super necessary later (say there're values too large and too small), there's no real advantage taking the log of phi and phidot
-       ! Let's try splining wrt the log of a first (I feel like this is a good way since 0 < a < 1 and log will give larger step spacing and hence better spline accuracy)
-       !First do phi
-
-       !RL using analytical derivative at the boundary
-
-       !d1 = dlog(10._dl)*phidotnorm_table(1)*hnot/littlehfunc(1) 
-       !d2 = dlog(10._dl)*phidotnorm_table(ntable)*hnot/littlehfunc(ntable)
-       !call spline(loga_table(1:ntable),phinorm_table,ntable,d1,d2,phinorm_table_ddlga)
-       !do i = 1, ntable
-       !   call spline_out(loga_table,phinorm_table, phinorm_table_ddlga,ntable,loga_table(i),phiax_kg_splinetest)
-       !   write(*, *) 'Rayne, what is phiax_kg_splinetest, phi_original, and the fractional difference?', phiax_kg_splinetest, phinorm_table(i), phiax_kg_splinetest/phinorm_table(i) - 1.0
-       !end do
-
-
-       !Then do phidot
-
-       !d1=(phidotnorm_table(2)-phidotnorm_table(1))/(loga_table(2)-loga_table(1))
-       !d2=(phidotnorm_table(ntable)-phidotnorm_table(ntable-1))/(loga_table(ntable)-loga_table(ntable-1))
-       !RL using analytical derivative at the boundary
-       !d1 = -dlog(10._dl) * (2*phidotnorm_table(1) + ((maxion_twiddle*(10._dl**(loga_table(1))))**2)*phinorm_table(1)*hnot/littlehfunc(1))
-       !d2 = -dlog(10._dl) * (2*phidotnorm_table(ntable) + ((maxion_twiddle*(10._dl**(loga_table(ntable))))**2)*phinorm_table(ntable)*hnot/littlehfunc(ntable))
-       !call spline(loga_table(1:ntable),phidotnorm_table,ntable,d1,d2,phidotnorm_table_ddlga)
-       !write(*, *) 'Rayne, what is the last entry of the a (delogged from loga_table)?', 10**(loga_table(ntable))
-
-!!!!!!!!!!!!!!!!!!!!!!!
 
        !!feed out real (dl) valued version of all this stuff for output
        !put scalar field initial condition in planck units
@@ -1442,14 +1196,6 @@ contains
        !output omega_r
        Params%omegar=Params%omegah2_rad/hsq
 
-       !RL test the grhoax
-       !do i = 1, ntable 
-       !   write(*, *) 'Rayne, test_grhoaxknots, test_grhoaxfromphiphidotknots, their fractional difference'
-       !   test_grhoaxknots = 10.0_dl**(rhoaxh2ovrhom_logtable(i))*hsq
-
-       !   test_grhoaxfromphiphidotknots = phidotnorm_table(i)**2.0_dl/((10.0_dl**(loga_table(i)))**2.0_dl)+ (maxion_twiddle * phinorm_table(i))**2.0_dl
-       !   write(*, *) test_grhoaxknots, test_grhoaxfromphiphidotknots, test_grhoaxknots/test_grhoaxfromphiphidotknots - 1.0_dl
-       !end do
 
        !write(*, *) 'Rayne, the last entry of rhoaxh2_ov_rhom', rhoaxh2_ov_rhom(ntable)
 
@@ -1486,12 +1232,7 @@ contains
        !!       write(020124, '(36e52.42,\)') maxion_twiddle, a_arr(i), Params%a_osc, Params%a_skip, littlehfunc(i)/hnot
        !!    end do
 
-       !RL 08152023: since it's just a test, I can assign the numerical first derivatives at the boundary for Pef_test for the spline boundary condition and use a larger ntable
-       !!d1=(Params%wef_table_test(2)-Params%wef_table_test(1))/(loga_table(2)-loga_table(1))
-       !!d2=(Params%wef_table_test(ntable)-Params%wef_table_test(ntable-1))/(loga_table(ntable)-loga_table(ntable-1))
-       !!call spline(loga_table(1:ntable),Params%wef_table_test(1:ntable),ntable,d1,d2,Params%wef_table_test_buff(1:ntable))
-       !!write(*, *) 'Finally in the background, v_vec(1, :)', v_vec(1, :)
-       !!write(*, *) 'v_vec(2, :)', v_vec(2, :)
+
        deallocate(a_arr, v_vec, littlehfunc, littlehfunc_buff, rhoaxh2_ov_rhom)
        !!write(*, *) 'R1, H0_in_Mpc_inv/H0_eV', Params%H0_in_Mpc_inv/Params%H0_eV
      end subroutine w_evolve

@@ -696,13 +696,7 @@ program driver
   !!write(*, *) 'omk_str', omk_str ', '_omk', omk_str'
   !!write(testthetafilename, '(A,A,A,A,A,A,A,A,A,A,A,A,I0,A,I0,A,A,A,I0,A,A,A)') '../Testdata/housecleaning3/AxiEF2_axf', useaxfrac_str, abun_str, '_omdah20d12_H0', H0_str, '_hyb2ktau2_Ct6tau*t12hw6_wEFAtowEF_m', max_str(1:1), 'd', max_str(3:4), 'e-', max_str(8:9), '_m-nuon_aB', int(AccuracyBoost), '_laB', int(lAccuracyBoost), '_Lratc', dolateradtrunc_str, '_dfac', int(P%dfac), 'd', dfac_str(5:5), '_zstar_rs-star_thetastar_sigma8_om0.dat' !_scalclsF_dfac
   !!write(testthetafilename, '(A,A,A,A,A,A,A,A,A,A,A,A,I0,A,I0,A,A,A,I0,A,A,A)') '../testdata_midway/Asm_axf', useaxfrac_str, abun_str, '_omdah20d12_H0', H0_str, '_hyb2ktau2_Ct6tau*t12hw6_wEFAtowEF_m', max_str(1:1), 'd', max_str(3:4), 'e-', max_str(8:9), '_m-nuon_aB', int(AccuracyBoost), '_laB', int(lAccuracyBoost), '_Lratc', dolateradtrunc_str, '_dfac', int(P%dfac), 'd', dfac_str(5:5), '_zstar_rs-star_thetastar_sigma8_om0.dat' !
-  !!write(*, *) 'testthetafilename:', testthetafilename
-  !call CreateTxtFile('../Testdata/auxiCAMB_housecleaning/LCDMtestforcurvature_interpoffsmallSetTimeStep10x_omk=0d1_zstar_rs-star_thetastar.dat',02222404)
- !!call CreateTxtFile(testthetafilename,02222404)
-  !!write(filenametest, '(A, I0, A)') '../Testdata/auxiCAMB_housecleaning/renormalizedonlydv1_workmodetestcs2_1e-29eV_fax=1d0_1stk_v1_v2_dv1_dv2_tc_ts_tcp_tsp_tdc_tds_tdcp_tdsp_tdrhoef_tdPef_csquaredaxtest.dat' !
-  !!  write(filenametest, '(A, I0, A)') '../Testdata/auxiCAMB_housecleaning/renormalizedonlydv1_workmodetestcs2_1e-29eV_fax=1d0_dfac=73d15416_k_v1_v2_dv1_dv2_tc_ts_tcp_tsp_tdc_tds_tdcp_tdsp_tdrhoef_tdPef_csquaredaxtest.dat' !
 
-  !!call CreateTxtFile(filenametest,042824)
   !!  call CreateTxtFile(filenametest,050924)
   !call cpu_time(clock_stop) ! RH timing 
   !print*, 'timing after dans routine', clock_stop - clock_start
