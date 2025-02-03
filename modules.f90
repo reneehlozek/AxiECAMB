@@ -187,16 +187,12 @@ module ModelParams
      !
      !Scalar field EOS, log10(density), log10(scale_factor), spline buffer for scalar field EOS
      !and log10(density)
-     !!real(dl) :: tau_table_bgtest(ntable) !RL for background test, PROBABLY DELETE WHEN TEST FINISHED
-     !!real(dl) :: loga_table(ntable)!!, !!grhoax_table(ntable), grhoax_table_buff(ntable)!!!RL added waxp1 wax_table(ntable), waxp1_table(ntable), wax_table_buff(ntable), waxp1_table_buff(ntable)
+     
      !!real(dl), allocatable :: grhoax_table(:), grhoax_table_buff(:)
      !real(dl) :: adotoa_background(ntable), adotoa_background_buff(ntable) !RL for debugging
      !Adiabatic sound speed Pdot/rhodot and its spline buffer !RL commented out
      !real(dl) ::cs2_table(ntable),cs2_table_buff(ntable)
      real(dl) :: phiinit,aeq, ainit, lens_amp,rhorefp_ovh2, Prefp !RL added Prefp
-     !!real(dl) wef_table_test(ntable), wef_table_test_buff(ntable)!RL 08152023
-     logical :: output_hold !RL testing 10062023
-     real(dl) test_thetastar, test_rs, test_DA !RL 110723 for testing - SHOULD DELETE AFTER TEST COMPLETE
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   end type CAMBparams
@@ -3011,12 +3007,6 @@ contains
        ThermoDerivedParams( derived_zstar ) = z_star
        ThermoDerivedParams( derived_rstar ) = rs
        ThermoDerivedParams( derived_thetastar ) = 100*rs/DA
-       !RL testing 110723 - SHOULD DELETE AFTER TEST COMPLETE
-       !!!CP%test_thetastar=ThermoDerivedParams( derived_thetastar )
-       !!!CP%test_rs= rs
-       !!!CP%test_DA=DA
-       !!!write(*, *) 'CP%test_thetastar, CP%test_rs, CP%test_DA', CP%test_thetastar, CP%test_rs, CP%test_DA
-       !-------------------
        ThermoDerivedParams( derived_zdrag ) = z_drag
        rs =rombint(dsound_da_exact,1d-8,1/(z_drag+1),1d-6)
        ThermoDerivedParams( derived_rdrag ) = rs

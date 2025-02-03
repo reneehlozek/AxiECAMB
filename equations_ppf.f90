@@ -1458,7 +1458,7 @@ contains
   end subroutine SwitchToMassiveNuApprox
 
   subroutine MassiveNuVarsOut(EV,y,yprime,a,grho,gpres,dgrho,dgp,dgq,dgpi, gdpi_diff,pidot_sum)
-    !!RL TEMPORARILY ADDED DGP TO OUTPUT THE PRESSURE PERTURBATION OF MASSIVE NEUTRINOS. PROBABLY SHOULD DELETE WHEN THIS IS DONE
+    !!RL added dgp for testing to output the pressure perturbation of massive neutrinos
     implicit none
     type(EvolutionVars) EV
     real(dl) :: y(EV%nvar), yprime(EV%nvar),a, grho,gpres,dgrho,dgp, dgq,dgpi, gdpi_diff,pidot_sum !RL temporarily added dgp
@@ -1484,7 +1484,7 @@ contains
 
        if (EV%MassiveNuApprox(nu_i)) then
           clxnu=y(EV%nu_ix(nu_i))
-          dpnu=y(EV%nu_ix(nu_i)+1) !RL temporarily added back by consulting the corresponding line in SwitchToMassiveNuApprox (This is probably not used since it was commented out BUT REMEMBER TO DELETE THIS LINE WHEN TESTING IS DONE)
+          dpnu=y(EV%nu_ix(nu_i)+1) !RL added back for testing only, by consulting the corresponding line in SwitchToMassiveNuApprox (Not used in the original CAMB since it was commented out)
           qnu=y(EV%nu_ix(nu_i)+2)
           pinu=y(EV%nu_ix(nu_i)+3)
           pinudot=yprime(EV%nu_ix(nu_i)+3)

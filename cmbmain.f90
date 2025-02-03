@@ -753,7 +753,7 @@ contains
        end if
     else
        !Fixed spacing
-       !RL hacking for test 07/14/2023 SHOULD DELETE AFTER TEST PHASE-------
+       !RL hacking for test 07/14/2023 
        !qmin = 1.e-5_dl
        !qmin = 2.e-4_dl
        !qmin = 1._dl
@@ -1206,59 +1206,9 @@ contains
     !        stop
     ! DM: with stop here, this output is only done for the lowest k-value.                                                
     ! Without stop here, need to reset other variables or rest of code falls over.                                       
-    ! Fix using dummy var for tauend? 
     !    end if
 
     !     Begin timestep loop.
-    !RL: output under fixed k scenario, taken from Meng-Xiang
-    if (fixq/=0._dl) then
-       tol1=tol/exp(AccuracyBoost-1) !* 1e-9_dl !RL added tolerance suppression
-       if (CP%WantTransfer .and. CP%Transfer%high_precision) tol1=tol1/100 !RL 042824
-       ! do j=2,TimeSteps%npoints
-       !tauend = TimeSteps%points(j)
-       do j=1,100000   !originally 100000, RL changing to small number for test purposes REMEMBER TO CHANGE TWO PLACES!!
-          !tauend = taustart+(j-1)*(CP%tau0-taustart)/100000 !RL: this seems to be the linear scale
-          !if (j .lt. 5000) then
-          !    tauend = taustart* (CP%tau_osc/taustart)**((j-1)/5000._dl) !RL: forces a tauend to be tau_osc
-          ! else
-          !    tauend = CP%tau_osc* (CP%tau0/(CP%tau_osc))**((j-5000)/95000._dl)
-          ! end if
-          !do j=2,TimeSteps%npoints
-          !   tauend=TimeSteps%points(j)
-          tauend = taustart * (CP%tau0/taustart)**((j-1)/100000._dl) !RL: remember to change back to 100000 (this seems to be the log scale) !RL used a fixed tau0 for comparison purposes 011323 - 14483 pertains to m_ax = 1e-30eV
-          !  write(*, *) 'tauend:', tauend
-          !tauend = taustart* (CP%tau0/taustart)**((j-0.5_dl)/100000._dl) !RL tampering with the tau spacing
-          !write(*, *) EV%oscillation_started 
-
-          !call GaugeInterface_EvolveScal(EV,tau,y,tauend,tol1,ind,c,w)
-          !!write(*, *) 'Rayne, tauend', tauend
-          call GaugeInterface_EvolveScal(EV,tau,y,tauend,tol1,ind,c,w)
-          if (global_error_flag/=0) return
-
-          call output(EV,y,j,tau,sources)
-          !!write(*, *) 'Rayne what is going on with sources(j)?', j, size(sources), TimeSteps%points(j), tau, sources(1)
-          !!write(01102401, '(36e52.42e3)') TimeSteps%points(j), sources(j), vis(j), dvis(j), ddvis(j)
-          !if (EV%oscillation_started == .true.) then ! .and. EV%oscillation_output_done == .false.
-          ! write(*,*) 'Oscillation started'!, y(EV%a_ix) changed to zero'
-          !call output(EV,y,1,tau,sources)
-          !   write(*,*) 'Let''s see what y(EV%a_ix) is at this time:', y(EV%a_ix), y(EV%a_ix + 1)
-          !EV%oscillation_output_done = .true.
-          !exit !RL: Remember to either incorporate this stop to the GaugeInterface or copy this block to all k's RL 01/09/2022: removed this exit since I have the GDM past tauosc now
-          !end if
-
-          !RL note 02/19/2023: this debug output routine is a little broken by calling "EV, y, 1..." since the "1" should have been "j" labeling a CAMB-determined timestep, which doesn't follow the super dense timestep we're using here in the debug mode. It is a bit tricky to fix it due to all the visibility function terms involved. Hence I added a small snippet to call the opacity function only at the subroutine output in equations_ppf.f90, which is activated only under the debug mode with fixed k and time-evolution. THIS SHOULD BE REVERTED TO ORIGINAL ONCE THE TESTING FINISHES AND THE DEBUG MODE IS DELETED.
-          !call output(EV,y,1,tau,sources)
-          !RL testing what's going on with outtransf
-          !MT%TransferData(:,fixq,1) is the result to be assigned but in the debug mode this is fine so I reassigned all the indices to just 1
-          !call outtransf(EV,y,tau, MT%TransferData(:,1,1)) 
-          ! ! ----- test for high k: truncated
-          ! if (fixq*tau>10000) then
-          !     EXIT
-          ! end if
-          ! ! ----- end test
-       end do
-       stop
-    end if
 
     itf=1
     tol1=tol/exp(AccuracyBoost-1) !* 2e-6_dl !RL
@@ -1838,8 +1788,6 @@ contains
   !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
   !flat source integration
   subroutine DoFlatIntegration(IV, llmax)
-    !!use assignjlfiles !RL 092023
-    use ThermoData !RL 010524 - DELETE WHEN DONE
     implicit none
     type(IntegrationVars) IV
     integer llmax
