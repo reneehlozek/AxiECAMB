@@ -319,7 +319,7 @@ contains
     !Constants in SI units
     real clock_start, clock_stop ! RH timing
     integer :: i_check
-    real(dl) dtauda, dtauda_check1, dtauda_check2, a_check!RL testing the difference between the two dtauda's in DeltaTime
+    real(dl) dtauda
     external dtauda
     global_error_flag = 0
 
@@ -369,7 +369,7 @@ contains
 
     nu_massless_degeneracy = CP%Num_Nu_massless !N_eff for massless neutrinos
 
-    !RL pasted DG's massless neutrino fix
+    !RL placed DG's massless neutrino fix
 
     if (CP%Num_nu_massive > 0) then
        if (CP%Nu_mass_eigenstates==0) stop 'Have Num_nu_massive>0 but no nu_mass_eigenstates'
@@ -392,15 +392,14 @@ contains
     !RL moved this line below 06/30/2023
     CP%Nu_massless_degeneracy=nu_massless_degeneracy
 
-    !write(*, *) 'Rayne, 06282023, in modules, CP%Nu_massless_degeneracy, nu_massless_degeneracy', CP%Nu_massless_degeneracy, nu_massless_degeneracy
-
+   
     if ((CP%WantTransfer).and. CP%MassiveNuMethod==Nu_approx) then
        CP%MassiveNuMethod = Nu_trunc
     end if
 
-    !!write(*, *) 'RLc, CP%omegak before GetOmegak()', CP%omegak !RL 032724: CP%omegak is already assigned before GetOmegak(). Tested that in all cases the difference between these two results are very small (mostly 1e-16 level). Since GetOmegak() is physically wrong, I removed it and readjusted H0 instead, although in practice the effect is very small.
+    !!write(*, *) 'CP%omegak before GetOmegak()', CP%omegak !RL 032724: CP%omegak is already assigned before GetOmegak(). Tested that in all cases the difference between these two results are very small (mostly 1e-16 level). Since GetOmegak() is physically wrong, I removed it and readjusted H0 instead, although in practice the effect is very small.
     !!CP%omegak = GetOmegak()
-    !!write(*, *) 'RLc, CP%omegak after GetOmegak()', CP%omegak
+    !!write(*, *) 'CP%omegak after GetOmegak()', CP%omegak
     
     CP%flat = (abs(CP%omegak) <= OmegaKFlat)
     CP%closed = CP%omegak < -OmegaKFlat
@@ -448,9 +447,6 @@ contains
     grhob=grhom*CP%omegab !fractional difference changes from -8.243792823000173E-002 to -1.092318371998413E-003
 
     grhov=grhom*CP%omegav !fractional difference changes from -1.092318371998413E-003 to 0
-    !!!write(*, *) 'We are at modules, RAYNE, and what is dtauda for a = 1.0 in the first place?'
-    !!!write(*, '(36e52.42)') dtauda(1._dl)
-    dtauda_check1 = dtauda(1._dl)
     grhok=grhom*CP%omegak
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -461,24 +457,7 @@ contains
     if(a_osc>1) then 
        a_osc=1.
     end if
-    !write(*, *) 'Rayne, starting to record the dtauda again after the fix saw dust in the right middle' !RL
-    !call CreateTxtFile('../Testdata/auxiCAMB_testdata_KGpert/MIDDLE_massiveneutrinoson_afterfix_DeltaTimemodulestest_max1e-24_k0d1.dat', 111112)
-
-    !do i_check = 1, 100000
-    !   if (i_check == 1) then
-    !     a_check = 0._dl
-    !   else if (i_check .gt. 1) then
-    !     a_check = 1.0d-10 * (1.0_dl/1.0d-10)**((i_check-1)/100000._dl)
-    !   end if
-    !   write(111112, *) a_check, dtauda(a_check)
-    !end do
-
-    !write(*, *) 'Are the corresponding tables defined?' !RL
-    !call CreateTxtFile('../auxiCAMB_testdata/splinetables_modulestest_max1e-32.dat', 22222)
-    !write(22222, *) CP%loga_table,CP%grhoax_table,CP%grhoax_table_buff
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
+    
 
 
     !  adotrad gives the relation a(tau) in the radiation era:
@@ -494,12 +473,8 @@ contains
 
     if (.not.call_again) then
        !call init_massive_nu(CP%omegan /=0) !RL commnented out 07/10/23
-       !!!write(*, *) 'Rayne, before call init_background in modules, CP%WantScalars', CP%WantScalars
        call init_background
        if (global_error_flag==0) then
-          !!write(*, *) 'Rayne, is this TimeOfz the culprit'
-          
-          !!write(*, *) 'Rayne, TimeOfz passed'
           ! print *, 'chi = ',  (CP%tau0 - TimeOfz(0.15_dl)) * CP%h0/100
           last_tau0=CP%tau0
           if (WantReion) call Reionization_Init(CP%Reion,CP%ReionHist, CP%YHe, akthom, CP%tau0, FeedbackLevel)
@@ -561,7 +536,6 @@ contains
        write(*,'("100 theta (CosmoMC)  = ",f9.6)') 100*CosmomcTheta()
 
        if (CP%Num_Nu_Massive > 0) then
-          !!write(*, *) 'Rayne, right before N_eff is printed, nu_massless_degeneracy, sum(CP%Nu_mass_degeneracies(1:CP%Nu_mass_eigenstates))', nu_massless_degeneracy, sum(CP%Nu_mass_degeneracies(1:CP%Nu_mass_eigenstates))
           write(*,'("N_eff (total)        = ",f9.6)') nu_massless_degeneracy + &
                sum(CP%Nu_mass_degeneracies(1:CP%Nu_mass_eigenstates))
           do nu_i=1, CP%Nu_mass_eigenstates
@@ -577,28 +551,6 @@ contains
 
     !    call cpu_time(clock_stop) ! RH timing                                                        
     !    print*, 'Total time taken RH in CAMBParams_Set:', clock_stop - clock_start
-    !!!write(*, *) 'Rayne, now what is dtauda for a=1.0 at the end of this module?'
-    !!!write(*, *) dtauda(1._dl)
-    !!!dtauda_check2 = dtauda(1._dl)
-    !!!write(*, *) 'So what is their fractional difference?', dtauda_check2/dtauda_check1 - 1.0_dl
-    !write(*, *) 'We are at modules and a_osc is', CP%a_osc
-    !CP%tau_osc=DeltaTime(0._dl, CP%a_osc, 1.0d-8) !RL adding tau_osc
-    !write(*, *) 'And the corresponding tau_osc from modules.f90 is', CP%tau_osc
-
-    !write(*, *) 'Rayne, starting to record the dtauda again after the fix saw dust' !RL
-    !call CreateTxtFile('../Testdata/auxiCAMB_testdata_KGpert/massiveneutrinoson_afterfix_DeltaTimemodulestest_max1e-24_k0d1.dat', 11111)
-    !!call CreateTxtFile('../Testdata/auxiCAMB_housecleaning/testsmoothing-withif-hw=7-tau12_scaleFactor_recdotmu-ro_recdotmu-sm_recxe-sm_Recxe(scaleFactor).dat', 666666) !RL 122123
-    !!call CreateTxtFile('../Testdata/auxiCAMB_housecleaning/Nz10000_dfac=10_tau_DTa_a_xe_dotmu_sdotmu.dat', 11111) !RL 122123
-    !!call CreateTxtFile('../Testdata/auxiCAMB_housecleaning/Nz10000_dfac=10_Timesteps(j2)_opac_dopac_expmmu_vis_dvis_ddvis.dat', 22222) !RL 122123
-    !!call CreateTxtFile('../Testdata/auxiCAMB_housecleaning/Nz10000_dfac=10_substeparoundaosc_a_Recxe(a).dat', 33333)
-    !do i_check = 1, 100000
-    !   if (i_check == 1) then
-    !     a_check = 0._dl
-    !   else if (i_check .gt. 1) then
-    !     a_check = 1.0d-10 * (1.0_dl/1.0d-10)**((i_check-1)/100000._dl)
-    !   end if
-    !   write(11111, *) a_check, dtauda(a_check)
-    !end do
   end subroutine CAMBParams_Set
 
 
@@ -687,10 +639,7 @@ contains
        atol = tol/1000/exp(AccuracyBoost-1)
     end if
 
-    !RL modifying
-    !write(*, *) 'Rayne, DeltaTime is called'
-    !!write(*, *) 'Rayne, is aosc defined at this point', CP%a_osc
-    !!write(*, *) 'Rayne, a1, a2', a1, a2
+    !RL modified for ULA switch
     if (a1 .lt. CP%a_osc .and. a2 .ge. CP%a_osc) then
        !!write(*, *) 'Rayne, a1 and a2 straddles aosc'
        !DeltaTime=rombint(dtauda,a1,CP%a_osc,atol) + rombint(dtauda, CP%a_osc*(1._dl+max(atol/100.0_dl,1.d-15)), a2, atol)
@@ -1327,14 +1276,13 @@ contains
        do in=1,CP%InitPower%nn
           do il=lmin,min(10000,CP%Max_l)
              write(fileio_unit,trim(numcat('(1I6,',last_C))//'E15.5)')il ,fact*Cl_scalar(il,in,C_Temp:last_C) !Default
-             !!write(*, *) 'Rayne what is going on with scalar Cls??', fact, Cl_scalar(il,in,C_Temp:last_C)
+             
              !RL 07282023 for full digit output, remove after testing is done
              !!!write(fileio_unit,trim(numcat('(1I6,',last_C))//'36e52.42)')il ,fact*Cl_scalar(il,in,C_Temp:last_C)
           end do
           do il=10100,CP%Max_l, 100
              write(fileio_unit,trim(numcat('(1E15.5,',last_C))//'E15.5)') real(il),&
                   fact*Cl_scalar(il,in,C_Temp:last_C) !Default
-             !!write(*, *) 'Rayne what is going on with scalar Cls??', fact, Cl_scalar(il,in,C_Temp:last_C)
              
              !RL 07282023 for full digit output, remove after testing is done
              !!!write(fileio_unit,trim(numcat('(1E15.5,',last_C))//'36e52.42)') real(il),&
@@ -2528,7 +2476,7 @@ contains
                +dddotmu(i+1)+2*(ddotmu(i)-ddotmu(i+1))))))/(tau*dlntau)
        end if
     end if
-    !write(*, *) 'Rayne, cs2, (3*cs2)-1', cs2b, 3._dl * cs2b - 1._dl !RL checked that the cs2b is actually the sound speed of baryons (- but why are they separate? At least when tight coupling, shouldn't the sound speed be that of the entire baryon-photon system?)
+    !write(*, *) 'cs2, (3*cs2)-1', cs2b, 3._dl * cs2b - 1._dl !RL checked cs2b, the sound speed of baryons
   end subroutine thermo
 
 
@@ -2639,9 +2587,9 @@ contains
 
     !Initialization of the half-width, and weight in the box, for the box-car smooth filter
     half_w = 0 !RL 010224 !121524 - since we have recombination skip, we turn smoothing off, half_w = -
-    !!!!write(*, *) 'RAYNE half_w', half_w
+    !!!!write(*, *) 'half_w', half_w
     wt = 1._dl/(2*half_w + 1) !Assign the weight for each element in the window)
-!!!!write(*, *) 'RAYNE wt', wt
+!!!!write(*, *) 'wt', wt
 
     !RL 122223 First isolate the rough recombination part of dotmu
     do i = 2, nthermo
@@ -2664,7 +2612,7 @@ contains
        a0=a
        tau01=tau
        adot0=adot
-       !!write(*, *) 'TAU', tau
+       !!write(*, *) 'tau', tau
     end do
     !RL 122223 Then run a box car to iron through this dotmu array
 
@@ -2673,42 +2621,42 @@ contains
           ! Handle start of the array (reduced window size)
           sum_sm = 0._dl
           do j_sm = 1, i + half_w
-             !!write(*, *) 'RAYNE in array start (1), j_sm', j_sm
+             !!write(*, *) ' in array start (1), j_sm', j_sm
              sum_sm = sum_sm + recdotmu_ro(j_sm)
           end do
           ! Then get the mirrored entries
           do j_sm = 1, half_w-i +1
-             !!write(*, *) 'RAYNE in array start (2, mirror), j_sm', j_sm
+             !!write(*, *) ' in array start (2, mirror), j_sm', j_sm
              sum_sm = sum_sm + recdotmu_ro(j_sm)
           end do
-          !!write(*, *) 'RAYNE IN ARRAY START, i, SUM_SM, SUM_SM*wt, recdotmu_ro(i)', i, sum_sm, sum_sm*wt,recdotmu_ro(i)
-          !!write(*, *) 'RAYNE IN ARRAY START, i, Recombination_xe(scaleFactor(i)), sum_sm*wt/(akthom/(scaleFactor(i)**2._dl))', i, Recombination_xe(scaleFactor(i)), sum_sm*wt/(akthom/(scaleFactor(i)**2._dl))
+          !!write(*, *) 'in array start, i, SUM_SM, SUM_SM*wt, recdotmu_ro(i)', i, sum_sm, sum_sm*wt,recdotmu_ro(i)
+          !!write(*, *) 'in array start, i, Recombination_xe(scaleFactor(i)), sum_sm*wt/(akthom/(scaleFactor(i)**2._dl))', i, Recombination_xe(scaleFactor(i)), sum_sm*wt/(akthom/(scaleFactor(i)**2._dl))
        else if (i .gt. nthermo-half_w) then
           ! Handle end of the array (reduced window size)
           sum_sm = 0._dl
           do j_sm = i-half_w, nthermo
-             !!write(*, *) 'RAYNE in array end (1), j_sm', j_sm
+             !!write(*, *) 'in array end (1), j_sm', j_sm
              sum_sm = sum_sm + recdotmu_ro(j_sm)
           end do
           ! Then get the mirrored entries
           do j_sm = 2*nthermo-(i+half_w) +1, nthermo
-             !!write(*, *) 'RAYNE in array end (2, mirror)'
+             !!write(*, *) 'in array end (2, mirror)'
              sum_sm = sum_sm + recdotmu_ro(j_sm)
           end do
-          !!write(*, *) 'RAYNE IN ARRAY END, i, SUM_SM, SUM_SM*wt, recdotmu_ro(i)', i, sum_sm, sum_sm*wt,recdotmu_ro(i)
-          !!write(*, *) 'RAYNE IN ARRAY END, i, Recombination_xe(scaleFactor(i)), sum_sm*wt/(akthom/(scaleFactor(i)**2._dl))', i, Recombination_xe(scaleFactor(i)), sum_sm*wt/(akthom/(scaleFactor(i)**2._dl))
+          !!write(*, *) 'in array end, i, SUM_SM, SUM_SM*wt, recdotmu_ro(i)', i, sum_sm, sum_sm*wt,recdotmu_ro(i)
+          !!write(*, *) 'in array end, i, Recombination_xe(scaleFactor(i)), sum_sm*wt/(akthom/(scaleFactor(i)**2._dl))', i, Recombination_xe(scaleFactor(i)), sum_sm*wt/(akthom/(scaleFactor(i)**2._dl))
        else
           ! Middle of the array (full window size) (Just take double loop)
           !!!if (i == half_w+1) then
              ! Initialize sum for the first full window
              sum_sm = 0._dl
              do j_sm = i - half_w, i + half_w
-                !!write(*, *) 'RAYNE in array middle, just starting first loop'
+                !!write(*, *) 'in array middle, just starting first loop'
                 sum_sm = sum_sm + recdotmu_ro(j_sm)
              end do
              !!sum_sm_test = sum_sm
-             !!write(*, *) 'RAYNE IN ARRAY MIDDLE1, i, SUM_SM, SUM_SM*wt, recdotmu_ro(i)', i, sum_sm, sum_sm*wt,recdotmu_ro(i)
-             !!write(*, *) 'RAYNE IN ARRAY MIDDLE1, i, Recombination_xe(scaleFactor(i)), sum_sm*wt/(akthom/(scaleFactor(i)**2._dl)), their fractional difference', i, Recombination_xe(scaleFactor(i)), sum_sm*wt/(akthom/(scaleFactor(i)**2._dl)), (Recombination_xe(scaleFactor(i)))/(sum_sm*wt/(akthom/(scaleFactor(i)**2._dl))) - 1.0_dl
+             !!write(*, *) 'in array middle 1, i, SUM_SM, SUM_SM*wt, recdotmu_ro(i)', i, sum_sm, sum_sm*wt,recdotmu_ro(i)
+             !!write(*, *) 'in array middle 1, i, Recombination_xe(scaleFactor(i)), sum_sm*wt/(akthom/(scaleFactor(i)**2._dl)), their fractional difference', i, Recombination_xe(scaleFactor(i)), sum_sm*wt/(akthom/(scaleFactor(i)**2._dl)), (Recombination_xe(scaleFactor(i)))/(sum_sm*wt/(akthom/(scaleFactor(i)**2._dl))) - 1.0_dl
 
           !!!else
              ! Update sum for subsequent windows
@@ -2718,15 +2666,15 @@ contains
              !!!sum_sm = sum_sm + recdotmu_ro(i+half_w) - recdotmu_ro(i-half_w-1)
              !!sum_sm = 0._dl
              !!do j_sm = i - half_w, i + half_w
-                !!write(*, *) 'RAYNE in array middle, just starting first loop'
+                !!write(*, *) 'in array middle, just starting first loop'
              !!   sum_sm = sum_sm + recdotmu_ro(j_sm)
              !!end do
              !!sum_sm_test = sum_sm_test + recdotmu_ro(i+half_w) - recdotmu_ro(i-half_w-1)
              !!write(*, *) 'Rayne, i, sum_sm, sum_sm_test, their fractional difference', i, sum_sm, sum_sm_test, sum_sm_test/sum_sm - 1._dl
 !!!if (i == half_w + 2) then
 !!!      write(*, *) 'Rayne, i, the new sum_sm', sum_sm
-!!!      write(*, *) 'RAYNE IN ARRAY MIDDLE2, i, SUM_SM, SUM_SM*wt, recdotmu_ro(i)', i, sum_sm, sum_sm*wt,recdotmu_ro(i)
-!!!      write(*, *) 'RAYNE IN ARRAY MIDDLE2, i, Recombination_xe(scaleFactor(i)), sum_sm*wt/(akthom/(scaleFactor(i)**2._dl))', i, Recombination_xe(scaleFactor(i)), sum_sm*wt/(akthom/(scaleFactor(i)**2._dl))
+!!!      write(*, *) 'in array middle 2, i, SUM_SM, SUM_SM*wt, recdotmu_ro(i)', i, sum_sm, sum_sm*wt,recdotmu_ro(i)
+!!!      write(*, *) 'in array middle 2, i, Recombination_xe(scaleFactor(i)), sum_sm*wt/(akthom/(scaleFactor(i)**2._dl))', i, Recombination_xe(scaleFactor(i)), sum_sm*wt/(akthom/(scaleFactor(i)**2._dl))
           !!!end if
 
 !!! end if
@@ -2735,19 +2683,19 @@ contains
        !Obtain the smoothed version of recxe
        recxe_sm(i) = sum_sm*wt/(akthom/(scaleFactor(i)**2._dl))
 !!!if (i .lt. half_w+1) then
-!!!!write(*, *) 'RAYNE, at the start, akthom, scalefactor(i)**2._dl, recxe_sm(i)', akthom, scalefactor(i)**2._dl, recxe_sm(i)
+!!!!write(*, *) 'at the start, akthom, scalefactor(i)**2._dl, recxe_sm(i)', akthom, scalefactor(i)**2._dl, recxe_sm(i)
 !!!end if
        !!write(*, *) 'Rayne, half_w = 0, recxe_sm(i)*(akthom/(scalefactor(i)**2._dl)), recdotmu_ro(i), their fractional difference', recxe_sm(i)*(akthom/(scaleFactor(i)**2._dl)), recdotmu_ro(i), recxe_sm(i)*(akthom/(scaleFactor(i)**2._dl))/recdotmu_ro(i) - 1._dl
 !!!write(*, *) 'Rayne, half_w, recxe_sm(i)*(akthom/(scalefactor(i)**2._dl)), recdotmu_ro(i), their fractional difference', half_w, recxe_sm(i)*(akthom/(scaleFactor(i)**2._dl)), recdotmu_ro(i), recxe_sm(i)*(akthom/(scaleFactor(i)**2._dl))/recdotmu_ro(i) - 1._dl
        !!!write(666666, '(36e52.42e3)') scaleFactor(i), recdotmu_ro(i), sum_sm*wt, recxe_sm(i), Recombination_xe(scaleFactor(i))
     end do
     !Finally, before formally assigning the final xe, update xe(1) which will always be in recombination
-!!!write(*, *) 'RAYNE, before reassigning xe(1), xe(1), recxe_sm(1), their fractional difference', xe(1), recxe_sm(1), xe(1)/recxe_sm(1) - 1._dl
+!!!write(*, *) 'before reassigning xe(1), xe(1), recxe_sm(1), their fractional difference', xe(1), recxe_sm(1), xe(1)/recxe_sm(1) - 1._dl
     !!write(*, *) 'RAYNE, before reassigning xe(1), a02, scaleFactor(1)**2._dl, their fractional difference',  a02, scaleFactor(1)**2._dl,  a02/(scaleFactor(1)**2._dl) - 1._dl
 !!!xe(1) = recxe_sm(1) !RL 122223
     !!xe(1) = recxe_sm(1)/(tauminn**4) !RL 123023
     xe(1) = recxe_sm(1)/(tauminn**tau_n) !RL 010224
-!!!write(*, *) 'RAYNE, also dotmu(1), xe(1)*akthom/a02 (now xe(1) is already the smoothed one), their fractional difference', dotmu(1), xe(1)*akthom/a02, dotmu(1)/(xe(1)*akthom/a02) - 1._dl !RL tried and true
+!!!write(*, *) 'also dotmu(1), xe(1)*akthom/a02 (now xe(1) is already the smoothed one), their fractional difference', dotmu(1), xe(1)*akthom/a02, dotmu(1)/(xe(1)*akthom/a02) - 1._dl !RL tried and true
     dotmu(1) = xe(1)*akthom/a02 !RL 122223 reassign dotmu(1)
 !!!!!!!write(*, *) 'Rayne, normal evaluation, scaleFactor', scaleFactor
     !Continue with the normal evaluation, but replacing Recombination_xe(a) with recxe_sm
@@ -2849,17 +2797,7 @@ contains
        adot0=adot
 !!!write(11111, '(36E52.42E3)') tau, DeltaTime(0._dl, a), a, xe(i), dotmu(i), sdotmu(i)
     end do !i
-!!write(*, *) 'Rayne, DeltaTime(0._dl, 1._dl/1101._dl), CP%tau_osc, DeltaTime(0._dl, 1._dl/901._dl), DeltaTime(0._dl, 1._dl/1301._dl)', DeltaTime(0._dl, 1._dl/1101._dl), CP%tau_osc, DeltaTime(0._dl, 1._dl/901._dl), DeltaTime(0._dl, 1._dl/1301._dl)
-    !RL testing 122223
-!!!alo_test = CP%a_osc*0.9_dl
-!!!ahi_test = CP%a_osc*1.1_dl
-!!!d_a_test = (ahi_test - alo_test)/10000
-!!!write(*, *) 'Rayne, alo_test, ahi_test, CP%a_osc', alo_test, ahi_test, CP%a_osc
-    !!do j_test = 1, 10000
-    !!   write(33333, '(36E52.42E3)') alo_test + j_test*d_a_test, Recombination_xe(alo_test + j_test*d_a_test)
-    !!end do
 
-!!!!!
 
     if (CP%Reion%Reionization .and. (xe(nthermo) < 0.999d0)) then
        write(*,*)'Warning: xe at redshift zero is < 1'
@@ -3146,7 +3084,7 @@ if (CP%a_osc .le. 1._dl) then
        !call Ranges_Add_delta(TimeSteps, 24.5_dl*dtauosc, min(CP%tau_osc+24.5_dl*dtauosc, CP%tau0), dtauosc)
        !!call Ranges_Add_delta(TimeSteps, 100.5_dl*dtauosc, min(CP%tau_osc+100.5_dl*dtauosc, CP%tau0), dtauosc)
        !call Ranges_Add_delta(TimeSteps, 200.5_dl*dtauosc, min(CP%tau_osc+200.5_dl*dtauosc, CP%tau0), dtauosc)
-!call Ranges_Add_delta(TimeSteps, max(1000.5_dl*dtauosc, taurst), min(CP%tau_osc+1000.5_dl*dtauosc, CP%tau0), dtauosc) !MAKE SURE THERE'S NOT A END SMALLER THAN START ISSUE
+       !call Ranges_Add_delta(TimeSteps, max(1000.5_dl*dtauosc, taurst), min(CP%tau_osc+1000.5_dl*dtauosc, CP%tau0), dtauosc) !make sure there's no "end smaller than start issue"
 !!!call Ranges_Add_delta(TimeSteps, 0.276765617169163391508845961652696132660000E2_dl, 0.304303865234321051502774935215711593627000E3_dl, dtauosc)
         !!call Ranges_Add_delta(TimeSteps, 0.276765617169163391508845961652696132660000E2_dl, 0.404303865234321051502774935215711593627000E3_dl, dtauosc)
          !!write(*, *) 'Rayne, tauosc add delta, dtauosc, 1000.5_dl*dtauosc, min(CP%tau_osc+1000.5_dl*dtauosc, CP%tau0)'

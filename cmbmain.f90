@@ -238,9 +238,7 @@ contains
     if (CP%WantCls) then
        !       clock_start = 0
        !       call cpu_time(clock_start) ! RH timing
-       !write(*, *) 'Rayne, what is Evolve_q%npoints right before SetkValuesForSources is called?', Evolve_q%npoints
        call SetkValuesForSources
-       !write(*, *) 'Rayne, what is Evolve_q%npoints right after SetkValuesForSources is called?', Evolve_q%npoints
        !       clock_stop = 0
        !       call cpu_time(clock_stop) ! RH timing 
        !       print*, 'timing for SetkValuesForSources in cmbmain', clock_stop - clock_start
@@ -283,7 +281,6 @@ contains
        !$OMP & PRIVATE(EV, q_ix)
        !        print*, 'Im going to DoSourcek for Evolve_q%npoints times: ', Evolve_q%npoints
 
-       !write(*, *) 'Rayne, what is Evolve_q%npoints right before DoSourcek is called?', Evolve_q%npoints
 
        do q_ix= 1,Evolve_q%npoints
           if (global_error_flag==0) then 
@@ -354,7 +351,6 @@ contains
     if (CP%WantCls) then
 
        if (global_error_flag==0) then
-          !!write(*, *) 'Rayne, global_error_flag==0'
           !           clock_start = 0
           !           call cpu_time(clock_start) ! RH timing 
           call InitSourceInterpolation
@@ -381,10 +377,7 @@ contains
           !This is only slow if not called before with same (or higher) Max_l, Max_eta_k
           !Preferably stick to Max_l being a multiple of 50
 
-          !!write(*, *) 'Rayne, before SetkValuesForInt, Evolve_q%npoints, ThisCT%q%npoints', Evolve_q%npoints, ThisCT%q%npoints
           call SetkValuesForInt
-          !!write(*, *) 'Rayne, after SetkValuesForInt, Evolve_q%npoints, ThisCT%q%npoints', Evolve_q%npoints, ThisCT%q%npoints
-
           if (DebugMsgs .and. Feedbacklevel > 0) write(*,*) 'Set ',ThisCT%q%npoints,' integration k values'
 
           !Begin k-loop and integrate Sources*Bessels over time
@@ -645,7 +638,6 @@ contains
     IV%metricdeltas_q => null()
 
     allocate(IV%Source_q(TimeSteps%npoints,SourceNum))
-    !write(*, *) 'Rayne, in SourceToTransfers, CP%tau_osc, CP%tau0', CP%tau_osc, CP%tau0
     if (CP%tau_osc .lt. CP%tau0) then
        allocate(IV%metricdeltas_q(2,SourceNum)) !RL 090323
        !!print *, "Allocated IV%metricdeltas_q with shape: ", shape(IV%metricdeltas_q)
@@ -779,10 +771,8 @@ contains
        end do
        MT%num_q_trans = ntodo
     end if
-    !write(*, *) 'Rayne, what is MT%num_q_trans if I do not want Cls?', MT%num_q_trans
 
     if (CP%WantCls) then
-!!!write(*, *) 'Rayne, CP%WantCls = T', CP%WantCls
        ntodo = MT%num_q_trans
        first_i = ntodo+1
        do q_ix = 1,ntodo
@@ -794,8 +784,6 @@ contains
           end if
        end do
 
-       !write(*, *) 'Rayne, what is MT%num_q_trans before this block?', MT%num_q_trans
-       !write(*, *) 'What is first_i and ntodo?', first_i, ntodo !RL
        if (first_i > ntodo) then
           MT%num_q_trans = Evolve_q%npoints
        else
@@ -868,15 +856,12 @@ contains
        !taubar= (-1.0d0+dsqrt(1.0d0+abar/adotrad))/om/2.0d0                                                                      
 
 
-       !old working start time for other modes!
-
-       !write(*, *) 'Rayne, taustart, tauosc, taueq, 0.3_dl*CP%tau_osc', taustart, tauosc, taueq, 0.3_dl*CP%tau_osc
+       !old working start time for other modes
        taustart=min(taustart,tauosc,taueq, 0.3_dl*CP%tau_osc) !RL added CP%tau_osc as a constraint (the 0.001 prefactors in the times are subject to test and change)
     end if
 
     GetTauStart=taustart
     !RL putting a flag to check the perturbation taustart is after the background taustart
-    !write(*, *) 'Rayne, DeltaTime in cmbmain1'
     if (taustart .le. DeltaTime(0._dl, 10.0**(loga_table(1)), 1.0d-10)) then
        write(*, *) 'WARNING: perturbation taustart is before background taustart, &
             &the initial condition may not be valid. perttaustart, bgtaustart:', &
@@ -890,7 +875,6 @@ contains
     real(dl) taustart
     type(EvolutionVars) EV
 
-    !write(*, *) 'Rayne, what is Evolve_q%points?', Evolve_q%points
     EV%q=Evolve_q%points(q_ix)
 
     if (fixq/=0._dl) then
@@ -1027,7 +1011,6 @@ contains
           end if
        end do
     endif
-    !write(*, *) 'Rayne, what is qmax and qmin assigned in InitVars?', qmax, qmin
   end subroutine InitVars
 
   subroutine SetkValuesForSources
@@ -1047,7 +1030,6 @@ contains
        dlnk0=5._dl/10/SourceAccuracyBoost
        if (CP%closed) dlnk0=dlnk0/2
     end if
-    !write(*, *) 'Rayne, what is AccuracyBoost and dlnk0?', AccuracyBoost, dlnk0
 
     if (CP%AccurateReionization) dlnk0 = dlnk0/2
 
@@ -1275,7 +1257,6 @@ contains
        end if
 
     end do !time step loop
-    !write(*, *) 'Rayne, end of CalcScalarSources, EV%q, EV%metric_delta, CP%tau_osc, CP%tau0', EV%q, EV%metric_delta
     if (allocated(deltaBCSrc)) then
        deltaBCSrc(EV%q_ix,1,:)=EV%metric_delta !RL 090323 adding the delta function due to source discontinuity
     end if
@@ -1393,8 +1374,6 @@ contains
 
        tau = GetTauStart(EV%q)
 
-       !write(*, *) 'Rayne, right before calling GetNumEqns, EV%q_ix, EV%q', EV%q_ix, EV%q
-
        call GetNumEqns(EV)
 
        call GetTransfer(EV, tau)
@@ -1411,9 +1390,7 @@ contains
     real(dl) atol
 
     atol=tol/exp(AccuracyBoost-1) !default
-    !atol=atol/10000 !RL hacking 07/13/2023
     if (CP%Transfer%high_precision) atol=atol/10000
-    !if (CP%Transfer%high_precision) atol=atol/100000 !RL hacking 07/12/2023
 
     ind=1
     call initial(EV,y, tau)
@@ -2393,7 +2370,7 @@ contains
        out(1) = out(1) + CP%expmmu_tauosc*ujl_osc*(IV%metricdeltas_q(1, 1) &
             &- CP%opac_tauosc*IV%metricdeltas_q(2, 1)*11._dl/10._dl) &
             &+ CP%expmmu_tauosc*dotujl_osc*IV%metricdeltas_q(2, 1) !RL090424
-       !write(*, *) 'CURVED UNIVERSE TRIGGERED, BC TERMS', CP%expmmu_tauosc*ujl_osc*(IV%metricdeltas_q(1, 1) - CP%opac_tauosc*IV%metricdeltas_q(2, 1)*11._dl/10._dl) + CP%expmmu_tauosc*dotujl_osc*IV%metricdeltas_q(2, 1)
+       !write(*, *) 'curved universe triggered, boundary terms', CP%expmmu_tauosc*ujl_osc*(IV%metricdeltas_q(1, 1) - CP%opac_tauosc*IV%metricdeltas_q(2, 1)*11._dl/10._dl) + CP%expmmu_tauosc*dotujl_osc*IV%metricdeltas_q(2, 1)
     end if
 
     !---------------
