@@ -149,9 +149,9 @@ program driver
   call DarkEnergy_ReadParams(DefIni)
 
   P%H0     = Ini_Read_Double('hubble')
-  !!!write(H0_str1,'(F5.2)') P%H0
+!!!write(H0_str1,'(F5.2)') P%H0
   !write(*, *) 'abun_str T', abun_str
-  !!!write(H0_str, '(A,A,A)') H0_str1(1:2), 'd', H0_str1(4:5)
+!!!write(H0_str, '(A,A,A)') H0_str1(1:2), 'd', H0_str1(4:5)
   P%H0_in_Mpc_inv = dble(P%H0)/dble(c/1.0d3) !RL
   P%H0_eV = h_P*P%H0_in_Mpc_inv/(Mpc_in_sec*2._dl*const_pi*elecV) !RL
 
@@ -162,7 +162,7 @@ program driver
   else
      P%omegan = Ini_Read_Double('omega_neutrino')
   end if
-     
+
   !!P%dfac = Ini_Read_Double('movH_switch') !RL 092623 switch time
   P%dfac = 10._dl !RL 121924 making movH internal
   ntable = nint(P%dfac*100) + 1 !RL 111123
@@ -210,6 +210,45 @@ program driver
      end if
   end if
 
+  !RL moved here 020625, tested Cl identical before and after the suite of changes
+  if (P%Num_Nu_Massive /= sum(P%Nu_mass_numbers(1:P%Nu_mass_eigenstates))) then
+     if (sum(P%Nu_mass_numbers(1:P%Nu_mass_eigenstates))/=0) stop 'Num_Nu_Massive is not sum of Nu_mass_numbers'
+  end if
+
+  if (P%Omegan == 0 .and. P%Num_Nu_Massive /=0) then
+     print*, 'omeganuh2 is set to 0 but we still have massive neutrinos, resetting'
+     if (P%share_delta_neff) then
+        P%Num_Nu_Massless = P%Num_Nu_Massless + P%Num_Nu_Massive
+     else
+        P%Num_Nu_Massless = P%Num_Nu_Massless + sum(P%Nu_mass_degeneracies(1:P%Nu_mass_eigenstates))
+     end if
+     P%Num_Nu_Massive  = 0
+     P%Nu_mass_numbers = 0
+  end if
+
+!!!4/8 DG Error in original AxionCAMB
+!!! massless neutrino contribution wrong
+!!!When neutrinos are massive
+  !!correcting H contributions already
+  if (P%Num_nu_massive > 0) then
+     if (P%Nu_mass_eigenstates==0) stop 'Have Num_nu_massive>0 but no nu_mass_eigenstates'
+     if (P%Nu_mass_eigenstates==1 .and. P%Nu_mass_numbers(1)==0) P%Nu_mass_numbers(1) = P%Num_Nu_Massive
+     if (all(P%Nu_mass_numbers(1:P%Nu_mass_eigenstates)==0)) P%Nu_mass_numbers=1 !just assume one for all
+     if (P%share_delta_neff) then
+        !default case of equal heating of all neutrinos
+        fractional_number = P%Num_Nu_massless + P%Num_Nu_massive
+        actual_massless = int(P%Num_Nu_massless + 1e-6_dl)
+        neff_i = fractional_number/(actual_massless + P%Num_Nu_massive)
+        nu_massless_degeneracy = neff_i*actual_massless
+        P%Nu_massless_degeneracy=nu_massless_degeneracy
+        P%Nu_mass_degeneracies(1:P%Nu_mass_eigenstates) = P%Nu_mass_numbers(1:P%Nu_mass_eigenstates)*neff_i
+     end if
+     if (abs(sum(P%Nu_mass_fractions(1:P%Nu_mass_eigenstates))-1) > 1e-4) &
+          stop 'Nu_mass_fractions do not add up to 1'
+  else
+     P%Nu_mass_eigenstates = 0
+  end if
+
   grhog= ((kappa/(c**2.0d0)*4.0d0*sigma_boltz)/(c**3.0d0))*(P%tcmb**4.0d0)*(Mpc**2.0d0) !RL replaced the COBE temperature
   P%grhor = (7.0d0/8.0d0)*((4.0d0/11.0d0)**(4.0d0/3.0d0))*grhog
 
@@ -241,7 +280,7 @@ program driver
   !     print*, P%Num_Nu_Massless, P%Num_Nu_Massive, rh_num_nu_massless, 'here 2'
   omegah2_rad= omegah2_rad+(rh_Num_Nu_massless*P%grhor*(c**2.0d0)/((1.d5**2.0d0)))/3.0d0     
   P%omegah2_rad = omegah2_rad
-  
+
   if (Ini_Read_Logical('use_physical',.false.)) then 
      P%omegab = Ini_Read_Double('ombh2')/(P%H0/100)**2
 
@@ -250,22 +289,22 @@ program driver
      P%ma     = Ini_Read_Double('m_ax') !! RH axion mass
      if (P%ma < 0) P%ma = 10**P%ma ! RH making this exponential from the inidriver
      P%m_ovH0 = P%ma/P%H0_eV !RL 050724
-     
+
      if (P%use_axfrac) then
         !! Compute axion fractions rather than densities
         P%omegada = Ini_Read_Double('omdah2')/(P%H0/100)**2
         ! Read in Axion faction and compute density
         P%axfrac = Ini_Read_Double('axfrac')
         if (P%m_ovH0 .ge. 10._dl) then !RL 120124 - DM case
-           
+
            P%omegaax = P%axfrac*P%omegada 
            P%omegac = (1-P%axfrac)*P%omegada
         else !RL 120124 - DE case
            write(*, *) 'Note: m/H0 < 10, axfrac is ULA fraction in dark energy'
-           !!!write(*,*) 'P%omegac*h2 before assignment', P%omegac*((P%H0/1.d2)**2.0d0)
+!!!write(*,*) 'P%omegac*h2 before assignment', P%omegac*((P%H0/1.d2)**2.0d0)
            P%omegac = P%omegada
            P%omegaax = P%axfrac*(1._dl-P%omegab-P%omegac - P%omegan -P%omegak - P%omegah2_rad/((P%H0/1.d2)**2.0d0))
-           !!!write(*,*) 'P%axfrac, P%omegaax', P%axfrac, P%omegaax
+!!!write(*,*) 'P%axfrac, P%omegaax', P%axfrac, P%omegaax
         end if
 
      else 
@@ -277,14 +316,14 @@ program driver
         else !RL 120124 - DE case
            P%axfrac = P%omegaax/(1.0d0-P%omegab-P%omegac - P%omegan -P%omegak - P%omegah2_rad/((P%H0/1.d2)**2.0d0))
         end if
-        
+
      endif
 
 !!!!!!
      !Compute value of cosmological constant including curvature and radiation (photons + massless neutrinos) self consistently	
      P%omegav = 1._dl-P%omegab-P%omegac - P%omegan -P%omegak-P%omegaax - P%omegah2_rad/((P%H0/1.d2)**2.0d0)
-     !!!write(*, *) 'Budget for DE:', P%axfrac*(1._dl-P%omegab-P%omegac - P%omegan -P%omegak - P%omegah2_rad/((P%H0/1.d2)**2.0d0))
-     !!!write(*, *) 'P%omegaax', P%omegaax
+!!!write(*, *) 'Budget for DE:', P%axfrac*(1._dl-P%omegab-P%omegac - P%omegan -P%omegak - P%omegah2_rad/((P%H0/1.d2)**2.0d0))
+!!!write(*, *) 'P%omegaax', P%omegaax
 
      P%Hinf = Ini_Read_Double('Hinf') ! H inflation in GeV 
      P%Hinf = (10**P%Hinf)/mplanck ! computing the ratio of Hinflation to Mplanck
@@ -295,7 +334,7 @@ program driver
         write(*, *) 'WARNING: axion isocurvature disabled in this release, proceeding without'
         P%axion_isocurvature = .false.
      end if
-     
+
 
   else
 
@@ -489,7 +528,7 @@ program driver
 !!!        abun_str = '1d0e-6'
 !!!     else
 !!!        write(abun_str1,'(F6.4)') P%axfrac
-        !write(*, *) 'abun_str T', abun_str
+  !write(*, *) 'abun_str T', abun_str
 !!!        write(abun_str, '(A,A,A)') abun_str1(1:1), 'd', abun_str1(3:6)
 !!!        write(*, *) 'abun_str:', abun_str
 !!!     end if
@@ -498,10 +537,10 @@ program driver
 !!!     !write(*, *) 'axfrac?', P%axfrac
 !!!     if (Ini_Read_Double('omaxh2') .eq. 1.e-6_dl) then
 !!!        abun_str = '1d0e-6'
- !!!    else
+!!!    else
 !!!        write(abun_str1,'(F6.4)') Ini_Read_Double('omaxh2')
 !!!        write(*, *) 'abun_str1:', abun_str1
-        ! write(*, *) 'abun_str F, abun_str(3:3):', abun_str, abun_str(3:3)
+  ! write(*, *) 'abun_str F, abun_str(3:3):', abun_str, abun_str(3:3)
 !!!        write(abun_str, '(A,A,A)') abun_str1(1:1), 'd', abun_str1(3:6)
 !!!     end if
 !!!  end if
@@ -517,46 +556,6 @@ program driver
 !!!  write(*, *) 'RL checkpoint, dolateradtrunc_str:', dolateradtrunc_str
 
   call Ini_Close
-
-
-
-  ! DM: Beginning of DG axion additions giving params
-
-  hnot=P%H0/100.d0
-
-  if (P%Num_Nu_Massive /= sum(P%Nu_mass_numbers(1:P%Nu_mass_eigenstates))) then
-     if (sum(P%Nu_mass_numbers(1:P%Nu_mass_eigenstates))/=0) stop 'Num_Nu_Massive is not sum of Nu_mass_numbers'
-  end if
-
-  if (P%Omegan == 0 .and. P%Num_Nu_Massive /=0) then
-     if (P%share_delta_neff) then
-        P%Num_Nu_Massless = P%Num_Nu_Massless + P%Num_Nu_Massive
-     else
-        P%Num_Nu_Massless = P%Num_Nu_Massless + sum(P%Nu_mass_degeneracies(1:P%Nu_mass_eigenstates))
-     end if
-     P%Num_Nu_Massive  = 0
-     P%Nu_mass_numbers = 0
-  end if
-
-  nu_massless_degeneracy = P%Num_Nu_massless !N_eff for massless neutrinos
-  if (P%Num_nu_massive > 0) then
-     if (P%Nu_mass_eigenstates==0) stop 'Have Num_nu_massive>0 but no nu_mass_eigenstates'
-     if (P%Nu_mass_eigenstates==1 .and. P%Nu_mass_numbers(1)==0) P%Nu_mass_numbers(1) = P%Num_Nu_Massive
-     if (all(P%Nu_mass_numbers(1:P%Nu_mass_eigenstates)==0)) P%Nu_mass_numbers=1 !just assume one for all
-     if (P%share_delta_neff) then
-        !default case of equal heating of all neutrinos
-        fractional_number = P%Num_Nu_massless + P%Num_Nu_massive
-        actual_massless = int(P%Num_Nu_massless + 1e-6_dl)
-        neff_i = fractional_number/(actual_massless + P%Num_Nu_massive)
-        nu_massless_degeneracy = neff_i*actual_massless
-        P%Nu_mass_degeneracies(1:P%Nu_mass_eigenstates) = P%Nu_mass_numbers(1:P%Nu_mass_eigenstates)*neff_i
-     end if
-     if (abs(sum(P%Nu_mass_fractions(1:P%Nu_mass_eigenstates))-1) > 1e-4) &
-          stop 'Nu_mass_fractions do not add up to 1'
-  else
-     P%Nu_mass_eigenstates = 0
-  end if
-  P%Nu_massless_degeneracy=nu_massless_degeneracy !RL added 06/30/2023
 
   ! DM: The place axion evolution is called
   ! This computes axion parameters and also creates the lookup table for axions during slow-roll.
@@ -575,12 +574,12 @@ program driver
   P%a_skipst = 1._dl/(1300._dl + 1._dl) !lower threshold of recombination skip
   P%dfac_skip = 0._dl !RL initializing P%dfac_skip just to make sure it doesn't get assigned to some random numbers
   call w_evolve(P, badflag)
-  
+
   !First check if we're in the window before recombination where the photon ETA is an issue
   if (P%dfac .lt. 23._dl .and. P%m_ovH0 .ge. 10._dl .and. P%ma .lt. 1.e-25_dl &
        &.and. P%a_osc*(P%omegaax/(P%omegac+P%omegaax))/aeq_LCDM .gt. 0.03_dl &
        &.and. P%a_osc .lt. P%a_skipst) then !RL 022624 - is an empirically tuned number 0.03_dl 
-  !if (P%a_osc .lt. 1._dl) then
+     !if (P%a_osc .lt. 1._dl) then
      twobeta_tgt = 7.08_dl*const_pi!22.25_dl!10.5_dl*const_pi!
      !P%dfac = twobeta_tgt + 0.75_dl*const_pi !First guess using radiation domination
      P%dfac = twobeta_tgt + 0.75_dl*const_pi - twobeta_tgt**2/&
@@ -589,7 +588,7 @@ program driver
      ntable = nint(P%dfac*100) + 1     
      call w_evolve(P, badflag)
      call get_phase_info(P, y_phase, beta_coeff, movHETA_new, twobeta_new)
-     
+
      !Rough guess of target ETA values using beta. This is useful in bracket finding
      movHETA_beta = (twobeta_tgt + const_pi*3._dl*(1.0_dl + y_phase)/(4.0_dl + 3.0_dl*y_phase))/beta_coeff
      hETA_beta = (P%dfac/movHETA_beta) * (P%ah_osc/P%a_osc)
@@ -608,20 +607,20 @@ program driver
         hosc_old2 = P%ah_osc/P%a_osc
         hETA_old2 = P%ahosc_ETA/P%a_osc
         twobeta_old2 = twobeta_new
-        
+
         iter_dfacETA = 1
         do while (iter_dfacETA .lt. 500)
            if (abs(twobeta_new - twobeta_tgt) .lt. beta_tol) then 
-              
+
               iter_dfacETA = -1
               exit
            else if ((twobeta_old2-twobeta_tgt)*(twobeta_old1-twobeta_tgt) .lt. 0._dl) then
-              
+
               exit
            else
               hosc_new = 1._dl*(hETA_beta-hETA_old1)+hosc_old2 !Still use hETA_beta-hETA_old1 to make the shooting step larger, or else the shooting step diminishes each time
               P%dfac = P%dfac * ((P%ah_osc/P%a_osc)/hosc_new)
-              
+
               ntable = nint(P%dfac*100) + 1
               call w_evolve(P, badflag)
               call get_phase_info(P, y_phase, beta_coeff, movHETA_new, twobeta_new)
@@ -645,7 +644,7 @@ program driver
            iter_dfacETA = 1
            do while (iter_dfacETA .lt.500)
               if (abs(twobeta_new - twobeta_tgt) .lt. beta_tol) then 
-                 
+
                  exit
               else
                  if ((twobeta_new - twobeta_tgt) * (twobeta_old1 - twobeta_tgt) .lt. 0._dl) then
@@ -664,23 +663,23 @@ program driver
                  ntable = nint(P%dfac*100) + 1
                  call w_evolve(P, badflag)
                  call get_phase_info(P, y_phase, beta_coeff, movHETA_new, twobeta_new)
-                 
+
               end if
            end do
-          end if
+        end if
      else
      end if
 
   end if
 
   do iter_dfac = 1, 500
-     !!!write(*, *) 'P%a_osc, P%a_skip*(1._dl - 1.e-2_dl), P%a_skipst', P%a_osc, P%a_skip*(1._dl - 1.e-2_dl), P%a_skipst
+!!!write(*, *) 'P%a_osc, P%a_skip*(1._dl - 1.e-2_dl), P%a_skipst', P%a_osc, P%a_skip*(1._dl - 1.e-2_dl), P%a_skipst
      if (P%a_osc .lt. P%a_skip*(1._dl - 1.e-2_dl) .and. P%a_osc .ge. P%a_skipst) then !
         !RL 032024: 1e-2 is the tolerence to eliminate additional loops if we don't skip to exactly after a_skip due to numerical factors
         P%dfac = P%dfac_skip
         ntable = nint(P%dfac*100) + 1
         call w_evolve(P, badflag)
-        !!!write(*, *) 'Rayne, each call, P%a_osc, P%a_skip, P%a_skip*(1._dl - 1.e-2_dl), P%dfac, P%dfac_skip', P%a_osc, P%a_skip, P%a_skip*(1._dl - 1.e-2_dl), P%dfac, P%dfac_skip
+!!!write(*, *) 'Rayne, each call, P%a_osc, P%a_skip, P%a_skip*(1._dl - 1.e-2_dl), P%dfac, P%dfac_skip', P%a_osc, P%a_skip, P%a_skip*(1._dl - 1.e-2_dl), P%dfac, P%dfac_skip
      else
         exit
      end if
@@ -688,7 +687,7 @@ program driver
 
   if (iter_dfac .gt. 500 .and. P%a_osc .lt. P%a_skip) then
      print*, 'Warning: maximum iteration reached, but aosc still not skipped sufficiently: &
-&P%a_osc, P%a_skip', P%a_osc, P%a_skip
+          &P%a_osc, P%a_skip', P%a_osc, P%a_skip
   end if
 
 
@@ -716,7 +715,7 @@ program driver
 !!!! regenerate the spectra here
   if (global_error_flag==0) then 
 
-     !!!write(*, *) 'RL, calling CAMB_GetResults'
+!!!write(*, *) 'RL, calling CAMB_GetResults'
      call CAMB_GetResults(P)
 
 

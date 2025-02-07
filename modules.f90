@@ -313,7 +313,7 @@ contains
     logical, optional :: DoReion
     logical WantReion
     integer nu_i,actual_massless
-    real(dl) nu_massless_degeneracy, neff_i
+    real(dl) neff_i
     !external GetOmegak
     real(dl), save :: last_tau0
     !Constants in SI units
@@ -351,47 +351,6 @@ contains
     else
        CP%transfer%num_redshifts=0
     end if
-
-    if (CP%Num_Nu_Massive /= sum(CP%Nu_mass_numbers(1:CP%Nu_mass_eigenstates))) then
-       if (sum(CP%Nu_mass_numbers(1:CP%Nu_mass_eigenstates))/=0) stop 'Num_Nu_Massive is not sum of Nu_mass_numbers'
-    end if
-    if (CP%Omegan == 0 .and. CP%Num_Nu_Massive /=0) then
-       print*, 'we are where omeganuh2=0 but we still have massive neutrinos; inside modules', CP%Num_Nu_Massive
-       if (CP%share_delta_neff) then
-          CP%Num_Nu_Massless = CP%Num_Nu_Massless + CP%Num_Nu_Massive
-       else
-          CP%Num_Nu_Massless = CP%Num_Nu_Massless + sum(CP%Nu_mass_degeneracies(1:CP%Nu_mass_eigenstates))
-       end if
-       CP%Num_Nu_Massive  = 0
-       CP%Nu_mass_numbers = 0
-    end if
-
-
-    nu_massless_degeneracy = CP%Num_Nu_massless !N_eff for massless neutrinos
-
-    !RL placed DG's massless neutrino fix
-
-    if (CP%Num_nu_massive > 0) then
-       if (CP%Nu_mass_eigenstates==0) stop 'Have Num_nu_massive>0 but no nu_mass_eigenstates'
-       if (CP%Nu_mass_eigenstates==1 .and. CP%Nu_mass_numbers(1)==0) CP%Nu_mass_numbers(1) = CP%Num_Nu_Massive
-       if (all(CP%Nu_mass_numbers(1:CP%Nu_mass_eigenstates)==0)) CP%Nu_mass_numbers=1 !just assume one for all
-       if (CP%share_delta_neff) then
-          !default case of equal heating of all neutrinos
-          fractional_number = CP%Num_Nu_massless + CP%Num_Nu_massive
-          actual_massless = int(CP%Num_Nu_massless + 1e-6_dl)
-          neff_i = fractional_number/(actual_massless + CP%Num_Nu_massive)
-          nu_massless_degeneracy = neff_i*actual_massless
-          CP%Nu_mass_degeneracies(1:CP%Nu_mass_eigenstates) = CP%Nu_mass_numbers(1:CP%Nu_mass_eigenstates)*neff_i
-       end if
-       if (abs(sum(CP%Nu_mass_fractions(1:CP%Nu_mass_eigenstates))-1) > 1e-4) &
-            stop 'Nu_mass_fractions do not add up to 1'
-    else
-       CP%Nu_mass_eigenstates = 0
-    end if
-
-    !RL moved this line below 06/30/2023
-    CP%Nu_massless_degeneracy=nu_massless_degeneracy
-
    
     if ((CP%WantTransfer).and. CP%MassiveNuMethod==Nu_approx) then
        CP%MassiveNuMethod = Nu_trunc
@@ -435,7 +394,7 @@ contains
     !correction for fractional number of neutrinos, e.g. 3.04 to give slightly higher T_nu hence rhor
     !for massive Nu_mass_degeneracies parameters account for heating from grhor
 
-    grhornomass=grhor*nu_massless_degeneracy
+    grhornomass=grhor*CP%Nu_massless_degeneracy !RL fixed 020625
     grhormass=0
     do nu_i = 1, CP%Nu_mass_eigenstates
        grhormass(nu_i)=grhor*CP%Nu_mass_degeneracies(nu_i)
@@ -536,7 +495,7 @@ contains
        write(*,'("100 theta (CosmoMC)  = ",f9.6)') 100*CosmomcTheta()
 
        if (CP%Num_Nu_Massive > 0) then
-          write(*,'("N_eff (total)        = ",f9.6)') nu_massless_degeneracy + &
+          write(*,'("N_eff (total)        = ",f9.6)') CP%Nu_massless_degeneracy + &
                sum(CP%Nu_mass_degeneracies(1:CP%Nu_mass_eigenstates))
           do nu_i=1, CP%Nu_mass_eigenstates
              conv = k_B*(8*grhor/grhog/7)**0.25*CP%tcmb/elecV * &
