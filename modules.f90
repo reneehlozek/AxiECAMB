@@ -472,7 +472,7 @@ contains
        write(*,'("Om_c h^2             = ",f9.6)') CP%omegac*(CP%H0/100)**2
        write(*,'("Om_nu h^2            = ",f9.6)') CP%omegan*(CP%H0/100)**2
        write(*,'("Om_Lambda            = ",f9.6)') CP%omegav
-       write(*,'("H0                   = ",f9.6)') CP%H0
+       write(*,'("H0                   = ",f10.6)') CP%H0
        !Axions                                                                                                                    
        write(*,'("Om_ax h^2            = ",f9.6)') CP%omegaax*(CP%H0/100)**2
        !write(*,'("a_osc                = ",e9.2)')  a_osc
