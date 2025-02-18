@@ -2908,16 +2908,16 @@ contains
        ThermoDerivedParams( derived_thetastar ) = 100*rs/DA
        ThermoDerivedParams( derived_DAstar ) = DA/1000
        ThermoDerivedParams( derived_zdrag ) = z_drag
-       rs =rombint(dsound_da_exact,1d-8,1/(z_drag+1),1d-6)
+       rs =rombint(dsound_da_exact,1d-8,1._dl/(z_drag+1._dl),1d-6)
        ThermoDerivedParams( derived_rdrag ) = rs
        ThermoDerivedParams( derived_kD ) =  sqrt(1.d0/(rombint(ddamping_da, 1d-8, 1/(z_star+1), 1d-6)/6))
-       ThermoDerivedParams( derived_thetaD ) =  100*pi/ThermoDerivedParams( derived_kD )/DA
-       z_eq = (grhob+grhoc+grhoax)/(grhog+grhornomass+sum(grhormass(1:CP%Nu_mass_eigenstates))) -1
+       ThermoDerivedParams( derived_thetaD ) =  100._dl*pi/ThermoDerivedParams( derived_kD )/DA
+       z_eq = (grhob+grhoc+grhoax)/(grhog+grhornomass+sum(grhormass(1:CP%Nu_mass_eigenstates))) -1._dl
        ThermoDerivedParams( derived_zEQ ) = z_eq
-       a_eq = 1/(1+z_eq)
+       a_eq = 1._dl/(1._dl+z_eq)
        ThermoDerivedParams( derived_kEQ ) = 1._dl/(a_eq*dtauda(a_eq))
-       ThermoDerivedParams( derived_thetaEQ ) = 100*timeOfz( ThermoDerivedParams( derived_zEQ ))/DA
-       ThermoDerivedParams( derived_theta_rs_EQ ) = 100*rombint(dsound_da_exact,1d-8,a_eq,1d-6)/DA
+       ThermoDerivedParams( derived_thetaEQ ) = 100._dl*timeOfz( ThermoDerivedParams( derived_zEQ ))/DA
+       ThermoDerivedParams( derived_theta_rs_EQ ) = 100._dl*rombint(dsound_da_exact,1d-8,a_eq,1d-6)/DA
 
        if (associated(BackgroundOutputs%z_outputs)) then
           if (allocated(BackgroundOutputs%H)) &
