@@ -58,7 +58,7 @@ module ModelParams
   !Nu_best: automatically use mixture which is fastest and most accurate
 
   integer, parameter :: max_Nu = 5 !Maximum number of neutrino species
-  integer, parameter :: max_transfer_redshifts = 500!RL 07/11/2023: default 500 ! COSMOSIS - alter number of transfer redshifts 
+  integer, parameter :: max_transfer_redshifts = 600!RL 04/30/25: default 500. 600 is to accomodate accuracy_boost = 6 with do_nonlinear and should not be needed for normal use ! COSMOSIS - alter number of transfer redshifts 
   !    integer, parameter :: max_transfer_redshifts = 150
   integer, parameter :: fileio_unit = 13 !Any number not used elsewhere will do
   integer, parameter :: outNone=1

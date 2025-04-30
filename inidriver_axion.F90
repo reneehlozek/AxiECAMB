@@ -108,8 +108,9 @@ program driver
 
   P%NonLinear = Ini_Read_Int('do_nonlinear',NonLinear_none)
   if (P%NonLinear == 1 .or. P%NonLinear == 2) then
-     write(*, *) 'do_nonlinear is temporarily disabled in this version, setting back to 0.'
-     P%NonLinear = 0
+     !write(*, *) 'do_nonlinear is temporarily disabled in this version, setting back to 0.'
+     !P%NonLinear = 0
+     write(*, *) 'Warning: do_nonlinear options are not well-tested in this version'
   end if
 
   P%DoLensing = .false.
