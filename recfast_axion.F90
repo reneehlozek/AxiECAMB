@@ -634,7 +634,7 @@ contains
     do i = 1,24
        cw(i) = 0._dl
     end do
-    !!call CreateTxtFile('../Testdata/auxiCAMB_housecleaning/Nz=10000_dfac=10_zrec_xrec_dxrec.dat', 12212311) !RL
+    
     do i = 1,Nz
        !       calculate the start and end redshift for the interval at each z
        !       or just at each z

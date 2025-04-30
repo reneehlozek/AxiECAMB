@@ -250,7 +250,6 @@ subroutine init_background
 &Taking tau_osc as the smaller value (tau0) instead.'
      CP%tau_osc = min(CP%tau_osc, CP%tau0)
   end if
-  
 
 end  subroutine init_background
 
@@ -475,7 +474,6 @@ contains
     type(EvolutionVars) EV
     real(dl) c(24),w(EV%nvar,9), y(EV%nvar), tol1, tau, tauend, tau_osc
     integer ind
-    !write(*, *) 'In auxi, tol1 was originally', tol1
     !write(*, *), 'GaugeInterface_ScalEv, EV%q, tau, tauend, c(1)', EV%q, tau, tauend, c(1)
     call dverk(EV,EV%ScalEqsToPropagate,derivs,tau,y,tauend,tol1,ind,c,EV%nvar,w) !
     !!write(*, *) 'GaugeInterface_ScalEv, EV%nvar, EV%a_kg_ix, EV%a_kg_ix + 1, y(EV%a_kg_ix), y(EV%a_kg_ix+1), y(1:48)', EV%nvar, EV%a_kg_ix, EV%a_kg_ix + 1, y(EV%a_kg_ix), y(EV%a_kg_ix+1), y(1:48)
@@ -2678,7 +2676,7 @@ contains
        ! Derived by Dan Grin using a Matrix ODE formalism
        ! All assume tau_i<<tau_osc
        initv(6,:)=0.0d0
-       Ra=grhoax/(grhog+grhonu)/a_osc**3.0d0 !LOTAD why is there a grhoax that's not declared in the subroutine?? and also grhog and a_osc, let's ask Dan when sending a follow up !RL 050224: There's a grhoax declared in modules. It's different than the dorp used at the reference point. This notation is really confusing
+       Ra=grhoax/(grhog+grhonu)/a_osc**3.0d0 !why is there a grhoax that's not declared in the subroutine? also grhog and a_osc, let's ask Dan when sending a follow up !RL 050224: There's a grhoax declared in modules. It's different than the dorp used at the reference point. This notation is really confusing
        omr=(grhog+grhonu)/(grhob+grhoc)
        frac=grhoax/(grhoax+grhob+grhoc) ! Fraction of matter in axions	
 

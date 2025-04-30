@@ -632,7 +632,14 @@ contains
     else
        atol = 1d-4/exp(AccuracyBoost-1)
     end if
-    DeltaPhysicalTimeGyr = rombint(dtda,a1,a2,atol)*Mpc/c/Gyr
+    !RL modified for ULA switch 043025
+    if (a1 .lt. CP%a_osc .and. a2 .ge. CP%a_osc) then
+       !!write(*, *) 'a1 and a2 straddles aosc'
+       DeltaPhysicalTimeGyr = (rombint(dtda,a1,CP%a_osc*(1._dl-max(atol/100.0_dl,1.d-15)),atol) + rombint(dtda,CP%a_osc,a2,atol))*Mpc/c/Gyr
+    else
+       !!write(*, *) 'a1 and a2 doesn''t straddle aosc'
+       DeltaPhysicalTimeGyr = rombint(dtda,a1,a2,atol)*Mpc/c/Gyr
+    end if
   end function DeltaPhysicalTimeGyr
 
   function AngularDiameterDistance(z)

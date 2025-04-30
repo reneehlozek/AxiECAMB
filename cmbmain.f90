@@ -133,47 +133,6 @@ contains
     !     Timing variables for testing purposes. Used if DebugMsgs=.true. in ModelParams
     real(sp) actual,timeprev,starttime
     integer i_output, l_output !RL092023 temporary
-    character(len=300) :: filename !RL092023 temporary
-    !RL 032724
-    !call CreateTxtFile('../Testdata/auxiCAMB_housecleaning/testcurvedsources_1e-24eV_fax=1_omk=0d1.dat', 032724)
-    !RL testing
-    !write(filename, '(A,I0,A,I0,A,I0,A,I0,A,I0,A)') '../Testdata/auxiCAMB_housecleaning/Atswitch_max=6d86e-28eV_fax=1d0_massnuon_aB=', int(AccuracyBoost), '_laB=', int(lAccuracyBoost), '_lateradtrunc=F_dfac=', int(CP%dfac), 'd0_ntable=', 100*int(CP%dfac), '_EVm_k_a_aosc_tauosc_CPahosc_CPdrefphsq_wefa_tvpc_tvps_tvpcp_tvpsp_tdvpc_tdvps_tdvpcp_tdvpsp_drhoef_uef.dat'
-    !!    write(filename, '(A,I0,A,I0,A,I0,A,I0,A,I0,A)') '../Testdata/auxiCAMB_housecleaning/hyb9_ef=efa_Ct_wEFA9ov8_m3d44e-28_fax=1d0_m-nuon_aB', int(AccuracyBoost), '_laB', int(lAccuracyBoost), '_ratruncF_dfac', int(CP%dfac), 'd0_ntab', 100*int(CP%dfac), '_k0d1_inithermo_tau_DeltaTime(a)_a_xe_dotmu_sdotmu.dat'
-    !!    call CreateTxtFile(filename,11142301)
-    !!write(filename, '(A,I0,A,I0,A,I0,A,I0,A,I0,A)') '../Testdata/auxiCAMB_housecleaning/6-6x1000griddingrightaroundtau*_m3d44e-28_fax=1de-6_m-nuon_aB', int(AccuracyBoost), '_laB', int(lAccuracyBoost), '_ratruncF_dfac', int(CP%dfac), 'd0_ntab', 100*int(CP%dfac), 'l=2_k=2e-4_steppoint_stepdpoint_Jldpoint_IVsourceq(1)_sums(1)_vis_dvis_ddvis.dat'
-    !!write(filename, '(A,I0,A,I0,A,I0,A,I0,A,I0,A)') '../Testdata/auxiCAMB_housecleaning/6-6x1000griddingrightaroundtau*_m3d44e-28_fax=1de-6_m-nuon_aB', int(AccuracyBoost), '_laB', int(lAccuracyBoost), '_ratruncF_dfac', int(CP%dfac), 'd0_ntab', 100*int(CP%dfac), 'k=2e-4_steppoint_EVsource(1)_vis_dvis_ddvis.dat'
-    !!    call CreateTxtFile(filename,01102401)
-    !!    call CreateTxtFile(filename,010423)
-    !!    write(filename, '(A,I0,A,I0,A,I0,A,I0,A,I0,A)') '../Testdata/auxiCAMB_housecleaning/hyb9_ef=efa_Ct_wEFA9ov8_m3d44e-28_fax=1d0_m-nuon_aB', int(AccuracyBoost), '_laB', int(lAccuracyBoost), '_ratruncF_dfac', int(CP%dfac), 'd0_ntab', 100*int(CP%dfac), '_k0d1_RecInit_rows_zrec_xrec_dxrec.dat'
-    !!    call CreateTxtFile(filename,11162301)
-    !!    write(filename, '(A,I0,A,I0,A,I0,A,I0,A,I0,A)') '../Testdata/auxiCAMB_housecleaning/hyb9_ef=efa_Ct_wEFA9ov8_m3d44e-28_fax=1d0_m-nuon_aB', int(AccuracyBoost), '_laB', int(lAccuracyBoost), '_ratruncF_dfac', int(CP%dfac), 'd0_ntab', 100*int(CP%dfac), '_k0d1_RecInit_zend_Trad_Tmat_xH_xHe_x.dat'
-    !!    call CreateTxtFile(filename,11162302)
-    !!write(filename, '(A,I0,A,I0,A,I0,A,I0,A,I0,A)') '../Testdata/auxiCAMB_housecleaning/hyb9_ef=efa_Ct_wEFA9ov8_m3d44e-28_fax=1d0_m-nuon_aB', int(AccuracyBoost), '_laB', int(lAccuracyBoost), '_ratruncF_dfac', int(CP%dfac), 'd0_ntab', 100*int(CP%dfac), '_k0d1_ION_z_dorp_Hz_dHdz_y(1)_f(1)_y(2)_f(2)_y(3)_f(3).dat'
-    !!    call CreateTxtFile(filename,11162303)
-    !call CreateTxtFile(filename,10122023)
-    ! RL 092023 - Allocate and fill ell array---------
-    !allocate(l_outputs(6))
-    !l_outputs = [110, 130, 150, 175, 200, 250] !
-    ! Allocate unit numbers array of same size
-    !allocate(unit_nums(size(l_outputs)))
-    !movHstar = 10
-    !ntableused = 1000
-    ! Open files and store unit numbers
-    !do i_output = 1, size(l_outputs)
-    !    l_output = l_outputs(i_output)
-    !    write(filename, '(A,I0,A,I0,A,I0,A,I0,A,I0,A)') '../Testdata/auxiCAMB_housecleaning/jltest_max=1e-28eV_fax=1d0_massnuon_aB=', int(AccuracyBoost), '_laB=', int(lAccuracyBoost), '_lateradtrunc=F_dfac=', movHstar, 'd0_ntable=', ntableused, '_l=',l_output, '_l_xf_jl.dat'
-    !   unit_nums(i_output) = 09202300+l_output
-    !   call CreateTxtFile(trim(filename), unit_nums(i_output))
-    !!       write(filename, '(A,I0,A,I0,A,I0,A,I0,A)') '../Testdata/auxiCAMB_housecleaning/C2_ell1000test_m1de-26_fax=1d0_m-nuon_aB', int(AccuracyBoost), '_laB', int(lAccuracyBoost), '_ratruncF_dfac', int(CP%dfac), 'd0_IVq_TimeSteppointnow_IVsourceqnow_sumnow.dat'
-    !!       call CreateTxtFile(filename,02122402)
-    !end do
-    !Store source evolution filename
-    !write(filename, '(A,I0,A,I0,A,I0,A,I0,A,I0,A)') '../Testdata/auxiCAMB_housecleaning/afterDoSourcek_max=1e-28eV_fax=1d0_massnuon_aB=', int(AccuracyBoost), '_laB=', int(lAccuracyBoost), '_lateradtrunc=F_dfac=', movHstar, 'd0_ntable=', ntableused, '_EVq_delta-Hsigma-source_delta-sigma-source.dat'
-    !call CreateTxtFile(filename,09192300)
-    !Store source integration filename
-    !write(filename, '(A,I0,A,I0,A,I0,A,I0,A,I0,A)') '../Testdata/auxiCAMB_housecleaning/inDoFlatIntegration_max=1e-28eV_fax=1d0_massnuon_aB=', int(AccuracyBoost), '_laB=', int(lAccuracyBoost), '_lateradtrunc=F_dfac=', movHstar, 'd0_ntable=', ntableused, '_IVq_delta-Hsigma_opacosc_delta-sigma_expmmuosc.dat'
-    !call CreateTxtFile(filename,09192301)
-    ! RL 092023----------     
 
     !!    clock_totstart = 0
     !!    call cpu_time(clock_totstart) ! RH timing
@@ -1348,10 +1307,6 @@ contains
     integer q_ix
     real(dl) tau
     type(EvolutionVars) EV
-
-    !RL testing
-
-    !!call CreateTxtFile('../Testdata/auxiCAMB_housecleaning/ompO3_kspan_QSBCon_ab=1_lab=1_lateradtrunc=F_massnuon_transferhighprec=F_C=3d0_max=1e-28eV_fax=1d0_dfac=10d0_ntable=1000_qmin=1de-5_kmax=8_k_tauosc_z_u-ef_P-ef_rho-ef_w-efa_Pefovrhoef-min-wefa_qsbc-corr.dat', 08032023) !
 
 !!!write(*, *) 'RL, is TransferOut called? and Evolve_q%npoints+1, MT%num_q_trans, MT%q_trans(Evolve_q%npoints+1), MT%q_trans(MT%num_q_trans)?', Evolve_q%npoints+1, MT%num_q_trans, MT%q_trans(Evolve_q%npoints+1), MT%q_trans(MT%num_q_trans)
 

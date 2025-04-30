@@ -1217,9 +1217,6 @@ contains
 
        !Output rho_ef, P_ef, w_efa for comparison
 
-       !!    call CreateTxtfile('../Testdata/auxiCAMB_housecleaning/QSBCcheck_max=1e-21eV_fax=1d0_dfac=10d0_ntable=1000_k=20d0invMpc_mtilde_a_aosc_ahoverh0_movH_v1bg_v2bg_grhoaxinternal_P-ef_rho-ef_w-efa_Povrhoef-min-wefa.dat', 080323)
-       !!    call CreateTxtfile('../Testdata/auxiCAMB_housecleaning/inflooptest_zskip=700_dfac=21d2333110005483_mtilde_a_aosc_askip_dfacskip_ahoverh0.dat', 020124)
-
        !RL test 08152023
        !!    do i = 1, ntable
        !!   write(070423, '(36e52.42,\)') maxion_twiddle, a_arr(i), Params%a_osc, littlehfunc(i)/hnot, a_arr(i)*hnot*maxion_twiddle/littlehfunc(i), v_vec(1,i), v_vec(2,i), rhoaxh2_ov_rhom(i)
