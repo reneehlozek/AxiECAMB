@@ -146,13 +146,13 @@ contains
  
  end subroutine Reionization_SetParamsForZre
 
- subroutine Reionization_Init(Reion, ReionHist, Yhe, akthom, tau0, FeedbackLevel)
+ subroutine Reionization_Init(Reion, ReionHist, Yhe, akthom, tau0, aosc, FeedbackLevel) !RL 050225 added aosc since there's no clean way to use DeltaTime here
   use constants
   Type(ReionizationParams), target :: Reion
   Type(ReionizationHistory), target :: ReionHist
-  real(dl), intent(in) :: akthom, tau0, Yhe 
+  real(dl), intent(in) :: akthom, tau0, aosc, Yhe 
   integer, intent(in) :: FeedbackLevel
-  real(dl) astart
+  real(dl) astart, aend, atol, deltatime_reion
 
      ReionHist%akthom = akthom  
      ReionHist%fHe =  YHe/(mass_ratio_He_H*(1.d0-YHe))
@@ -195,13 +195,28 @@ contains
       !Get relevant times       
        astart=1.d0/(1.d0+Reion%redshift + Reion%delta_redshift*8)
        !ReionHist%tau_start = max(0.05_dl, rombint(dtauda,0._dl,astart,1d-3))
-       ReionHist%tau_start = max(0.05_dl, DeltaTime_external(0._dl,astart,1d-3)) !RL 050225
+       !ReionHist%tau_start = max(0.05_dl, DeltaTime_external(0._dl,astart,1d-3)) !RL 050225 failed
+       atol = 1d-3
+       !RL 050225 reuse deltatime_reion for both time regimes
+       if (0._dl .lt. aosc .and. astart .ge. aosc) then
+          deltatime_reion=rombint(dtauda,0._dl,aosc*(1._dl-max(atol/100.0_dl,1.d-15)),atol) + rombint(dtauda, aosc, astart, atol)
+       else
+          deltatime_reion=rombint(dtauda,0._dl,astart,atol)
+       end if
+       ReionHist%tau_start = max(0.05_dl, deltatime_reion)
           !Time when a very small reionization fraction (assuming tanh fitting)
 
        !ReionHist%tau_complete = min(tau0, &
        !   ReionHist%tau_start+ rombint(dtauda,astart,1.d0/(1.d0+max(0.d0,Reion%redshift-Reion%delta_redshift*8)),1d-3))
-       ReionHist%tau_complete = min(tau0, &
-          ReionHist%tau_start+ DeltaTime_external(astart,1.d0/(1.d0+max(0.d0,Reion%redshift-Reion%delta_redshift*8)),1d-3)) !RL 050225
+       !ReionHist%tau_complete = min(tau0, &
+       !   ReionHist%tau_start+ DeltaTime_external(astart,1.d0/(1.d0+max(0.d0,Reion%redshift-Reion%delta_redshift*8)),1d-3)) !RL 050225 failed
+       aend = 1.d0/(1.d0+max(0.d0,Reion%redshift-Reion%delta_redshift*8))
+       if (astart .lt. aosc .and. aend .ge. aosc) then
+          deltatime_reion=rombint(dtauda,astart,aosc*(1._dl-max(atol/100.0_dl,1.d-15)),atol) + rombint(dtauda, aosc, aend, atol)
+       else
+          deltatime_reion=rombint(dtauda,astart, aend,atol)
+       end if
+       ReionHist%tau_complete = min(tau0, ReionHist%tau_start + deltatime_reion)
 
     end if   
        

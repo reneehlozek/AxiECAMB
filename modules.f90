@@ -437,7 +437,7 @@ contains
        if (global_error_flag==0) then
           ! print *, 'chi = ',  (CP%tau0 - TimeOfz(0.15_dl)) * CP%h0/100
           last_tau0=CP%tau0
-          if (WantReion) call Reionization_Init(CP%Reion,CP%ReionHist, CP%YHe, akthom, CP%tau0, FeedbackLevel)
+          if (WantReion) call Reionization_Init(CP%Reion,CP%ReionHist, CP%YHe, akthom, CP%tau0, CP%a_osc, FeedbackLevel)
        end if
     else
        CP%tau0=last_tau0
