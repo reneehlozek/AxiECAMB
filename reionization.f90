@@ -54,7 +54,7 @@ module Reionization
       real(dl), parameter :: Reionization_maxz = 50._dl
       real(dl), private, parameter :: Reionization_tol = 1d-5
 
-      real(dl), private, external :: dtauda, rombint,rombint2
+      real(dl), private, external :: dtauda, rombint,rombint2, DeltaTime_external !RL 05025 added DeltaTime_external
 
     Type(ReionizationParams), private, pointer ::  ThisReion
     Type(ReionizationHistory), private, pointer :: ThisReionHist
@@ -194,11 +194,14 @@ contains
 
       !Get relevant times       
        astart=1.d0/(1.d0+Reion%redshift + Reion%delta_redshift*8)
-       ReionHist%tau_start = max(0.05_dl, rombint(dtauda,0._dl,astart,1d-3))
+       !ReionHist%tau_start = max(0.05_dl, rombint(dtauda,0._dl,astart,1d-3))
+       ReionHist%tau_start = max(0.05_dl, DeltaTime_external(0._dl,astart,1d-3)) !RL 050225
           !Time when a very small reionization fraction (assuming tanh fitting)
 
+       !ReionHist%tau_complete = min(tau0, &
+       !   ReionHist%tau_start+ rombint(dtauda,astart,1.d0/(1.d0+max(0.d0,Reion%redshift-Reion%delta_redshift*8)),1d-3))
        ReionHist%tau_complete = min(tau0, &
-          ReionHist%tau_start+ rombint(dtauda,astart,1.d0/(1.d0+max(0.d0,Reion%redshift-Reion%delta_redshift*8)),1d-3))
+          ReionHist%tau_start+ DeltaTime_external(astart,1.d0/(1.d0+max(0.d0,Reion%redshift-Reion%delta_redshift*8)),1d-3)) !RL 050225
 
     end if   
        

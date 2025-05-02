@@ -336,7 +336,16 @@ function dtauda(a)
 
 end function dtauda
 
+function DeltaTime_external(a1,a2, in_tol) !RL 050225 have to do this to use DeltaTime in reoinization. Modules is compiled after reioinization so can't use ModelParams
+  use precision
+  use constants
+  use ModelParams
+  implicit none
+  real(dl) DeltaTime_external
+  real(dl), intent(IN) :: a1, a2, in_tol
+  DeltaTime_external = DeltaTime(a1, a2, in_tol)
 
+end function DeltaTime_external
 
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
