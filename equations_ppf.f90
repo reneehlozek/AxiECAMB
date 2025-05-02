@@ -230,8 +230,6 @@ subroutine init_background
   use LambdaGeneral
   use ModelParams !RL
   integer :: i_check
-  real(dl) dtauda, a_check !RL testing the difference between the two dtauda's in DeltaTime
-  external dtauda
   !This is only called once per model, and is a good point to do any extra initialization.
   !It is called before first call to dtauda, but after massive neutrinos are initialized and after GetOmegak
   is_cosmological_constant = .not. use_tabulated_w .and. w_lam==-1_dl .and. wa_ppf==0._dl
@@ -1752,11 +1750,9 @@ contains
     real(dl) :: grhor_t,grhog_t,grhov_t
     real(dl) :: grhomat,dgrhomat,grhomat_dot,dgrhomat_dot
     real(dl) dorp
-    real(dl) grhoax_frac
     real(dl) gr
     integer i
-    external grhoax_frac
-
+    
 
     ! DM: note g(density_var_dot) = a^2(density_var_dot) NOT (a^2 density_var)_dot
     !!write(*, *) 'GrowthRate is called' !RL testing
