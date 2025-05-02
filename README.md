@@ -36,9 +36,9 @@ AxiECAMB adopts ULAs with a quadratic potential and operates in synchronous gaug
 
 In addition to these methods, AxiECAMB fixes numerous bugs and inaccuracies in AxionCAMB such that it is typically ~50% faster. 
 
-With default settings for accuracy and k<1E3 Mpc-1, AxiECAMB produces accurate results for m<~1e-18eV. For heavier ones ULA effects only appear at higher k, and fitting functions for matter power spectra specified in https://arxiv.org/abs/2201.10238 is more efficient. 
+With default settings for accuracy and k<1e3 Mpc-1, AxiECAMB produces accurate results for m<~1e-18eV. For heavier masses, ULA effects only appear at higher k, and fitting functions for matter power spectra specified in https://arxiv.org/abs/2201.10238 is more efficient. 
 
-Our threshold for dark matter vs dark energy like ULAs is whether the mass is greater than 10 times the present Hubble, or m/H0 > 10. For this category, the axfrac (fraction of ULA-abundance) parameter represents the ULA fraction in dark matter, and ULA contributes to the total matter transfer function. If m/H0 < 10, axfrac refers to the ULA fraction in dark energy instead, and the matter transfer function excludes the ULA.  In this case KG is solved to the present day and present day cosmological parameters are specified as their instantaneous z=0 values not their time average.
+Our threshold for dark matter vs dark energy like ULAs is whether the mass is greater than 10 times the present Hubble, or m/H0 > 10. For this category, the axfrac (fraction of ULA-abundance) parameter represents the ULA fraction in dark matter, and ULA contributes to the total matter transfer function. If m/H0 < 10, axfrac refers to the ULA fraction in dark energy instead, and the matter transfer function excludes the ULA. In this case KG is solved to the present day and present day cosmological parameters are specified as their instantaneous z=0 values not their time average.
 
 ----------------------------------------------------------------------
 #### <a name="warnings"></a>Warnings
@@ -51,6 +51,6 @@ The ULA GrowthRate subroutine pertaining to SZ analysis (and other measures of t
 
 If the matter power spectra or transfer function is needed for z>0, one needs to be careful regarding whether z is before or after the switch point to fluid approximation, given that they are defined differently before and after the switch. The code will display a warning sign if a z>0 is requested that is before the switch.
 
-The non-linear mode of the code is not extensively tested and is disabled for this release.
+The non-linear mode of the code is inherited from axionCAMB and not extensively tested. Turning on the non-linear mode will trigger a warning message.
 
 accurateBB in params.ini should be assigned as T if accurate BB polarization power spectra are needed.
