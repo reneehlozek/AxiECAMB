@@ -1939,7 +1939,7 @@ contains
             ( PK%log_kh(2)-PK%log_kh(1) )
        outpower = PK%matpower(1,itf) + dp*(logk - PK%log_kh(1))
        !    outpower = exp(max(-30._dl,outpower))
-       outpower = exp(outpower) ! RH change for axions !RL 122024 moved location so that the second category is safter
+       outpower = exp(outpower) ! RH change for axions !RL 122024 moved location so that the second category is safer
     else if (logk > PK%log_kh(PK%num_k)) then
        !Do dodgy linear extrapolation on assumption accuracy of result won't matter
        !RL 122024 this can be too dodgy for light DM masses that our results may break. Since the result won't matter we directly set it to zero
@@ -1964,9 +1964,8 @@ contains
        outpower = a0*PK%matpower(llo,itf)+ b0*PK%matpower(lhi,itf)+&
             ((a0**3-a0)* PK%ddmat(llo,itf) &
             +(b0**3-b0)*PK%ddmat(lhi,itf))*ho**2/6
-       outpower = PK%matpower(1,itf) + dp*(logk - PK%log_kh(1))
        !    outpower = exp(max(-30._dl,outpower))
-       outpower = exp(outpower) ! RH change for axions !RL 122024 moved location so that the second category is safter
+       outpower = exp(outpower) ! RH change for axions !RL 122024 moved location so that the second category is safer
     end if
 
   end function MatterPowerData_k
