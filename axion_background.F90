@@ -1076,7 +1076,7 @@ contains
             &maxion_twiddle,Params%a_osc, (/v1_ref, v2_ref/), badflag,lhsqcont_massless,&
             &lhsqcont_massive,Params%Nu_mass_eigenstates,Nu_masses, littlehauxi, &
             &Params%ahosc_ETA, A_coeff, tvarphi_c,tvarphi_cp,tvarphi_s,tvarphi_sp, rhorefp, Prefp)
-       !write(*, *) 'Rayne, in the background, aosc, adotoa at aosc', Params%a_osc, littlehauxi*Params%H0_in_Mpc_inv/hnot
+       
 
        !Store the background EFA field variables at the switch
        Params%ah_osc = littlehauxi
@@ -1208,27 +1208,7 @@ contains
        !print*,'axion bg subroutine timing:', clock_stop - clock_start
        !write(*, *) 'Rayne, what is the last entry of the Params%logatable in the background?', loga_table(ntable)
        !write(*, *) 'Rayne, Params%H0_in_Mpc_inv', Params%H0_in_Mpc_inv
-       !!    call CreateTxtfile('../Testdata/axionCAMB_debuggingeffects/massivenuoff_afterfixRLauxi_dfac=3d0_ntable=5000_max=1e-33eV_k=1d0Mpcinv_fax=1de-6_mtilde_a_ahovh0.dat', 071023)
-       !!    do i= 1, ntable
-       !!       write(071023, '(36e52.42,\)')  maxion_twiddle, a_arr(i), littlehfunc(i)/hnot
-       !!    end do
-
-       !!write(*, *) 'Rayne, background finishes running, Params%WantScalars', Params%WantScalars
-
-       !Output rho_ef, P_ef, w_efa for comparison
-
-       !RL test 08152023
-       !!    do i = 1, ntable
-       !!   write(070423, '(36e52.42,\)') maxion_twiddle, a_arr(i), Params%a_osc, littlehfunc(i)/hnot, a_arr(i)*hnot*maxion_twiddle/littlehfunc(i), v_vec(1,i), v_vec(2,i), rhoaxh2_ov_rhom(i)
-       !!   call auxiIC(Params, omegah2_regm,Params%omegah2_rad,omegah2_lambda,omk,hnot,maxion_twiddle,a_arr(i), (/v_vec(1, i), v_vec(2, i)/), badflag,lhsqcont_massless,lhsqcont_massive,Params%Nu_mass_eigenstates,Nu_masses, littlehauxi, A_coeff, tvarphi_c,tvarphi_cp,tvarphi_s,tvarphi_sp)
-       !reuse rhorefp and Pref to obtain the P-ef and rho-ef up until aosc
-       !!Params%wef_table_test(i) = ((maxion_twiddle**2.0d0)*(tvarphi_cp**2.0d0/2.0d0 + tvarphi_sp**2.0d0/2.0d0 - tvarphi_c*tvarphi_sp + tvarphi_s*tvarphi_cp))/((maxion_twiddle**2.0d0)*(tvarphi_c**2.0d0 + tvarphi_s**2.0d0 + (tvarphi_cp**2.0d0 + tvarphi_sp**2.0d0)/2.0d0 - tvarphi_c*tvarphi_sp + tvarphi_s*tvarphi_cp))
-       !       rhorefp = ((maxion_twiddle**2.0d0)*(tvarphi_c**2.0d0 + tvarphi_s**2.0d0 + (tvarphi_cp**2.0d0 + tvarphi_sp**2.0d0)/2.0d0 - tvarphi_c*tvarphi_sp + tvarphi_s*tvarphi_cp))
-       !       movH_test = a_arr(i)*hnot*maxion_twiddle/littlehfunc(i)
-       !       write(*, *) 'RL, at the end of w_evolve, Povrhoef-min-wefa', Prefp/rhorefp - 3.0d0/(2.0d0*(movH_test**2.0d0))
-       !!       write(020124, '(36e52.42,\)') maxion_twiddle, a_arr(i), Params%a_osc, Params%a_skip, littlehfunc(i)/hnot
-       !!    end do
-
+       
 
        deallocate(a_arr, v_vec, littlehfunc, littlehfunc_buff, rhoaxh2_ov_rhom)
        !!write(*, *) 'R1, H0_in_Mpc_inv/H0_eV', Params%H0_in_Mpc_inv/Params%H0_eV
@@ -1314,7 +1294,6 @@ contains
           call Nu_background(a*numasses(i),rhonu,pnu)
           mass_correctors(i)=rhonu
           w_nu(i) = pnu/rhonu
-          !write(*, *) 'Rayne, i, w_nu(i)', i, w_nu(i)
        enddo
        !write(*, *) 'Rayne, i, w_nu(i), w_nu, w_nu(1:Nu_mass_eigenstates), (1.0d0 + w_nu(i)), (1.0d0 + w_nu)', i, w_nu(i), w_nu, w_nu(1:Nu_mass_eigenstates), (1.0d0 + w_nu(i)), (1.0d0 + w_nu)
        a2 = a**2.0d0
