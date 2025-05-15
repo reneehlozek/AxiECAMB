@@ -26,7 +26,7 @@ FISHER=
 #A local machine test indicates that v4.5 can be about 20% slower than ifort
 F90C     = gfortran 
 #Below are suggested fflags for gfortran users that suppress harmless warnings at runtime but trap serious exceptions  
-FFLAGS = -O3 -fopenmp -ffixed-line-length-300 -ffpe-summary=none
+FFLAGS = -O3 -fopenmp -ffpe-summary=none
 
 
 #Old Intel ifc, add -openmp for multi-processor (some have bugs):
