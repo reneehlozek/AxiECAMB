@@ -1350,7 +1350,7 @@ contains
           wEFA_c_upd = (Prefp/rhorefp)/((lhETA/(maxion_twiddle*hnot*a))**2._dl)
           call lh(omegah2_regm,omegah2_rad,omegah2_lambda,omk,hnot**2.0d0,maxion_twiddle,&
                &a,v,lhETA_upd,badflag, lhsqcont_massless,lhsqcont_massive,Nu_mass_eigenstates,Numasses,rhorefp)
-          !!write(*, *) 'Rayne auxiIC iteration, wEFA_c_upd, Params%wEFA_c, abs(wEFA_c_upd/Params%wEFA_c -1.0_dl), littlehauxi_upd, littlehauxi, littlehauxi_upd/littlehauxi -1.0_dl'
+          !!write(*, *) 'auxiIC iteration, wEFA_c_upd, Params%wEFA_c, abs(wEFA_c_upd/Params%wEFA_c -1.0_dl), littlehauxi_upd, littlehauxi, littlehauxi_upd/littlehauxi -1.0_dl'
           !!   write(*, *) wEFA_c_upd, Params%wEFA_c, abs(wEFA_c_upd/Params%wEFA_c -1.0_dl), littlehauxi_upd, littlehauxi, littlehauxi_upd/littlehauxi -1.0_dl
           !if the new quantities are sufficiently close to the previous quantity, end the loop; else reassign, and loop again
           if (abs(wEFA_c_upd/Params%wEFA_c -1.0_dl) .lt. tol_EFA) then !!!-  .and. abs(lhETA_upd/lhETA -1.0_dl) .lt. tol_EFA) then

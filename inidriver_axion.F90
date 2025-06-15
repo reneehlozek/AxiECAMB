@@ -226,6 +226,7 @@ program driver
      P%Num_Nu_Massive  = 0
      P%Nu_mass_numbers = 0
   end if
+  P%Nu_massless_degeneracy = P%Num_Nu_massless !N_eff for massless neutrinos !RL 061425
 
 !!!4/8 DG Error in original AxionCAMB
 !!! massless neutrino contribution wrong

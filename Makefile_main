@@ -91,7 +91,7 @@ camb_fits: writefits.f90 $(CAMBOBJ) $(DRIVER)
 	$(F90C) $(F90FLAGS) -c $*.F90
 	
 clean:
-	-rm -f *.o *.a *.d core *.mod
+	-rm -f *.o *.a *.d core *.mod camb
 
 
 ## CosmoRec make parts

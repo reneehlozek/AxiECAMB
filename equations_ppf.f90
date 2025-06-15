@@ -1074,7 +1074,7 @@ contains
       if (kamnorm_test .lt. 1.e-14_dl) then
           !RL dealing with machine precision issue - Taylor expand to leading order
           csquared_ax_test = kamnorm_test/4.0_dl + 5.0_dl*((1/(a*dtauda(a)))**2.0_dl)/(4.0_dl*(k2/kamnorm_test))
-          !!write(*, *) 'Rayne, machine precision, kamnorm, csquared_ax_test', kamnorm_test, csquared_ax_test
+          !!write(*, *) 'machine precision, kamnorm, csquared_ax_test', kamnorm_test, csquared_ax_test
     else
        csquared_ax_test = (sqrt(1.0_dl + kamnorm_test) - 1.0_dl)**2.0_dl/(kamnorm_test) &
             &+ 5.0_dl*((1/(a*dtauda(a)))**2.0_dl)/(4.0_dl*(k2/kamnorm_test))       
@@ -1330,18 +1330,6 @@ contains
              EV%lmaxg=max(EV%lmaxg,10)
           end if
        end if
-       !07/13/2023 RL wants to understand where exactly does high_precision take effect
-       !!if (HighAccuracyDefault) then
-       !!   EV%lmaxnr=max(nint(45*lAccuracyBoost),3)
-       !!else
-       !!   EV%lmaxnr=max(nint(26*lAccuracyBoost),3)
-       !write(*,*) 'Rayne, EV%lmaxnr', EV%lmaxnr
-       !!endif
-       !!if (EV%q > 0.04 .and. EV%q < 0.5) then !baryon oscillation scales
-       !!   write(*, *) 'Rayne, EV%lmaxg', EV%lmaxg
-       !!   EV%lmaxg=max(EV%lmaxg,20)
-       !!end if
-       !RL 07/13/2023-------------------
 
        if (CP%closed) then
           EV%lmaxnu=min(EV%lmaxnu, EV%FirstZerolForBeta-1)
@@ -1451,11 +1439,10 @@ contains
 
   end subroutine SwitchToMassiveNuApprox
 
-  subroutine MassiveNuVarsOut(EV,y,yprime,a,grho,gpres,dgrho,dgp,dgq,dgpi, gdpi_diff,pidot_sum)
-    !!RL added dgp for testing to output the pressure perturbation of massive neutrinos
+  subroutine MassiveNuVarsOut(EV,y,yprime,a,grho,gpres,dgrho,dgq,dgpi, gdpi_diff,pidot_sum)
     implicit none
     type(EvolutionVars) EV
-    real(dl) :: y(EV%nvar), yprime(EV%nvar),a, grho,gpres,dgrho,dgp, dgq,dgpi, gdpi_diff,pidot_sum !RL temporarily added dgp
+    real(dl) :: y(EV%nvar), yprime(EV%nvar),a, grho,gpres,dgrho,dgq,dgpi, gdpi_diff,pidot_sum 
     !grho = a^2 kappa rho
     !gpres = a^2 kappa p
     !dgrho = a^2 kappa \delta\rho
@@ -1509,7 +1496,7 @@ contains
 
        dgrho= dgrho + grhonu_t*clxnu
        !write(*, *) 'Rayne, dgp, grhormass_t*dpnu', dgp, grhormass_t*dpnu
-       dgp = dgp + grhormass_t*dpnu !RL added this line: (dpnu/(rhonu*clxnu))(sound speed) * grhonu_t*clxnu = (dpnu/rhonu)*grhonu_t = dpnu*grhormass_t. dpnu and rhonu are both in units of the mean density of one eigenstate of massless neutrinos, hence it works to convert the conventions this way. (Also can do sanity check against the two lines above that compute grhonu_t and gpnu_t)
+       !dgp = dgp + grhormass_t*dpnu !RL removed for cleanup on June 14 25 !RL added this line: (dpnu/(rhonu*clxnu))(sound speed) * grhonu_t*clxnu = (dpnu/rhonu)*grhonu_t = dpnu*grhormass_t. dpnu and rhonu are both in units of the mean density of one eigenstate of massless neutrinos, hence it works to convert the conventions this way. (Also can do sanity check against the two lines above that compute grhonu_t and gpnu_t)
        dgq  = dgq   + grhonu_t*qnu
        dgpi = dgpi  + grhonu_t*pinu
        gdpi_diff = gdpi_diff + pinu*(3*gpnu_t-grhonu_t)
@@ -2058,16 +2045,10 @@ contains
     pidot_sum = 0
 
 
-    !write(*, *) 'Rayne, dgp before calling MassiveNuVarsOut', dgp
-    !!dgpnumass_temp = dgp
-    !!dgrhonumass_temp = dgrho
     if (CP%Num_Nu_Massive /= 0) then
-       call MassiveNuVarsOut(EV,y,yprime,a,grho,gpres,dgrho,dgp,dgq,dgpi, dgpi_diff,pidot_sum) !RL added dgp to the MassiveNuVarsOut since output is the only place that calls it, I don't need to worry it affecting other stuff. dgp is changed in this subroutine
+       call MassiveNuVarsOut(EV,y,yprime,a,grho,gpres,dgrho,dgq,dgpi, dgpi_diff,pidot_sum) 
     end if
-    !write(*, *) 'Rayne, dgp after calling MassiveNuVarsOut', dgp
-    !RL getting the dgpnumass and dgrhonumass by assigning a temporary variable before calling MassiveNuVarsOut and subtracting it after
-    !!dgpnumass_temp = dgp - dgpnumass_temp
-    !!dgrhonumass_temp = dgrho - dgrhonumass_temp
+    
 
     adotoa=sqrt((grho+grhok)/3)
 
@@ -2085,17 +2066,8 @@ contains
        pirdot=yprime(EV%r_ix+2)
     end if
 
-    !RL: this snippet is added to temporarily deal with the opacity problem in the output subroutine, FOR FIXED K DEBUG MODE ONLY. The opac(j) and dopac(j) throughout this subroutine are temporarily altered to equal the opacity evaluated in this following snippet. Other variables related to the visibility function, e.g. emmu(j), etc., are harder to extract and hence are not replaced here. SHOULD BE REVERTED UNDER THE NORMAL WORKING MODE OF CAMB
-
-    !---------------The following are for the fixed k debug mode
-    !call thermo(tau,cs2_output,opacity_output,dopacity_output)
-    !_______________The following test cases are true for dopacity_output as well if EV%TightCoupling; always true for opacity_output
-    !!write(*, *) 'Rayne, opacity_output, opac(j), their fractional difference', opacity_output, opac(j), opacity_output/opac(j) - 1.0
-    !write(*, *) 'Rayne, dopacity_output, dopac(j), their fractional difference', dopacity_output, dopac(j), dopacity_output/dopac(j) - 1.0
-    !opacity_use = opacity_output
-    !dopacity_use = dopacity_output
-    !---------------
-    !_______________The following are for working mode (and for the debug mode that uses all timesteps the same as defined in TimeSteps%npoints)
+    
+    !_______________RL The following are for working mode (and for the debug mode that uses all timesteps the same as defined in TimeSteps%npoints)
     opacity_use = opac(j)
     dopacity_use = dopac(j)
     !_______________
