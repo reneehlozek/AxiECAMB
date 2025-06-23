@@ -50,6 +50,7 @@
        real(dl) rat(nnmax) !ratio of scalar to tensor initial power spectrum amplitudes
        real(dl) k_0_scalar, k_0_tensor
        real(dl) ScalarPowerAmp(nnmax)
+       character(LEN=1024) DerivFileName
  
       end Type InitialPowerParams
 
@@ -195,6 +196,7 @@
           
            InitPower%k_0_scalar = Ini_Read_Double_File(Ini,'pivot_scalar',InitPower%k_0_scalar)
            InitPower%k_0_tensor = Ini_Read_Double_File(Ini,'pivot_tensor',InitPower%k_0_tensor) 
+           InitPower%DerivFileName = Ini_Read_String_File(Ini,'deriv_output_file')
            InitPower%nn = Ini_Read_Int('initial_power_num')
            if (InitPower%nn>nnmax) stop 'Too many initial power spectra - increase nnmax in InitialPower'
            InitPower%rat(:) = 1

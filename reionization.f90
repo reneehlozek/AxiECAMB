@@ -38,6 +38,7 @@ module Reionization
              logical    :: use_optical_depth
              real(dl)   :: redshift, delta_redshift, fraction
              real(dl)   :: optical_depth
+             character(LEN=1024) DerivFileName
         end type ReionizationParams
   
         type ReionizationHistory
@@ -117,11 +118,16 @@ contains
   use IniFile
   Type(ReionizationParams) :: Reion
   Type(TIniFile) :: Ini
+  character(LEN=1024) outroott
 
    Reion%Reionization = Ini_Read_Logical_File(Ini,'reionization')
    if (Reion%Reionization) then
    
     Reion%use_optical_depth = Ini_Read_Logical_File(Ini,'re_use_optical_depth') 
+    outroott = Ini_Read_String_File(Ini,'output_root')
+    Reion%DerivFileName = trim(outroott)//'_'//&
+    Ini_Read_String_File(Ini,'deriv_output_file')
+    !write(*,*) Reion%DerivFileName, 'hi renee'
   
     if (Reion%use_optical_depth) then
               Reion%optical_depth = Ini_Read_Double_File(Ini,'re_optical_depth')

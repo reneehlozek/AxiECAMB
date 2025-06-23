@@ -480,6 +480,7 @@ program driver
   P%AccurateReionization = Ini_Read_Logical('accurate_reionization',.false.)
   P%AccurateBB = Ini_Read_Logical('accurate_BB',.false.)
   P%DerivedParameters = Ini_Read_Logical('derived_parameters',.true.)
+  P%DerivFileName = trim(outroot)//Ini_Read_String('deriv_output_file') ! RH modified
 
   version_check = Ini_Read_String('version_check')
   if (version_check == '') then

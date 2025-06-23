@@ -174,7 +174,7 @@ module ModelParams
      !If true, sigma_8 is not calculated either
 
      logical DerivedParameters !calculate various derived parameters  (ThermoDerivedParams)
-
+     character(LEN=1024) DerivFileName ! RH modified
      !Derived parameters, not set initially
      type(ReionizationHistory) :: ReionHist
 
@@ -289,10 +289,15 @@ module ModelParams
   integer, parameter :: lmax_extrap_highl = 8000
   real(dl), allocatable :: highL_CL_template(:,:)
 
-  integer, parameter :: derived_age=1, derived_zstar=2, derived_rstar=3, derived_thetastar=4, derived_DAstar = 5, &
-        derived_zdrag=6, derived_rdrag=7,derived_kD=8,derived_thetaD=9, derived_zEQ =10, derived_keq =11, &
-        derived_thetaEQ=12, derived_theta_rs_EQ = 13
-    integer, parameter :: nthermo_derived = 13
+   ! RH modified
+  integer, parameter :: derived_age=1, derived_taustar=2, derived_zstar=3, derived_rstar=4, & 
+   derived_rastar=5, derived_thetastar=6, derived_DAstar = 7, &
+   derived_zdrag=8, derived_rdrag=9,derived_kD=10,derived_thetaD=11, &
+   derived_zEQ =12, derived_keq =13, &
+   derived_thetaEQ=14,derived_taurec=15,  &
+   derived_zrec=16, derived_rrec=17, derived_rarec=18, derived_theta_rs_EQ = 19
+
+    integer, parameter :: nthermo_derived = 19
 
   real(dl) ThermoDerivedParams(nthermo_derived)
 
@@ -313,6 +318,7 @@ contains
     integer, optional :: error !Zero if OK
     logical, optional :: DoReion
     logical WantReion
+    logical write_params !RH for axionEmu
     integer nu_i,actual_massless
     real(dl) neff_i
     !external GetOmegak
@@ -465,6 +471,11 @@ contains
     !    write(66,'(f10.8)') 100*CosmomcTheta()
     !    close(unit=66) 
 
+   write_params=.TRUE.
+    if(write_params) then 
+        open(unit=66,file=CP%DerivFileName, & 
+        status='unknown', position="append",action='write') 
+    end if
 
     if (present(error)) then
        error = 0
@@ -2148,6 +2159,9 @@ contains
     integer in, j
     !JD 08/13 Changes in here to PK arrays and variables
     integer j_PK
+    logical write_params
+
+
     real(dl) z_osc !RL 121924 for comparison
     z_osc = 1._dl/CP%a_osc - 1._dl
     if (z_osc .lt. 0._dl) then
@@ -2178,6 +2192,19 @@ contains
           !!write(02222404, '(36e52.42e3)') ThermoDerivedParams( derived_zstar ), ThermoDerivedParams( derived_rstar ),  ThermoDerivedParams( derived_thetastar ), real(MTrans%sigma_8(j_PK,in)), omegam_0
        end do
     end do
+
+
+   ! RH modifications for axionEmu
+    write_params=.TRUE.
+!    write(*,*) CP%DerivFileName, 'hi renee file'
+    if(write_params) then 
+        open(unit=66,file=CP%DerivFileName, & 
+        status='unknown',position="append", action='write') 
+        !write(*,'("Om_b h^2             = ",f9.6)')
+        write(66,'("sigma8            = ",f9.6)') real(MTrans%sigma_8(1,1))
+        close(66)
+    end if
+    
 
   end subroutine Transfer_output_Sig8
 
@@ -2395,11 +2422,11 @@ module ThermoData
   real(dl) :: tight_tau, actual_opt_depth
   !Times when 1/(opacity*tau) = 0.01, for use switching tight coupling approximation
   real(dl) :: matter_verydom_tau
-  real(dl) :: r_drag0, z_star, z_drag  !!JH for updated BAO likelihood.
+  real(dl) :: r_drag0, z_star, z_drag, z_rec  !!JH for updated BAO likelihood. RH updated for axionEmu
 
-  public thermo,inithermo,vis,opac,expmmu,dvis,dopac,ddvis,lenswin, tight_tau,&
-       Thermo_OpacityToTime,matter_verydom_tau, ThermoData_Free,&
-       z_star, z_drag  !!JH for updated BAO likelihood.
+    public thermo,inithermo,vis,opac,expmmu,dvis,dopac,ddvis,lenswin, tight_tau,&
+    Thermo_OpacityToTime,matter_verydom_tau, ThermoData_Free,&
+    z_star, z_drag, z_rec  !!JH for updated BAO likelihood. RH updated for axionEmu
 contains
 
   subroutine thermo(tau,cs2b,opacity, dopacity)
@@ -2490,6 +2517,8 @@ contains
     external rombint
     integer j_test !RL 122123
     real(dl) alo_test, ahi_test, d_a_test !RL 122123
+    real(dl) rrec, tau_star, DArec ! RH modified
+    logical write_params ! RH modified
     !!real(dl) Hosc_thresh !RL 121123
     !!Hosc_thresh = (CP%ma/3._dl)*CP%H0_in_Mpc_inv/CP%H0_eV !RL: the beginning of oscillations - if it exceeds taurend then do not consider
 !!!!!! !RL 122223 smoothing out the delta function of dotmu
@@ -2909,35 +2938,93 @@ contains
        end if
        DA = AngularDiameterDistance(z_star)/(1/(z_star+1))
 
-       ThermoDerivedParams( derived_Age ) = DeltaPhysicalTimeGyr(0.0_dl,1.0_dl)
-       ThermoDerivedParams( derived_zstar ) = z_star
-       ThermoDerivedParams( derived_rstar ) = rs
-       ThermoDerivedParams( derived_thetastar ) = 100*rs/DA
-       ThermoDerivedParams( derived_DAstar ) = DA/1000
-       ThermoDerivedParams( derived_zdrag ) = z_drag
-       rs =rombint(dsound_da_exact,1d-8,1._dl/(z_drag+1._dl),1d-6)
-       ThermoDerivedParams( derived_rdrag ) = rs
-       ThermoDerivedParams( derived_kD ) =  sqrt(1.d0/(rombint(ddamping_da, 1d-8, 1/(z_star+1), 1d-6)/6))
-       ThermoDerivedParams( derived_thetaD ) =  100._dl*pi/ThermoDerivedParams( derived_kD )/DA
-       z_eq = (grhob+grhoc+grhoax)/(grhog+grhornomass+sum(grhormass(1:CP%Nu_mass_eigenstates))) -1._dl
-       ThermoDerivedParams( derived_zEQ ) = z_eq
-       a_eq = 1._dl/(1._dl+z_eq)
-       ThermoDerivedParams( derived_kEQ ) = 1._dl/(a_eq*dtauda(a_eq))
-       ThermoDerivedParams( derived_thetaEQ ) = 100._dl*timeOfz( ThermoDerivedParams( derived_zEQ ))/DA
-       ThermoDerivedParams( derived_theta_rs_EQ ) = 100._dl*rombint(dsound_da_exact,1d-8,a_eq,1d-6)/DA
+      ThermoDerivedParams( derived_taurec )= tau_maxvis
+      rrec =rombint(dsound_da_exact,1d-8,1/(z_rec+1),1d-6)
+      ThermoDerivedParams( derived_rrec ) = rrec
+      ThermoDerivedParams( derived_zrec )= z_rec
+      DArec = AngularDiameterDistance(z_rec)/(1/(z_rec+1))
+      ThermoDerivedParams( derived_rarec ) = DArec
+      tau_star = rombint(dtauda,1d-8,1/(z_star+1),1d-6) ! RH added to comput conformal time when optical depth =1
+      ThermoDerivedParams(derived_taustar) = tau_star 
+      rs =rombint(dsound_da_exact,1d-8,1/(z_star+1),1d-6)
+      DA = AngularDiameterDistance(z_star)/(1/(z_star+1))
+      ThermoDerivedParams( derived_rastar ) = DA
+
+      ThermoDerivedParams( derived_Age ) = DeltaPhysicalTimeGyr(0.0_dl,1.0_dl)
+      ThermoDerivedParams( derived_zstar ) = z_star
+      ThermoDerivedParams( derived_rstar ) = rs
+      ThermoDerivedParams( derived_thetastar ) = 100*rs/DA
+      ThermoDerivedParams( derived_DAstar ) = DA/1000
+      ThermoDerivedParams( derived_zdrag ) = z_drag
+      rs =rombint(dsound_da_exact,1d-8,1._dl/(z_drag+1._dl),1d-6)
+      ThermoDerivedParams( derived_rdrag ) = rs
+      ThermoDerivedParams( derived_kD ) =  sqrt(1.d0/(rombint(ddamping_da, 1d-8, 1/(z_star+1), 1d-6)/6))
+      ThermoDerivedParams( derived_thetaD ) =  100._dl*pi/ThermoDerivedParams( derived_kD )/DA
+      z_eq = (grhob+grhoc+grhoax)/(grhog+grhornomass+sum(grhormass(1:CP%Nu_mass_eigenstates))) -1._dl
+      ThermoDerivedParams( derived_zEQ ) = z_eq
+      a_eq = 1._dl/(1._dl+z_eq)
+      ThermoDerivedParams( derived_kEQ ) = 1._dl/(a_eq*dtauda(a_eq))
+      ThermoDerivedParams( derived_thetaEQ ) = 100._dl*timeOfz( ThermoDerivedParams( derived_zEQ ))/DA
+      ThermoDerivedParams( derived_theta_rs_EQ ) = 100._dl*rombint(dsound_da_exact,1d-8,a_eq,1d-6)/DA
+   
+
+        
 
        if (associated(BackgroundOutputs%z_outputs)) then
           if (allocated(BackgroundOutputs%H)) &
                deallocate(BackgroundOutputs%H, BackgroundOutputs%DA, BackgroundOutputs%rs_by_D_v)
           noutput = size(BackgroundOutputs%z_outputs)
           allocate(BackgroundOutputs%H(noutput), BackgroundOutputs%DA(noutput), BackgroundOutputs%rs_by_D_v(noutput))
+          write_params=.true.
+         if(write_params) then
+            open(unit=56,file=CP%DerivFileName, & 
+         status='old',position="append", action='write')
           do i=1,noutput
              BackgroundOutputs%H(i) = HofZ(BackgroundOutputs%z_outputs(i))
              BackgroundOutputs%DA(i) = AngularDiameterDistance(BackgroundOutputs%z_outputs(i))
              BackgroundOutputs%rs_by_D_v(i) = rs/BAO_D_v_from_DA_H(BackgroundOutputs%z_outputs(i), &
                   BackgroundOutputs%DA(i),BackgroundOutputs%H(i))
-          end do
+            write(56, '(A8,3F9.6)') 'z h da =', BackgroundOutputs%z_outputs(i), BackgroundOutputs%H(i), BackgroundOutputs%DA(i)
+          end do 
+          close(56)
+         end if
        end if
+
+
+      write_params=.true.
+      if(write_params) then
+         !write(*,*) CP%DerivFileName, 'test'
+         open(unit=56,file=CP%DerivFileName, & 
+         status='old',position="append", action='write') 
+         write(56,'("100*theta            = ",f9.6)') ThermoDerivedParams( derived_thetastar )
+        ! write(56,"(hih)")
+         write(56,'("YHe                    = ",f9.6)') CP%YHe
+         write(56,'("tau_rec                = ",f8.2)') ThermoDerivedParams( derived_taurec )
+         write(56,'("z_rec                = ",f8.2)') ThermoDerivedParams( derived_zrec )
+         write(56,'("rs_rec                = ",f8.2)') ThermoDerivedParams( derived_rrec )
+         write(56,'("ra_rec                = ",f8.2)') ThermoDerivedParams( derived_rarec)
+         write(56,'("taustar                = ",f8.2)') ThermoDerivedParams( derived_taustar )
+         write(56,'("zstar                = ",f8.2)') ThermoDerivedParams( derived_zstar )
+         write(56,'("rs_star       = ",f7.2)') ThermoDerivedParams( derived_rstar )
+         write(56,'("ra_star       = ",f9.2)') ThermoDerivedParams( derived_rastar )
+         write(56,'("r_s(zdrag)/Mpc       = ",f7.2)') ThermoDerivedParams( derived_rdrag )
+         write(56,'("r_s(zdrag)/Mpc       = ",f7.2)') ThermoDerivedParams( derived_rdrag )
+
+         write(56,'("Age of universe/GYr  = ",f7.3)') ThermoDerivedParams( derived_Age )
+         write(56,'("zstar                = ",f8.2)') ThermoDerivedParams( derived_zstar )
+         write(56,'("r_s(zstar)/Mpc       = ",f7.2)') ThermoDerivedParams( derived_rstar )
+         write(56,'("100*theta            = ",f9.6)') ThermoDerivedParams( derived_thetastar )
+
+         write(56,'("zdrag                = ",f8.2)') ThermoDerivedParams( derived_zdrag )
+         write(56,'("r_s(zdrag)/Mpc       = ",f7.2)') ThermoDerivedParams( derived_rdrag )
+
+         write(56,'("k_D(zstar) Mpc       = ",f7.4)') ThermoDerivedParams( derived_kD )
+         write(56,'("100*theta_D          = ",f9.6)') ThermoDerivedParams( derived_thetaD )
+         
+
+         write(*,*) 'ok done writing'
+         close(56)
+      end if 
 
        if (FeedbackLevel > 0) then
           write(*,'("Age of universe/GYr  = ",f7.3)') ThermoDerivedParams( derived_Age )
