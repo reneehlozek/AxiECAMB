@@ -959,11 +959,11 @@ contains
     !RH changes
     if (Feedbacklevel > 0)  then
         write(*,'("tau_recomb/Mpc       = ",f7.2,"  tau_now/Mpc = ",f8.1)') tau_maxvis,CP%tau0
-        if(write_params) then 
-            open(unit=66,file=CP%DerivFileName, status='unknown', position='append',action='write') 
-            write(66,'("tau_recomb/Mpc       = ",f7.2)') tau_maxvis 
-            close(66)
-        end if
+      !   if(write_params) then 
+      !       open(unit=66,file=CP%DerivFileName, status='unknown', position='append',action='write') 
+      !       write(66,'("tau_recomb/Mpc       = ",f7.2)') tau_maxvis
+      !       close(66)
+      !   end if
     end if
 
     if (Feedbacklevel > 0)  &
