@@ -159,6 +159,7 @@ contains
   real(dl), intent(in) :: akthom, tau0, aosc, Yhe 
   integer, intent(in) :: FeedbackLevel
   real(dl) astart, aend, atol, deltatime_reion
+  logical write_params
 
      ReionHist%akthom = akthom  
      ReionHist%fHe =  YHe/(mass_ratio_He_H*(1.d0-YHe))
@@ -189,8 +190,21 @@ contains
           
        if (Reion%use_optical_depth) then
         call Reionization_SetFromOptDepth(Reion,ReionHist)
-        if (FeedbackLevel > 0) write(*,'("Reion redshift       =  ",f6.3)') Reion%redshift
-       end if
+
+        if (FeedbackLevel > 0) then
+          ! RH added for axionEmu                                                                                                                    
+          write(*,'("Reion redshift       =  ",f6.3)') Reion%redshift
+          write_params=.true. 
+          if(write_params) then
+            open(unit=66,file=Reion%DerivFileName, status='replace', action='write')
+            write(66,'("z_reion       =  ",f6.3)') Reion%redshift
+            close(66)
+         end if
+      end if
+   end if
+   
+
+       
 
        call Reionization_SetParamsForZre(ThisReion,ThisReionHist)
        
