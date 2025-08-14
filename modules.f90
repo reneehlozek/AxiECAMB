@@ -2190,6 +2190,9 @@ contains
        do j_PK=1, CP%Transfer%PK_num_redshifts
           j = CP%Transfer%PK_redshifts_index(j_PK)
           write(*,*) 'at z = ',real(CP%Transfer%redshifts(j)), ' sigma8 (all matter)=', real(MTrans%sigma_8(j_PK,in))
+!          write(*,*) 'checking sigma8', real(MTrans%sigma_8(1,1))
+
+    
           if (real(CP%Transfer%redshifts(j)) .gt. z_osc) then
              write(*, '(A, F9.5, A, F9.5, A)') 'Note: z = ', real(CP%Transfer%redshifts(j)), &
                   &' is before the axion switch point z = ', z_osc, &
@@ -2202,16 +2205,18 @@ contains
     end do
 
 
-   ! RH modifications for axionEmu
+    
+    ! RH modifications for axionEmu
     write_params=.TRUE.
-!    write(*,*) CP%DerivFileName, 'hi renee file'
+    !    write(*,*) CP%DerivFileName, 'hi renee file'
     if(write_params) then 
-        open(unit=66,file=CP%DerivFileName, & 
-        status='unknown',position="append", action='write') 
-        !write(*,'("Om_b h^2             = ",f9.6)')
-        write(66,'("sigma8 = ",f9.5)') real(MTrans%sigma_8(1,1))
-        close(66)
+       open(unit=66,file=CP%DerivFileName, & 
+            status='unknown',position="append", action='write') 
+       !write(*,'("Om_b h^2             = ",f9.6)')
+       write(66,'("sigma8 = ",f9.5)') real(MTrans%sigma_8(CP%Transfer%PK_num_redshifts,1))
+       close(66)
     end if
+
     
 
   end subroutine Transfer_output_Sig8
@@ -3010,7 +3015,7 @@ contains
          status='unknown', action='write')
          baozstart=0.0
          baozend = 5.0
-         numzbao = 100
+         numzbao = 1250
          dzbao = (baozend-baozstart)/numzbao
          write(56,*) 'z               H               DA            rs_by_D_v'
          do i=1,numzbao
@@ -3019,7 +3024,7 @@ contains
              axionoutputDA(i) = AngularDiameterDistance(axionoutputz(i))
              axionoutputrs_by_D_v(i) = rs/BAO_D_v_from_DA_H(axionoutputz(i), &
                   axionoutputDA(i), axionoutputH(i))
-            write(56, '(f9.4, f15.5, f15.5, f15.5)') axionoutputz(i), axionoutputH(i), axionoutputDA(i), axionoutputrs_by_D_v(i)
+            write(56, '(f9.3, f15.7, f15.7, f15.7)') axionoutputz(i), axionoutputH(i), axionoutputDA(i), axionoutputrs_by_D_v(i)
           end do 
           close(56)
          end if
@@ -3028,8 +3033,8 @@ contains
       if(write_params) then
          !write(*,*) CP%DerivFileName, 'test'
          open(unit=56,file=CP%DerivFileName, status='old',position="append", action='write') 
-         write(56,*) '----------------'
-         write(56,*) '   ===  Derived params ==='
+!         write(56,*) '----------------'
+!         write(56,*) '   ===  Derived params ==='
          write(56,'("tau_rec = ",f9.5)') ThermoDerivedParams( derived_taurec )
          write(56,'("z_rec = ",f8.2)') ThermoDerivedParams( derived_zrec )
          write(56,'("YHe = ",f9.5)') CP%YHe
