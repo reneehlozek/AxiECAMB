@@ -2164,10 +2164,13 @@ contains
 
   subroutine Transfer_output_Sig8(MTrans)
     Type(MatterTransferData), intent(in) :: MTrans
-    integer in, j
+    integer in, j, i
     !JD 08/13 Changes in here to PK arrays and variables
     integer j_PK
     logical write_params
+    character(LEN=1024) filenameS8 ! RH modified
+    real(dl) baozstart, baozend, dzbao, axionoutputz
+    integer numzbao
 
 
     real(dl) z_osc !RL 121924 for comparison
@@ -2216,6 +2219,25 @@ contains
        write(66,'("sigma8 = ",f9.5)') real(MTrans%sigma_8(CP%Transfer%PK_num_redshifts,1))
        close(66)
     end if
+
+   ! if(write_params) then
+   !    filenameS8 = trim(CP%DerivFileName)//'_S8'
+   !    open(unit=56,file= filenameS8, & 
+   !       status='unknown', action='write')
+   !    baozstart=0.0
+   !    baozend = 5.0
+   !    numzbao = 1250
+   !    dzbao = (baozend-baozstart)/numzbao
+   !    write(56,*) 'z               sigma8'
+   !       do i=1,numzbao
+   !          axionoutputz = baozstart+(i-1)*dzbao
+   !          write(56, '(f9.3, f9.5)') axionoutputz, real(MTrans%sigma_8(axionoutputz,1))
+   !       enddo
+   !    close(56)
+   ! end if
+
+
+
 
     
 
@@ -3033,8 +3055,8 @@ contains
       if(write_params) then
          !write(*,*) CP%DerivFileName, 'test'
          open(unit=56,file=CP%DerivFileName, status='old',position="append", action='write') 
-!         write(56,*) '----------------'
-!         write(56,*) '   ===  Derived params ==='
+         write(56,*) '----------------'
+         write(56,*) '                  ===  Derived params ===   '
          write(56,'("tau_rec = ",f9.5)') ThermoDerivedParams( derived_taurec )
          write(56,'("z_rec = ",f8.2)') ThermoDerivedParams( derived_zrec )
          write(56,'("YHe = ",f9.5)') CP%YHe
